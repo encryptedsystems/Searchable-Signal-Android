@@ -36,12 +36,19 @@ repositories {
 
 dependencies {
     compile 'org.bouncycastle:bcprov-jdk15on:1.54'
-    compile 'org.apache.lucene:lucene-core:6.1.0'
-    compile 'org.apache.lucene:lucene-analyzers-common:6.1.0'
-    compile 'org.apache.pdfbox:pdfbox:1.8.10'
-    compile 'org.apache.poi:poi-scratchpad:3.15-beta1'
+    //compile 'org.apache.lucene:lucene-core:6.1.0'
+    //compile 'org.apache.pdfbox:pdfbox:2.0.2'
+    //compile 'org.apache.pdfbox:pdfbox:1.8.10'
+    //compile 'org.apache.poi:poi:3.14'
     //compile 'org.apache.poi:poi:3.15-beta1'
-    compile 'org.apache.poi:poi-ooxml:3.15-beta1'
+    //compile 'com.google.guava:guava:19.0'
+    //compile 'com.carrotsearch:java-sizeof:0.0.5'
+    //compile 'org.apache.hadoop:hadoop-common:2.7.1'
+    //compile 'com.amazonaws:aws-java-sdk:1.11.19'
+    //compile 'org.apache.hadoop:hadoop-core:1.2.1'
+    //compile 'org.apache.lucene:lucene-analyzers-common:6.1.0'
+    //compile 'org.apache.poi:poi-scratchpad:3.15-beta1'
+    //compile 'org.apache.poi:poi-ooxml:3.15-beta1'
 
     compile 'me.leolin:ShortcutBadger:1.1.0-WS1'
     compile 'se.emilsjolander:stickylistheaders:2.7.0'
@@ -187,6 +194,8 @@ android {
         buildConfigField "String", "REDPHONE_RELAY_HOST", "\"relay.whispersystems.org\""
         buildConfigField "String", "REDPHONE_PREFIX_NAME", "\".whispersystems.org\""
         buildConfigField "boolean", "DEV_BUILD", "false"
+
+        multiDexEnabled true
     }
 
     compileOptions {
@@ -201,6 +210,28 @@ android {
         exclude 'asm-license.txt'
         exclude 'META-INF/LICENSE'
         exclude 'META-INF/NOTICE'
+        /*exclude 'META-INF/DEPENDENCIES'
+        exclude 'javax/servlet/resources/jsp_2_1.xsd'
+        exclude 'javax/servlet/jsp/resources/web-jsptaglibrary_2_0.xsd'
+        exclude 'javax/servlet/jsp/resources/web-jsptaglibrary_1_2.dtd'
+        exclude 'javax/servlet/resources/XMLSchema.dtd'
+        exclude 'javax/servlet/resources/datatypes.dtd'
+        exclude 'META-INF/INDEX.LIST'
+        exclude 'javax/servlet/LocalStrings.properties'
+        exclude 'javax/servlet/resources/javaee_5.xsd'
+        exclude 'javax/servlet/jsp/resources/web-jsptaglibrary_1_1.dtd'
+        exclude 'javax/servlet/jsp/resources/web-jsptaglibrary_*.dtd'
+        exclude 'javax/servlet/resources/web-app_2_5.xsd'
+        exclude 'javax/servlet/resources/web-app_*.xsd'
+        exclude 'META-INF/ASL2.0'
+        exclude 'META-INF/jersey-module-version'
+        exclude 'core-default.xml'
+        exclude 'javax/servlet/resources/*.xsd'
+        exclude 'javax/servlet/jsp/resources/*.dtd'
+        exclude 'javax/servlet/jsp/resources/*.xsd'
+        exclude 'javax/servlet/resources/*.dtd'
+        exclude 'javax/servlet/http/LocalStrings.properties'
+        exclude 'javax/el/PrivateMessages.properties'*/
     }
 
     signingConfigs {

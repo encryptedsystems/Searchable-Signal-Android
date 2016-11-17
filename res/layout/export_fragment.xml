@@ -96,5 +96,48 @@
                 </LinearLayout>
             </LinearLayout>
         </LinearLayout>
+
+        <LinearLayout android:id="@+id/set_up_edb"
+            android:clickable="true"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dip"
+            android:background="?import_export_item_card_background"
+            android:orientation="vertical"
+            android:focusable="true">
+
+            <LinearLayout android:orientation="horizontal"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:gravity="center_vertical"
+                android:paddingTop="8dip"
+                android:paddingBottom="8dip"
+                android:layout_marginLeft="16dip"
+                android:layout_marginRight="16dip">
+
+                <ImageView android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginRight="10dip"
+                    android:layout_marginEnd="10dip"
+                    android:src="?plaintext_backup"/>
+
+                <LinearLayout android:orientation="vertical"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content">
+
+                    <TextView android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:gravity="start"
+                        style="@style/Registration.Description"
+                        android:text="@string/export_fragment__set_up_edb"/>
+
+                    <TextView android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:gravity="start"
+                        android:textAppearance="?android:attr/textAppearanceSmall"
+                        android:text="@string/export_fragment__set_up_edb_from"/>
+                </LinearLayout>
+            </LinearLayout>
+        </LinearLayout>
     </LinearLayout>
 </ScrollView>

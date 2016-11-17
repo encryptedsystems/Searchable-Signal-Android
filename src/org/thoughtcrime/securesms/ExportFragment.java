@@ -15,6 +15,7 @@ import android.view.ViewGroup;
 import android.widget.Toast;
 
 import org.thoughtcrime.securesms.crypto.MasterSecret;
+import org.thoughtcrime.securesms.database.Edb;
 import org.thoughtcrime.securesms.database.NoExternalStorageException;
 import org.thoughtcrime.securesms.database.PlaintextBackupExporter;
 
@@ -38,6 +39,7 @@ public class ExportFragment extends Fragment {
     View layout              = inflater.inflate(R.layout.export_fragment, container, false);
 //    View exportEncryptedView = layout.findViewById(R.id.export_encrypted_backup);
     View exportPlaintextView = layout.findViewById(R.id.export_plaintext_backup);
+    View setUpEdbView = layout.findViewById(R.id.set_up_edb);
 
 //    exportEncryptedView.setOnClickListener(new View.OnClickListener() {
 //      @Override
@@ -50,6 +52,12 @@ public class ExportFragment extends Fragment {
       @Override
       public void onClick(View v) {
         handleExportPlaintextBackup();
+      }
+    });
+    setUpEdbView.setOnClickListener(new View.OnClickListener() {
+      @Override
+      public void onClick(View v) {
+        handleSetUpEdb();
       }
     });
 
@@ -80,6 +88,21 @@ public class ExportFragment extends Fragment {
       @Override
       public void onClick(DialogInterface dialog, int which) {
         new ExportPlaintextTask().execute();
+      }
+    });
+    builder.setNegativeButton(getActivity().getString(R.string.ExportFragment_cancel), null);
+    builder.show();
+  }
+
+  private void handleSetUpEdb() {
+    AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+    builder.setIconAttribute(R.attr.dialog_alert_icon);
+    builder.setTitle(getActivity().getString(R.string.ExportFragment_set_up_edb_from_existing_sms));
+    builder.setMessage(getActivity().getString(R.string.ExportFragment_warning_this_will_enable_encrypted_search_on_sms));
+    builder.setPositiveButton(getActivity().getString(R.string.ExportFragment_set_up_edb), new Dialog.OnClickListener() {
+      @Override
+      public void onClick(DialogInterface dialog, int which) {
+        new SetUpEdbTask().execute();
       }
     });
     builder.setNegativeButton(getActivity().getString(R.string.ExportFragment_cancel), null);
@@ -136,6 +159,35 @@ public class ExportFragment extends Fragment {
           Toast.makeText(context,
                          context.getString(R.string.ExportFragment_export_successful),
                          Toast.LENGTH_LONG).show();
+          break;
+      }
+    }
+  }
+
+  private class SetUpEdbTask extends AsyncTask<Void, Void, Integer> {
+    private ProgressDialog dialog;
+
+    @Override
+    protected Integer doInBackground(Void... params) {
+      Edb.setupEdb(getActivity(), masterSecret);
+      return SUCCESS;
+    }
+
+    @Override
+    protected void onPostExecute(Integer result) {
+      Context context = getActivity();
+
+      if (dialog != null)
+        dialog.dismiss();
+
+      if (context == null)
+        return;
+
+      switch (result) {
+        case SUCCESS:
+          Toast.makeText(context,
+                  context.getString(R.string.ExportFragment_edb_setup_successful),
+                  Toast.LENGTH_LONG).show();
           break;
       }
     }

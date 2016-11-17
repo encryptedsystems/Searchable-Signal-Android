@@ -240,7 +240,7 @@ public class ZMF {
 
     //***********************************************************************************************//
 
-    public static Map<String,boolean[]> setupSetMV2(byte[] key, String keyword,  Multimap<String, String> documentsComposition,	Multimap<String, String> keywordComposition, int falsePosRate) throws InvalidKeyException, NoSuchAlgorithmException, NoSuchProviderException, NoSuchPaddingException, IOException{
+    /*public static Map<String,boolean[]> setupSetMV2(byte[] key, String keyword,  Multimap<String, String> documentsComposition,	Multimap<String, String> keywordComposition, int falsePosRate) throws InvalidKeyException, NoSuchAlgorithmException, NoSuchProviderException, NoSuchPaddingException, IOException{
 
 
         //Extract all documents' identifiers that are associated to the keyword
@@ -459,7 +459,7 @@ public class ZMF {
 
         return listOfBloomFilter;
 
-    }
+    }*/
 
 
 

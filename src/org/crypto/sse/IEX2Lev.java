@@ -39,6 +39,7 @@ import java.util.*;
 import java.util.concurrent.ExecutionException;
 
 public class IEX2Lev implements Serializable {
+    public static int maxTupleSize = 0;
 
     // Parameter of Disjunctive search
     public static int maxDocumentIDs = 0;
@@ -191,7 +192,7 @@ public class IEX2Lev implements Serializable {
 
             // Filter setting optional. For a setup without any filtering set
             // filterParameter to 1
-            if (((double) lookup.get(keyword).size() / TextExtractPar.maxTupleSize > filterParameter)) {
+            if (((double) lookup.get(keyword).size() / maxTupleSize > filterParameter)) {
 
                 // Stats
                 System.out.println("Keyword in LMM " + keyword);
@@ -221,7 +222,7 @@ public class IEX2Lev implements Serializable {
                 for (String word : VW) {
                     // Filter setting optional. For a setup without any
                     // filtering set filterParameter to 1
-                    if (((double) lookup.get(word).size() / TextExtractPar.maxTupleSize > filterParameter)) {
+                    if (((double) lookup.get(word).size() / maxTupleSize > filterParameter)) {
                         Collection<String> l1 = new ArrayList<String>(lookup.get(word));
                         Collection<String> l2 = new ArrayList<String>(lookup.get(keyword));
                         l1.retainAll(l2);
