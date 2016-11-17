@@ -168,6 +168,14 @@ public class ExportFragment extends Fragment {
     private ProgressDialog dialog;
 
     @Override
+    protected void onPreExecute() {
+      dialog = ProgressDialog.show(getActivity(),
+              getActivity().getString(R.string.ExportFragment_setting_up_edb),
+              getActivity().getString(R.string.ExportFragment_setting_up_edb_from_existing_sms),
+              true, false);
+    }
+
+    @Override
     protected Integer doInBackground(Void... params) {
       Edb.setupEdb(getActivity(), masterSecret);
       return SUCCESS;
