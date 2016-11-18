@@ -210,12 +210,13 @@ public class MMGlobal implements Serializable {
         }
 
         List<String> listOfKeyword = new ArrayList<String>(lookup.keySet());
-        int threads = 0;
+        int threads;
         if (Runtime.getRuntime().availableProcessors() > listOfKeyword.size()) {
             threads = listOfKeyword.size();
         } else {
             threads = Runtime.getRuntime().availableProcessors();
         }
+        threads = Math.max(1, threads);
 
         ExecutorService service = Executors.newFixedThreadPool(threads);
         ArrayList<String[]> inputs = new ArrayList<String[]>(threads);

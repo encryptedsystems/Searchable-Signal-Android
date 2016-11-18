@@ -25,6 +25,7 @@ import android.util.Pair;
 
 import com.google.common.collect.Multimap;
 
+import org.crypto.sse.MMGlobal;
 import org.thoughtcrime.securesms.R;
 import org.thoughtcrime.securesms.crypto.AsymmetricMasterCipher;
 import org.thoughtcrime.securesms.crypto.AsymmetricMasterSecret;
@@ -45,6 +46,7 @@ import java.util.Map;
 public class EncryptingSmsDatabase extends SmsDatabase {
 
   private final PlaintextCache plaintextCache = new PlaintextCache();
+  private Edb edb = null;
 
   public EncryptingSmsDatabase(Context context, SQLiteOpenHelper databaseHelper) {
     super(context, databaseHelper);
@@ -167,6 +169,14 @@ public class EncryptingSmsDatabase extends SmsDatabase {
 
   public Reader readerFor(MasterSecret masterSecret, Cursor cursor) {
     return new DecryptingReader(masterSecret, cursor);
+  }
+
+  public void setEdb(Edb edb) {
+    this.edb = edb;
+  }
+
+  public Edb getEdb() {
+    return edb;
   }
 
   public class DecryptingReader extends SmsDatabase.Reader {

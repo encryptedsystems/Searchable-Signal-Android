@@ -30,26 +30,46 @@ repositories {
     maven { // textdrawable
         url 'https://dl.bintray.com/amulyakhare/maven'
     }
+    maven {
+        url 'https://github.com/rtyley/spongycastle/releases/'
+    }
     jcenter()
     mavenLocal()
 }
 
 dependencies {
-    compile 'org.bouncycastle:bcprov-jdk15on:1.54'
-    //compile 'org.apache.lucene:lucene-core:6.1.0'
-    //compile 'org.apache.pdfbox:pdfbox:2.0.2'
-    //compile 'org.apache.pdfbox:pdfbox:1.8.10'
-    //compile 'org.apache.poi:poi:3.14'
-    //compile 'org.apache.poi:poi:3.15-beta1'
-    //compile 'com.google.guava:guava:19.0'
-    //compile 'com.carrotsearch:java-sizeof:0.0.5'
-    //compile 'org.apache.hadoop:hadoop-common:2.7.1'
-    //compile 'com.amazonaws:aws-java-sdk:1.11.19'
-    //compile 'org.apache.hadoop:hadoop-core:1.2.1'
-    //compile 'org.apache.lucene:lucene-analyzers-common:6.1.0'
-    //compile 'org.apache.poi:poi-scratchpad:3.15-beta1'
-    //compile 'org.apache.poi:poi-ooxml:3.15-beta1'
+    compile 'com.madgag.spongycastle:core:1.54.0.0'
+    compile 'com.madgag.spongycastle:prov:1.54.0.0'
+    //compile 'com.madgag.spongycastle:pkix:1.54.0.0'
+    //compile 'com.madgag.spongycastle:pg:1.54.0.0'
+    //compile 'org.bouncycastle:bcprov-jdk15on:1.55'
+    //compile 'org.bouncycastle:bcprov-jdk15on:1.54'
 
+    //compile 'org.apache.lucene:lucene-core:6.1.0'
+
+    //compile 'org.apache.pdfbox:pdfbox:2.0.2'
+
+    //compile 'org.apache.pdfbox:pdfbox:1.8.10'
+
+    //compile 'org.apache.poi:poi:3.14'
+
+    //compile 'org.apache.poi:poi:3.15-beta1'
+
+    compile 'com.google.guava:guava:19.0'
+
+    //compile 'com.carrotsearch:java-sizeof:0.0.5'
+
+    //compile 'org.apache.hadoop:hadoop-common:2.7.1'
+
+    //compile 'com.amazonaws:aws-java-sdk:1.11.19'
+
+    //compile 'org.apache.hadoop:hadoop-core:1.2.1'
+
+    //compile 'org.apache.lucene:lucene-analyzers-common:6.1.0'
+
+    //compile 'org.apache.poi:poi-scratchpad:3.15-beta1'
+
+    //compile 'org.apache.poi:poi-ooxml:3.15-beta1'
     compile 'me.leolin:ShortcutBadger:1.1.0-WS1'
     compile 'se.emilsjolander:stickylistheaders:2.7.0'
     compile 'com.google.android.gms:play-services-gcm:8.1.0'
@@ -71,31 +91,26 @@ dependencies {
     compile 'com.android.support:cardview-v7:22.2.1'
     compile 'com.melnykov:floatingactionbutton:1.3.0'
     compile 'com.google.zxing:android-integration:3.1.0'
-    compile ('com.android.support:support-v4-preferencefragment:1.0.0@aar'){
+    compile('com.android.support:support-v4-preferencefragment:1.0.0@aar') {
         exclude module: 'support-v4'
     }
-    compile ('com.android.support:gridlayout-v7:22.2.0') {
+    compile('com.android.support:gridlayout-v7:22.2.0') {
         exclude module: 'support-v4'
     }
-
     compile 'com.squareup.dagger:dagger:1.2.2'
-    compile ("com.doomonafireball.betterpickers:library:1.5.3") {
+    compile('com.doomonafireball.betterpickers:library:1.5.3') {
         exclude group: 'com.android.support', module: 'support-v4'
     }
-    compile 'com.madgag.spongycastle:prov:1.51.0.0'
     provided 'com.squareup.dagger:dagger-compiler:1.2.2'
-
     compile 'org.whispersystems:jobmanager:1.0.2'
     compile 'org.whispersystems:libpastelog:1.0.7'
     compile 'com.amulyakhare:com.amulyakhare.textdrawable:1.0.1'
     compile 'org.whispersystems:signal-service-android:2.3.1'
     compile 'com.h6ah4i.android.compat:mulsellistprefcompat:1.0.0'
     compile 'com.google.zxing:core:3.2.1'
-
-    compile ('cn.carbswang.android:NumberPickerView:1.0.9') {
+    compile('cn.carbswang.android:NumberPickerView:1.0.9') {
         exclude group: 'com.android.support', module: 'appcompat-v7'
     }
-
     testCompile 'junit:junit:4.12'
     testCompile 'org.assertj:assertj-core:1.7.1'
     testCompile 'org.mockito:mockito-core:1.9.5'
@@ -103,14 +118,13 @@ dependencies {
     testCompile 'org.powermock:powermock-module-junit4:1.6.1'
     testCompile 'org.powermock:powermock-module-junit4-rule:1.6.1'
     testCompile 'org.powermock:powermock-classloading-xstream:1.6.1'
-
     androidTestCompile 'com.google.dexmaker:dexmaker:1.2'
     androidTestCompile 'com.google.dexmaker:dexmaker-mockito:1.2'
-    androidTestCompile ('org.assertj:assertj-core:1.7.1') {
+    androidTestCompile('org.assertj:assertj-core:1.7.1') {
         exclude group: 'org.hamcrest', module: 'hamcrest-core'
     }
-    androidTestCompile ('com.squareup.assertj:assertj-android:1.0.0') {
-        exclude group: 'org.hamcrest',        module: 'hamcrest-core'
+    androidTestCompile('com.squareup.assertj:assertj-android:1.0.0') {
+        exclude group: 'org.hamcrest', module: 'hamcrest-core'
         exclude group: 'com.android.support', module: 'support-annotations'
     }
 }
@@ -142,7 +156,7 @@ dependencyVerification {
         'com.android.support:gridlayout-v7:a9b770cffca2c7c5cd83cba4dd12503365de5e8d9c79c479165adf18ab3bc25b',
         'com.squareup.dagger:dagger:789aca24537022e49f91fc6444078d9de8f1dd99e1bfb090f18491b186967883',
         'com.doomonafireball.betterpickers:library:132ecd685c95a99e7377c4e27bfadbb2d7ed0bea995944060cd62d4369fdaf3d',
-        'com.madgag.spongycastle:prov:b8c3fec3a59aac1aa04ccf4dad7179351e54ef7672f53f508151b614c131398a',
+        //'com.madgag.spongycastle:prov:b8c3fec3a59aac1aa04ccf4dad7179351e54ef7672f53f508151b614c131398a',
         'org.whispersystems:jobmanager:506f679fc2fcf7bb6d10f00f41d6f6ea0abf75c70dc95b913398661ad538a181',
         'org.whispersystems:libpastelog:bb331d9a98240fc139101128ba836c1edec3c40e000597cdbb29ebf4cbf34d88',
         'com.amulyakhare:com.amulyakhare.textdrawable:54c92b5fba38cfd316a07e5a30528068f45ce8515a6890f1297df4c401af5dcb',
@@ -154,7 +168,7 @@ dependencyVerification {
         'com.android.support:support-annotations:104f353b53d5dd8d64b2f77eece4b37f6b961de9732eb6b706395e91033ec70a',
         'com.nineoldandroids:library:68025a14e3e7673d6ad2f95e4b46d78d7d068343aa99256b686fe59de1b3163a',
         'javax.inject:javax.inject:91c77044a50c481636c32d916fd89c9118a72195390452c81065080f957de7ff',
-        'com.madgag.spongycastle:core:8d6240b974b0aca4d3da9c7dd44d42339d8a374358aca5fc98e50a995764511f',
+        //'com.madgag.spongycastle:core:8d6240b974b0aca4d3da9c7dd44d42339d8a374358aca5fc98e50a995764511f',
         'org.whispersystems:signal-service-java:1f268ea089d82c3a13e6cad3f4da10d63d3789f750894f9e50dae2bf7999aa71',
         'org.whispersystems:signal-protocol-android:d83cb3d15b667fc2543fa18ce80791c72c053e8ac54fc2941f0429a5944ca691',
         'com.google.android.gms:play-services-basement:e1d29b21e02fd2a63e5a31807415cbb17a59568e27e3254181c01ffae10659bf',
@@ -247,7 +261,7 @@ android {
                           'proguard-appcompat-v7.pro',
                           'proguard-square-okhttp.pro',
                           'proguard-square-okio.pro',
-                          'proguard-spongycastle.pro',
+                          //'proguard-spongycastle.pro',
                           'proguard-rounded-image-view.pro',
                           'proguard-glide.pro',
                           'proguard-shortcutbadger.pro',

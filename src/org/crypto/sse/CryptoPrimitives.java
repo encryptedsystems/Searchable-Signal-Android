@@ -24,13 +24,15 @@
 
 package org.crypto.sse;
 
-import org.bouncycastle.crypto.digests.SHA256Digest;
-import org.bouncycastle.crypto.digests.SHA512Digest;
-import org.bouncycastle.crypto.engines.AESFastEngine;
-import org.bouncycastle.crypto.macs.CMac;
-import org.bouncycastle.crypto.macs.HMac;
-import org.bouncycastle.crypto.params.KeyParameter;
-import org.bouncycastle.crypto.prng.ThreadedSeedGenerator;
+import android.util.Log;
+
+import org.spongycastle.crypto.digests.SHA256Digest;
+import org.spongycastle.crypto.digests.SHA512Digest;
+import org.spongycastle.crypto.engines.AESFastEngine;
+import org.spongycastle.crypto.macs.CMac;
+import org.spongycastle.crypto.macs.HMac;
+import org.spongycastle.crypto.params.KeyParameter;
+import org.spongycastle.crypto.prng.ThreadedSeedGenerator;
 
 import javax.crypto.*;
 import javax.crypto.spec.IvParameterSpec;
@@ -43,6 +45,12 @@ import java.security.spec.KeySpec;
 
 public class CryptoPrimitives {
 
+    static {
+        Log.i("sse", "insert provider");
+        //Security.insertProviderAt(new org.spongycastle.jce.provider.BouncyCastleProvider(), 1);
+        Security.addProvider(new org.spongycastle.jce.provider.BouncyCastleProvider());
+    }
+
     private CryptoPrimitives() {
     }
 
@@ -51,7 +59,7 @@ public class CryptoPrimitives {
     ///////////////////// KeyGen return a raw key based on PBE
     ///////////////////// PKCS12/////////////////////////////
     ///////////////////// mostly taken from
-    ///////////////////// org.bouncycastle.jce.provider.test.PBETest
+    ///////////////////// org.spongycastle.jce.provider.test.PBETest
     // check also doc in
     ///////////////////// http://docs.oracle.com/javase/7/docs/technotes/guides/security/StandardNames.html#SecretKeyFactory/////////////////////////////
     // ***********************************************************************************************//
@@ -167,7 +175,7 @@ public class CryptoPrimitives {
     public static byte[] encryptAES_CTR_String(byte[] keyBytes, byte[] ivBytes, String identifier, int sizeOfFileName)
             throws InvalidKeyException, InvalidAlgorithmParameterException, NoSuchAlgorithmException,
             NoSuchProviderException, NoSuchPaddingException, IOException {
-        Security.addProvider(new org.bouncycastle.jce.provider.BouncyCastleProvider());
+        //Security.addProvider(new org.spongycastle.jce.provider.BouncyCastleProvider());
 
         // Concatenate the title with the text. The title should be at most
         // "sizeOfFileName" characters including 3 characters marking the end of
@@ -178,7 +186,8 @@ public class CryptoPrimitives {
         // byte[] input = concat(input1 , input0);
         IvParameterSpec ivSpec = new IvParameterSpec(ivBytes);
         SecretKeySpec key = new SecretKeySpec(keyBytes, "AES");
-        Cipher cipher = Cipher.getInstance("AES/CTR/NoPadding", "BC");
+        //Cipher cipher = Cipher.getInstance("AES/CTR/NoPadding", "BC");
+        Cipher cipher = Cipher.getInstance("AES/CTR/NoPadding");
         cipher.init(Cipher.ENCRYPT_MODE, key, ivSpec);
         ByteArrayInputStream bIn = new ByteArrayInputStream(input);
         CipherInputStream cIn = new CipherInputStream(bIn, cipher);
@@ -204,7 +213,7 @@ public class CryptoPrimitives {
     public static byte[] decryptAES_CTR_String(byte[] input, byte[] keyBytes)
             throws InvalidKeyException, InvalidAlgorithmParameterException, NoSuchAlgorithmException,
             NoSuchProviderException, NoSuchPaddingException, IOException {
-        Security.addProvider(new org.bouncycastle.jce.provider.BouncyCastleProvider());
+        //Security.addProvider(new org.spongycastle.jce.provider.BouncyCastleProvider());
         // byte[] input = readAlternateImpl(folder + fileName);
 
         byte[] ivBytes = new byte[16];
@@ -240,7 +249,7 @@ public class CryptoPrimitives {
     public static byte[] DTE_encryptAES_CTR_String(byte[] encKeyBytes, byte[] PRFKeyBytes, String identifier,
                                                    int sizeOfFileName) throws InvalidKeyException, InvalidAlgorithmParameterException,
             NoSuchAlgorithmException, NoSuchProviderException, NoSuchPaddingException, IOException {
-        Security.addProvider(new org.bouncycastle.jce.provider.BouncyCastleProvider());
+        //Security.addProvider(new org.spongycastle.jce.provider.BouncyCastleProvider());
 
         // Title Encoding: Concatenate the title with the text. The title should
         // be at most "sizeOfFileName" characters including 3 characters marking
@@ -282,7 +291,7 @@ public class CryptoPrimitives {
                                              String folderInput, String inputFileName, byte[] keyBytes, byte[] ivBytes)
             throws InvalidKeyException, InvalidAlgorithmParameterException, NoSuchAlgorithmException,
             NoSuchProviderException, NoSuchPaddingException, IOException {
-        Security.addProvider(new org.bouncycastle.jce.provider.BouncyCastleProvider());
+        //Security.addProvider(new org.spongycastle.jce.provider.BouncyCastleProvider());
         byte[] input0 = readAlternateImpl(folderInput + inputFileName);
 
         // Concatenate the title with the text. The title should be at most 42
@@ -329,7 +338,7 @@ public class CryptoPrimitives {
                                       String inputFileName, byte[] keyBytes, byte[] ivBytes)
             throws InvalidKeyException, InvalidAlgorithmParameterException, NoSuchAlgorithmException,
             NoSuchProviderException, NoSuchPaddingException, IOException {
-        Security.addProvider(new org.bouncycastle.jce.provider.BouncyCastleProvider());
+        //Security.addProvider(new org.spongycastle.jce.provider.BouncyCastleProvider());
         byte[] input0 = readAlternateImpl(folderInput + inputFileName);
 
         // Concatenate the title with the text. The title should be at most 42
@@ -369,7 +378,7 @@ public class CryptoPrimitives {
     public static void decryptAES_CTR(String folderOUT, byte[] input, byte[] keyBytes)
             throws InvalidKeyException, InvalidAlgorithmParameterException, NoSuchAlgorithmException,
             NoSuchProviderException, NoSuchPaddingException, IOException {
-        Security.addProvider(new org.bouncycastle.jce.provider.BouncyCastleProvider());
+        //Security.addProvider(new org.spongycastle.jce.provider.BouncyCastleProvider());
 
         byte[] ivBytes = new byte[16];
         byte[] cipherText = new byte[input.length - 16];
@@ -420,7 +429,9 @@ public class CryptoPrimitives {
                 output = new BufferedOutputStream(new FileOutputStream(dirName + "/" + aOutputFileName));
                 output.write(aInput);
             } finally {
-                output.close();
+                if (output != null) {
+                    output.close();
+                }
             }
         } catch (FileNotFoundException ex) {
             System.out.println("File not found.");
@@ -632,7 +643,7 @@ public class CryptoPrimitives {
     public static boolean[][] onlineCipher(byte[] keyHash, byte[] keyEnc, boolean[] plaintext) throws IOException,
             InvalidKeyException, NoSuchAlgorithmException, NoSuchProviderException, NoSuchPaddingException {
 
-        Security.addProvider(new org.bouncycastle.jce.provider.BouncyCastleProvider());
+        //Security.addProvider(new org.spongycastle.jce.provider.BouncyCastleProvider());
 
         // Block extension using Block expansion function
         int blockSize = 128;

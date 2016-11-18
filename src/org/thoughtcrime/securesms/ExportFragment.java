@@ -14,12 +14,18 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Toast;
 
+import org.crypto.sse.EdbException;
 import org.thoughtcrime.securesms.crypto.MasterSecret;
+import org.thoughtcrime.securesms.database.DatabaseFactory;
 import org.thoughtcrime.securesms.database.Edb;
+import org.thoughtcrime.securesms.database.EncryptingSmsDatabase;
 import org.thoughtcrime.securesms.database.NoExternalStorageException;
 import org.thoughtcrime.securesms.database.PlaintextBackupExporter;
 
 import java.io.IOException;
+import java.security.NoSuchAlgorithmException;
+import java.security.NoSuchProviderException;
+import java.security.spec.InvalidKeySpecException;
 
 
 public class ExportFragment extends Fragment {
@@ -177,8 +183,14 @@ public class ExportFragment extends Fragment {
 
     @Override
     protected Integer doInBackground(Void... params) {
-      Edb.setupEdb(getActivity(), masterSecret);
-      return SUCCESS;
+      EncryptingSmsDatabase db = DatabaseFactory.getEncryptingSmsDatabase(getActivity());
+      try {
+        Edb.setupEdb(db, masterSecret);
+        return SUCCESS;
+      } catch (EdbException e) {
+        Log.w("SetUpEdbTask", e);
+        return IO_ERROR;
+      }
     }
 
     @Override
