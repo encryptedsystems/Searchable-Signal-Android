@@ -375,6 +375,7 @@ public class ConversationFragment extends Fragment
 
   @Override
   public Loader<Cursor> onCreateLoader(int id, Bundle args) {
+    Log.i(TAG, "onCreateLoader");
     return new ConversationLoader(getActivity(), threadId, args.getLong("limit", PARTIAL_CONVERSATION_LIMIT));
   }
 

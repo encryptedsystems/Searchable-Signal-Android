@@ -163,6 +163,7 @@ public class ConversationListActivity extends PassphraseRequiredActionBarActivit
 
   @Override
   public void onCreateConversation(long threadId, Recipients recipients, int distributionType) {
+    Log.i(TAG, "onCreateConversation");
     Intent intent = new Intent(this, ConversationActivity.class);
     intent.putExtra(ConversationActivity.RECIPIENTS_EXTRA, recipients.getIds());
     intent.putExtra(ConversationActivity.THREAD_ID_EXTRA, threadId);

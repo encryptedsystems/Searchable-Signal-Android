@@ -45,6 +45,7 @@ import org.whispersystems.jobqueue.JobManager;
 import org.whispersystems.signalservice.api.util.InvalidNumberException;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
@@ -141,6 +142,27 @@ public class SmsDatabase extends MessagingDatabase {
       if (cursor != null)
         cursor.close();
     }
+  }
+
+  public List<String> getAddressesForMessages(List<Long> ids) {
+    String where = ID + " IN (" + TextUtils.join(",", ids) + ")";
+
+    SQLiteDatabase db = databaseHelper.getReadableDatabase();
+    Cursor cursor = null;
+    List<String> res = new ArrayList<>();
+
+    try {
+      cursor = db.query(TABLE_NAME, new String[] { ADDRESS }, where, null, null, null, null);
+      for (cursor.moveToFirst(); !cursor.isAfterLast(); cursor.moveToNext()) {
+        res.add(cursor.getString(0));
+      }
+    } finally {
+      if (cursor != null) {
+        cursor.close();
+      }
+    }
+
+    return res;
   }
 
   public int getMessageCount() {
@@ -611,6 +633,21 @@ public class SmsDatabase extends MessagingDatabase {
   Cursor getMessages(int skip, int limit) {
     SQLiteDatabase db = databaseHelper.getReadableDatabase();
     return db.query(TABLE_NAME, MESSAGE_PROJECTION, null, null, null, null, ID, skip + "," + limit);
+  }
+
+  Cursor getMessagesFromIds(List<Long> message_ids) {
+    StringBuilder b_ids = new StringBuilder();
+    for (int i = 0; i < message_ids.size(); i++) {
+      b_ids.append(message_ids.get(i));
+      if (i < message_ids.size() - 1) {
+        b_ids.append(",");
+      }
+    }
+    String ids = b_ids.toString();
+    String where = ID + " IN (" + ids + ")";
+
+    SQLiteDatabase db = databaseHelper.getReadableDatabase();
+    return db.query(TABLE_NAME, MESSAGE_PROJECTION, where, null, null, null, null);
   }
 
   Cursor getOutgoingMessages() {

@@ -2,6 +2,7 @@ package org.thoughtcrime.securesms.database.loaders;
 
 import android.content.Context;
 import android.database.Cursor;
+import android.util.Log;
 
 import org.thoughtcrime.securesms.database.DatabaseFactory;
 import org.thoughtcrime.securesms.util.AbstractCursorLoader;
@@ -22,6 +23,7 @@ public class ConversationLoader extends AbstractCursorLoader {
 
   @Override
   public Cursor getCursor() {
+    Log.i("ConversationLoader", "getCursor");
     return DatabaseFactory.getMmsSmsDatabase(context).getConversation(threadId, limit);
   }
 }

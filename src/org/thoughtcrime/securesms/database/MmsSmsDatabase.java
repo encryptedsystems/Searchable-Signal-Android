@@ -25,12 +25,15 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.util.Log;
 
+import com.google.zxing.common.StringUtils;
+
 import org.thoughtcrime.securesms.crypto.MasterSecret;
 import org.thoughtcrime.securesms.database.MessagingDatabase.SyncMessageId;
 import org.thoughtcrime.securesms.database.model.MessageRecord;
 import org.whispersystems.libsignal.util.guava.Optional;
 
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 public class MmsSmsDatabase extends Database {
@@ -75,6 +78,25 @@ public class MmsSmsDatabase extends Database {
   public Cursor getConversation(long threadId, long limit) {
     String order     = MmsSmsColumns.NORMALIZED_DATE_RECEIVED + " DESC";
     String selection = MmsSmsColumns.THREAD_ID + " = " + threadId;
+
+    Cursor cursor = queryTables(PROJECTION, selection, order, limit > 0 ? String.valueOf(limit) : null);
+    setNotifyConverationListeners(cursor, threadId);
+
+    return cursor;
+  }
+
+  public Cursor getConversation(long threadId, long limit, List<Long> messageIds) {
+    String order     = MmsSmsColumns.NORMALIZED_DATE_RECEIVED + " DESC";
+    StringBuilder b = new StringBuilder();
+    for (long message_id : messageIds) {
+      b.append(message_id);
+      if (message_id != messageIds.get(messageIds.size() - 1)) {
+        b.append(",");
+      }
+    }
+    String messageIdsStr = b.toString();
+
+    String selection = MmsSmsColumns.THREAD_ID + " = " + threadId + " AND " + MmsSmsColumns.ID + " IN (" + messageIdsStr + ")";
 
     Cursor cursor = queryTables(PROJECTION, selection, order, limit > 0 ? String.valueOf(limit) : null);
     setNotifyConverationListeners(cursor, threadId);

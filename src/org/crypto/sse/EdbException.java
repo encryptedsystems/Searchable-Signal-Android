@@ -4,7 +4,7 @@ package org.crypto.sse;
  * Created by zheguang on 11/17/16.
  */
 
-public class EdbException extends Exception {
+public class EdbException extends RuntimeException {
     public EdbException() {
     }
 

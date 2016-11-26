@@ -299,6 +299,13 @@ public class ThreadDatabase extends Database {
   }
 
   public Cursor getFilteredConversationList(List<String> filter) {
+    StringBuilder b_filter = new StringBuilder();
+    for (String f : filter) {
+      b_filter.append(f);
+      b_filter.append(",");
+    }
+    String filterStr = b_filter.toString();
+    Log.i(TAG, "getFilteredConversationList: filter-numbers: " + filterStr);
     if (filter == null || filter.size() == 0)
       return null;
 
@@ -323,6 +330,14 @@ public class ThreadDatabase extends Database {
         selectionArgs[i++] = String.valueOf(id);
       }
 
+      StringBuilder b_selargs = new StringBuilder();
+      for (String selectionArg : selectionArgs) {
+        b_selargs.append(selectionArg);
+        b_selargs.append(",");
+      }
+      String selectionArgsStr = b_selargs.toString();
+
+      Log.i(TAG, "getFilteredConversationList: query: " + TABLE_NAME + ", " + selection + ", (" + selectionArgsStr + ")");
       cursors.add(db.query(TABLE_NAME, null, selection, selectionArgs, null, null, DATE + " DESC"));
     }
 

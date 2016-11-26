@@ -4,12 +4,17 @@ import android.content.Context;
 import android.database.Cursor;
 import android.database.MatrixCursor;
 import android.database.MergeCursor;
+import android.text.TextUtils;
+import android.util.Log;
 
 import org.thoughtcrime.securesms.contacts.ContactAccessor;
+import org.thoughtcrime.securesms.crypto.MasterSecret;
 import org.thoughtcrime.securesms.database.DatabaseFactory;
 import org.thoughtcrime.securesms.database.ThreadDatabase;
+import org.thoughtcrime.securesms.service.KeyCachingService;
 import org.thoughtcrime.securesms.util.AbstractCursorLoader;
 
+import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -61,7 +66,15 @@ public class ConversationListLoader extends AbstractCursorLoader {
   }
 
   private Cursor getFilteredConversationList(String filter) {
+    Log.i("ConversationListLoader", "getFilteredConversationList, filter: " + filter);
+    // search through (1) contacts and (2) messages in EDB.
     List<String> numbers = ContactAccessor.getInstance().getNumbersForThreadSearchFilter(context, filter);
-    return DatabaseFactory.getThreadDatabase(context).getFilteredConversationList(numbers);
+    MasterSecret masterSecret = KeyCachingService.getMasterSecret(context);
+    List<String> addresses = DatabaseFactory.getEncryptingSmsDatabase(context).getAddressesFromWord(masterSecret, filter);
+
+    List<String> all_numbers = new ArrayList<>(numbers);
+    all_numbers.addAll(addresses);
+    Log.i("ConversationListLoader", "all_numbers: " + TextUtils.join(",", all_numbers));
+    return DatabaseFactory.getThreadDatabase(context).getFilteredConversationList(all_numbers);
   }
 }

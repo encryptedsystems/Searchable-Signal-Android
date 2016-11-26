@@ -18,6 +18,9 @@ import org.thoughtcrime.securesms.util.ParcelUtil;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
+import java.security.InvalidAlgorithmParameterException;
+import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
 import java.security.spec.InvalidKeySpecException;
@@ -25,6 +28,10 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 import java.util.regex.Pattern;
+
+import javax.crypto.NoSuchPaddingException;
+
+import static org.crypto.sse.MMGlobal.testSI;
 
 /**
  * Created by zheguang on 11/16/16.
@@ -41,7 +48,7 @@ public class Edb {
         this.secrets = secrets;
     }
 
-    public static void setupEdb(EncryptingSmsDatabase db, MasterSecret masterSecret) throws EdbException {
+    public static void setupEdb(EncryptingSmsDatabase db, MasterSecret masterSecret) {
         Log.i("Edb", "setupEdb");
 
         //EncryptingSmsDatabase db = DatabaseFactory.getEncryptingSmsDatabase(context);
@@ -60,6 +67,7 @@ public class Edb {
 
             while ((record = reader.getNext()) != null) {
                 Log.i("edb", "read loop");
+                Log.i("edb.recipient", record.getIndividualRecipient().getName() + ", " + record.getIndividualRecipient().getNumber());
                 DisplayRecord.Body body = record.getBody();
                 if (body.isPlaintext()) {
                     String message_id = String.valueOf(record.getId());
@@ -88,6 +96,7 @@ public class Edb {
 
         Edb edb;
         try {
+            // TODO: use serialized masterSecret as the input password
             List<byte[]> secrets= IEX2Lev.keyGen(256, "samzhao", "salt/salt", 100);
             MMGlobal two_lev = MMGlobal.constructEMMParGMM(secrets.get(0), word_id_map, bigBlock, smallBlock, dataSize);
             edb = new Edb(two_lev, secrets);
@@ -96,5 +105,21 @@ public class Edb {
         }
 
         db.setEdb(edb);
+    }
+
+    public List<Long> searchMessageIdsFor(String word) {
+        List<String> values;
+        try {
+            byte[][] token = MMGlobal.genToken(secrets.get(0), word);
+            values = testSI(token, two_lev.getDictionary(), two_lev.getArray());
+        } catch (IOException | NoSuchAlgorithmException | InvalidKeyException | NoSuchPaddingException | NoSuchProviderException | InvalidAlgorithmParameterException e) {
+            throw new EdbException(e);
+        }
+
+        List<Long> message_ids = new ArrayList<>();
+        for (String val : values) {
+            message_ids.add(Long.parseLong(val));
+        }
+        return message_ids;
     }
 }

@@ -41,6 +41,7 @@ import org.whispersystems.libsignal.InvalidMessageException;
 
 import java.lang.ref.SoftReference;
 import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 
 public class EncryptingSmsDatabase extends SmsDatabase {
@@ -144,6 +145,11 @@ public class EncryptingSmsDatabase extends SmsDatabase {
   public Reader getMessages(MasterSecret masterSecret, int skip, int limit) {
     Cursor cursor = super.getMessages(skip, limit);
     return new DecryptingReader(masterSecret, cursor);
+  }
+
+  public List<String> getAddressesFromWord(MasterSecret masterSecret, String word) {
+    List<Long> message_ids = edb.searchMessageIdsFor(word);
+    return super.getAddressesForMessages(message_ids);
   }
 
   public Reader getOutgoingMessages(MasterSecret masterSecret) {
