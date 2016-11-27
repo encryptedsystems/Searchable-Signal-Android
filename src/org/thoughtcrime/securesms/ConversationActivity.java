@@ -175,6 +175,7 @@ public class ConversationActivity extends PassphraseRequiredActionBarActivity
   public static final String IS_ARCHIVED_EXTRA       = "is_archived";
   public static final String TEXT_EXTRA              = "draft_text";
   public static final String DISTRIBUTION_TYPE_EXTRA = "distribution_type";
+  public static final String QUERY_FILTER            = "query_filter";
 
   private static final int PICK_IMAGE        = 1;
   private static final int PICK_VIDEO        = 2;
@@ -216,6 +217,7 @@ public class ConversationActivity extends PassphraseRequiredActionBarActivity
   private boolean    isSecureText;
   private boolean    isSecureVoice;
   private boolean    isMmsEnabled = true;
+  private String queryFilter;
 
   private DynamicTheme    dynamicTheme    = new DynamicTheme();
   private DynamicLanguage dynamicLanguage = new DynamicLanguage();
@@ -1043,6 +1045,7 @@ public class ConversationActivity extends PassphraseRequiredActionBarActivity
     threadId         = getIntent().getLongExtra(THREAD_ID_EXTRA, -1);
     archived         = getIntent().getBooleanExtra(IS_ARCHIVED_EXTRA, false);
     distributionType = getIntent().getIntExtra(DISTRIBUTION_TYPE_EXTRA, ThreadDatabase.DistributionTypes.DEFAULT);
+    queryFilter      = getIntent().getStringExtra(QUERY_FILTER);
 
     if (Build.VERSION.SDK_INT < Build.VERSION_CODES.JELLY_BEAN) {
       LinearLayout conversationContainer = ViewUtil.findById(this, R.id.conversation_container);
@@ -1290,6 +1293,10 @@ public class ConversationActivity extends PassphraseRequiredActionBarActivity
 
   protected long getThreadId() {
     return this.threadId;
+  }
+
+  public String getQueryFilter() {
+    return this.queryFilter;
   }
 
   private String getMessage() throws InvalidMessageException {

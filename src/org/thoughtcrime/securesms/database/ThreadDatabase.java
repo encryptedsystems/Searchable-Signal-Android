@@ -341,6 +341,7 @@ public class ThreadDatabase extends Database {
       cursors.add(db.query(TABLE_NAME, null, selection, selectionArgs, null, null, DATE + " DESC"));
     }
 
+    Log.i(TAG, "getFilteredConversationList: num cursors: " + cursors.size());
     Cursor cursor = cursors.size() > 1 ? new MergeCursor(cursors.toArray(new Cursor[cursors.size()])) : cursors.get(0);
     setNotifyConverationListListeners(cursor);
     return cursor;

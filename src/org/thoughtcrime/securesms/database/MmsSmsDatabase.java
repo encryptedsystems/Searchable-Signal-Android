@@ -23,6 +23,7 @@ import android.database.sqlite.SQLiteOpenHelper;
 import android.database.sqlite.SQLiteQueryBuilder;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.text.TextUtils;
 import android.util.Log;
 
 import com.google.zxing.common.StringUtils;
@@ -79,26 +80,20 @@ public class MmsSmsDatabase extends Database {
     String order     = MmsSmsColumns.NORMALIZED_DATE_RECEIVED + " DESC";
     String selection = MmsSmsColumns.THREAD_ID + " = " + threadId;
 
-    Cursor cursor = queryTables(PROJECTION, selection, order, limit > 0 ? String.valueOf(limit) : null);
+    Cursor cursor = queryTables(PROJECTION, selection, selection, order, limit > 0 ? String.valueOf(limit) : null);
     setNotifyConverationListeners(cursor, threadId);
 
     return cursor;
   }
 
   public Cursor getConversation(long threadId, long limit, List<Long> messageIds) {
+    Log.i(TAG, "getConversation with messageIds: " + TextUtils.join(",", messageIds));
     String order     = MmsSmsColumns.NORMALIZED_DATE_RECEIVED + " DESC";
-    StringBuilder b = new StringBuilder();
-    for (long message_id : messageIds) {
-      b.append(message_id);
-      if (message_id != messageIds.get(messageIds.size() - 1)) {
-        b.append(",");
-      }
-    }
-    String messageIdsStr = b.toString();
+    String messageIdsStr = TextUtils.join(",", messageIds);
+    String sms_selection = SmsDatabase.TABLE_NAME + "." + SmsDatabase.THREAD_ID + " = " + threadId + " AND " + SmsDatabase.TABLE_NAME + "." + SmsDatabase.ID + " IN (" + messageIdsStr + ")";
+    String mms_selection = MmsDatabase.TABLE_NAME + "." + MmsDatabase.THREAD_ID + " = " + threadId + " AND " + MmsDatabase.TABLE_NAME + "." + MmsDatabase.ID + " IN (" + messageIdsStr + ")";
 
-    String selection = MmsSmsColumns.THREAD_ID + " = " + threadId + " AND " + MmsSmsColumns.ID + " IN (" + messageIdsStr + ")";
-
-    Cursor cursor = queryTables(PROJECTION, selection, order, limit > 0 ? String.valueOf(limit) : null);
+    Cursor cursor = queryTables(PROJECTION, sms_selection, mms_selection, order, limit > 0 ? String.valueOf(limit) : null);
     setNotifyConverationListeners(cursor, threadId);
 
     return cursor;
@@ -112,7 +107,7 @@ public class MmsSmsDatabase extends Database {
     String order           = MmsSmsColumns.NORMALIZED_DATE_RECEIVED + " ASC";
     String selection       = MmsSmsColumns.THREAD_ID + " = " + threadId + " AND " + MmsSmsColumns.MISMATCHED_IDENTITIES + " IS NOT NULL";
 
-    Cursor cursor = queryTables(PROJECTION, selection, order, null);
+    Cursor cursor = queryTables(PROJECTION, selection, selection, order, null);
     setNotifyConverationListeners(cursor, threadId);
 
     return cursor;
@@ -122,19 +117,19 @@ public class MmsSmsDatabase extends Database {
     String order     = MmsSmsColumns.NORMALIZED_DATE_RECEIVED + " DESC";
     String selection = MmsSmsColumns.THREAD_ID + " = " + threadId;
 
-    return  queryTables(PROJECTION, selection, order, "1");
+    return  queryTables(PROJECTION, selection, selection, order, "1");
   }
 
   public Cursor getUnread() {
     String order           = MmsSmsColumns.NORMALIZED_DATE_RECEIVED + " ASC";
     String selection       = MmsSmsColumns.READ + " = 0";
 
-    return queryTables(PROJECTION, selection, order, null);
+    return queryTables(PROJECTION, selection, selection, order, null);
   }
 
   public int getUnreadCount(long threadId) {
     String selection = MmsSmsColumns.READ + " = 0 AND " + MmsSmsColumns.THREAD_ID + " = " + threadId;
-    Cursor cursor    = queryTables(PROJECTION, selection, null, null);
+    Cursor cursor    = queryTables(PROJECTION, selection, selection, null, null);
 
     try {
       return cursor != null ? cursor.getCount() : 0;
@@ -155,7 +150,7 @@ public class MmsSmsDatabase extends Database {
     DatabaseFactory.getMmsDatabase(context).incrementDeliveryReceiptCount(syncMessageId);
   }
 
-  private Cursor queryTables(String[] projection, String selection, String order, String limit) {
+  private Cursor queryTables(String[] projection, String sms_selection, String mms_selection, String order, String limit) {
     String[] mmsProjection = {MmsDatabase.DATE_SENT + " AS " + MmsSmsColumns.NORMALIZED_DATE_SENT,
                               MmsDatabase.DATE_RECEIVED + " AS " + MmsSmsColumns.NORMALIZED_DATE_RECEIVED,
                               MmsDatabase.TABLE_NAME + "." + MmsDatabase.ID + " AS " + MmsSmsColumns.ID,
@@ -274,9 +269,9 @@ public class MmsSmsDatabase extends Database {
     smsColumnsPresent.add(SmsDatabase.STATUS);
 
     @SuppressWarnings("deprecation")
-    String mmsSubQuery = mmsQueryBuilder.buildUnionSubQuery(TRANSPORT, mmsProjection, mmsColumnsPresent, 4, MMS_TRANSPORT, selection, null, null, null);
+    String mmsSubQuery = mmsQueryBuilder.buildUnionSubQuery(TRANSPORT, mmsProjection, mmsColumnsPresent, 4, MMS_TRANSPORT, mms_selection, null, null, null);
     @SuppressWarnings("deprecation")
-    String smsSubQuery = smsQueryBuilder.buildUnionSubQuery(TRANSPORT, smsProjection, smsColumnsPresent, 4, SMS_TRANSPORT, selection, null, null, null);
+    String smsSubQuery = smsQueryBuilder.buildUnionSubQuery(TRANSPORT, smsProjection, smsColumnsPresent, 4, SMS_TRANSPORT, sms_selection, null, null, null);
 
     SQLiteQueryBuilder unionQueryBuilder = new SQLiteQueryBuilder();
     String unionQuery = unionQueryBuilder.buildUnionQuery(new String[] {smsSubQuery, mmsSubQuery}, order, limit);

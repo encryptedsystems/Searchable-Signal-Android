@@ -148,8 +148,13 @@ public class EncryptingSmsDatabase extends SmsDatabase {
   }
 
   public List<String> getAddressesFromWord(MasterSecret masterSecret, String word) {
-    List<Long> message_ids = edb.searchMessageIdsFor(word);
+    List<Long> message_ids = edb.searchMessageIdsFor(masterSecret, word);
     return super.getAddressesForMessages(message_ids);
+  }
+
+  public List<Long> getMessageIdsFromWord(MasterSecret masterSecret, String word) {
+    List<Long> message_ids = edb.searchMessageIdsFor(masterSecret, word);
+    return message_ids;
   }
 
   public Reader getOutgoingMessages(MasterSecret masterSecret) {

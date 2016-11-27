@@ -41,11 +41,11 @@ public class Edb {
     public static int ROW_LIMIT = 500;
 
     public MMGlobal two_lev;
-    public List<byte[]> secrets;
+    public List<byte[]> secrets;  // TODO: moved these keys to KeyCachingService
 
-    Edb(MMGlobal two_lev, List<byte[]> secrets) {
+    private Edb(MMGlobal two_lev, List<byte[]> secrets) {
         this.two_lev = two_lev;
-        this.secrets = secrets;
+        this.secrets = secrets; // TODO: moved these keys to KeyCachingService
     }
 
     public static void setupEdb(EncryptingSmsDatabase db, MasterSecret masterSecret) {
@@ -107,7 +107,8 @@ public class Edb {
         db.setEdb(edb);
     }
 
-    public List<Long> searchMessageIdsFor(String word) {
+    public List<Long> searchMessageIdsFor(MasterSecret masterSecret, String word) {
+        // TODO: use provided masterSecret to retrieve Edb secrets
         List<String> values;
         try {
             byte[][] token = MMGlobal.genToken(secrets.get(0), word);
