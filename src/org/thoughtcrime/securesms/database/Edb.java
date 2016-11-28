@@ -12,6 +12,7 @@ import org.crypto.sse.IEX2Lev;
 import org.crypto.sse.MMGlobal;
 import org.thoughtcrime.securesms.BuildConfig;
 import org.thoughtcrime.securesms.crypto.MasterSecret;
+import org.thoughtcrime.securesms.crypto.MasterSecretUtil;
 import org.thoughtcrime.securesms.database.model.DisplayRecord;
 import org.thoughtcrime.securesms.database.model.SmsMessageRecord;
 import org.thoughtcrime.securesms.util.ParcelUtil;
@@ -40,12 +41,10 @@ import static org.crypto.sse.MMGlobal.testSI;
 public class Edb {
     public static int ROW_LIMIT = 500;
 
-    public MMGlobal two_lev;
-    public List<byte[]> secrets;  // TODO: moved these keys to KeyCachingService
+    public final MMGlobal two_lev;
 
-    private Edb(MMGlobal two_lev, List<byte[]> secrets) {
+    private Edb(MMGlobal two_lev) {
         this.two_lev = two_lev;
-        this.secrets = secrets; // TODO: moved these keys to KeyCachingService
     }
 
     public static void setupEdb(EncryptingSmsDatabase db, MasterSecret masterSecret) {
@@ -96,11 +95,15 @@ public class Edb {
 
         Edb edb;
         try {
-            // TODO: use serialized masterSecret as the input password
-            List<byte[]> secrets= IEX2Lev.keyGen(256, "samzhao", "salt/salt", 100);
-            MMGlobal two_lev = MMGlobal.constructEMMParGMM(secrets.get(0), word_id_map, bigBlock, smallBlock, dataSize);
-            edb = new Edb(two_lev, secrets);
-        } catch (InterruptedException | ExecutionException | IOException | NoSuchAlgorithmException | NoSuchProviderException | InvalidKeySpecException e) {
+            //List<byte[]> secrets= IEX2Lev.keyGen(256, "samzhao", "salt/salt", 100);
+            //MMGlobal two_lev = MMGlobal.constructEMMParGMM(secrets.get(0), word_id_map, bigBlock, smallBlock, dataSize);
+            EdbSecret edbSecret = masterSecret.getEdbSecret();
+            if (edbSecret == null) {
+                throw new EdbException("EdbSecret has not been generated yet: null");
+            }
+            MMGlobal two_lev = MMGlobal.constructEMMParGMM(edbSecret.getInvertedIndexKey().getEncoded(), word_id_map, bigBlock, smallBlock, dataSize);
+            edb = new Edb(two_lev);
+        } catch (InterruptedException | ExecutionException | IOException e) {
             throw new EdbException(e);
         }
 
@@ -111,7 +114,11 @@ public class Edb {
         // TODO: use provided masterSecret to retrieve Edb secrets
         List<String> values;
         try {
-            byte[][] token = MMGlobal.genToken(secrets.get(0), word);
+            EdbSecret edbSecret = masterSecret.getEdbSecret();
+            if (edbSecret == null) {
+                throw new EdbException("EdbSecret has not been generated yet: null");
+            }
+            byte[][] token = MMGlobal.genToken(edbSecret.getInvertedIndexKey().getEncoded(), word);
             values = testSI(token, two_lev.getDictionary(), two_lev.getArray());
         } catch (IOException | NoSuchAlgorithmException | InvalidKeyException | NoSuchPaddingException | NoSuchProviderException | InvalidAlgorithmParameterException e) {
             throw new EdbException(e);

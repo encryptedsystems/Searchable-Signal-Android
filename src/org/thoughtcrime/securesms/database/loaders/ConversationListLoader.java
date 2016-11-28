@@ -69,11 +69,17 @@ public class ConversationListLoader extends AbstractCursorLoader {
     Log.i("ConversationListLoader", "getFilteredConversationList, filter: " + filter);
     // search through (1) contacts and (2) messages in EDB.
     List<String> numbers = ContactAccessor.getInstance().getNumbersForThreadSearchFilter(context, filter);
-    MasterSecret masterSecret = KeyCachingService.getMasterSecret(context);
-    List<String> addresses = DatabaseFactory.getEncryptingSmsDatabase(context).getAddressesFromWord(masterSecret, filter);
-
     List<String> all_numbers = new ArrayList<>(numbers);
-    all_numbers.addAll(addresses);
+
+    if (DatabaseFactory.getEncryptingSmsDatabase(context).getEdb() != null) {
+      MasterSecret masterSecret = KeyCachingService.getMasterSecret(context);
+      List<String> addresses = DatabaseFactory.getEncryptingSmsDatabase(context).getAddressesFromWord(masterSecret, filter);
+      all_numbers.addAll(addresses);
+      Log.i("ConversationListLoader", "edb: not null");
+    } else {
+      Log.i("ConversationListLoader", "edb: null");
+    }
+
     Log.i("ConversationListLoader", "all_numbers: " + TextUtils.join(",", all_numbers));
     return DatabaseFactory.getThreadDatabase(context).getFilteredConversationList(all_numbers);
   }

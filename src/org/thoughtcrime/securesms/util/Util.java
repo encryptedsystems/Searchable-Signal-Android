@@ -283,6 +283,17 @@ public class Util {
     return parts;
   }
 
+  public static byte[][] splitN(byte[] input, int part_length, int num_parts) {
+    byte[][] parts = new byte[num_parts][];
+
+    for (int i = 0; i < num_parts; i++) {
+      parts[i] = new byte[part_length];
+      System.arraycopy(input, i * part_length, parts[i], 0, part_length);
+    }
+
+    return parts;
+  }
+
   public static byte[] combine(byte[]... elements) {
     try {
       ByteArrayOutputStream baos = new ByteArrayOutputStream();

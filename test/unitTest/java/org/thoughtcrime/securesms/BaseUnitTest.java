@@ -16,6 +16,9 @@ import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 import org.thoughtcrime.securesms.crypto.MasterSecret;
+import org.thoughtcrime.securesms.database.EdbSecret;
+
+import java.util.Arrays;
 
 import javax.crypto.spec.SecretKeySpec;
 
@@ -40,7 +43,11 @@ public abstract class BaseUnitTest {
   @Before
   public void setUp() throws Exception {
     masterSecret = new MasterSecret(new SecretKeySpec(new byte[16], "AES"),
-                                    new SecretKeySpec(new byte[16], "HmacSHA1"));
+                                    new SecretKeySpec(new byte[16], "HmacSHA1"),
+                                    EdbSecret.from(Arrays.asList(
+                                            new byte[EdbSecret.KEY_BIT_SIZE],
+                                            new byte[EdbSecret.KEY_BIT_SIZE],
+                                            new byte[EdbSecret.KEY_BIT_SIZE])));
     mockStatic(Looper.class);
     mockStatic(Log.class);
     mockStatic(Handler.class);

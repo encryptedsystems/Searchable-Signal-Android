@@ -17,6 +17,7 @@
  */
 package org.thoughtcrime.securesms.crypto;
 
+import org.thoughtcrime.securesms.database.EdbSecret;
 import org.thoughtcrime.securesms.util.Base64;
 import org.thoughtcrime.securesms.util.Util;
 import org.whispersystems.libsignal.InvalidKeyException;
@@ -105,7 +106,9 @@ public class AsymmetricMasterCipher {
   private MasterCipher getMasterCipherForSecret(byte[] secretBytes) {
     SecretKeySpec cipherKey   = deriveCipherKey(secretBytes);
     SecretKeySpec macKey      = deriveMacKey(secretBytes);
-    MasterSecret masterSecret = new MasterSecret(cipherKey, macKey);
+
+    // Disallow EDB update during public-key based insertion by passing null EdbSecret
+    MasterSecret masterSecret = new MasterSecret(cipherKey, macKey, null);
 
     return new MasterCipher(masterSecret);
   }

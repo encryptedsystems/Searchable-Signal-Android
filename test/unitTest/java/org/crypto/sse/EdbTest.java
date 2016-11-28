@@ -10,7 +10,6 @@ import org.thoughtcrime.securesms.database.Edb;
 import org.thoughtcrime.securesms.database.EncryptingSmsDatabase;
 import org.thoughtcrime.securesms.database.model.DisplayRecord;
 import org.thoughtcrime.securesms.database.model.SmsMessageRecord;
-import org.thoughtcrime.securesms.util.ParcelUtil;
 
 import java.io.IOException;
 import java.security.InvalidAlgorithmParameterException;
@@ -53,7 +52,6 @@ public class EdbTest extends BaseUnitTest {
         when(reader.getNext()).thenReturn(smss[0], smss[1], null); // use null to end the read
         when(reader.getCount()).thenReturn(0);
 
-        masterSecret = new MasterSecret(new SecretKeySpec(new byte[16], "AES"), new SecretKeySpec(new byte[16], "HmacSHA1"));
         when(db.getMessages(any(MasterSecret.class), anyInt(), anyInt())).thenReturn(reader);
         doNothing().when(db).setEdb(any(Edb.class));
     }
@@ -72,7 +70,7 @@ public class EdbTest extends BaseUnitTest {
         Edb edb = db.getEdb();
 
         String keyword = "world";
-        byte[][] token = MMGlobal.genToken(edb.secrets.get(0), keyword);
+        byte[][] token = MMGlobal.genToken(masterSecret.getEdbSecret().getInvertedIndexKey().getEncoded(), keyword);
         List<String> ids = MMGlobal.testSI(token, edb.two_lev.getDictionary(), edb.two_lev.getArray());
         List<String> expected = Arrays.asList("10");
         Assert.assertEquals(ids, expected);

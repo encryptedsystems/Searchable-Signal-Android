@@ -18,6 +18,9 @@ package org.thoughtcrime.securesms.crypto;
 
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.support.annotation.Nullable;
+
+import org.thoughtcrime.securesms.database.EdbSecret;
 
 import javax.crypto.spec.SecretKeySpec;
 import java.util.Arrays;
@@ -42,6 +45,8 @@ public class MasterSecret implements Parcelable {
 
   private final SecretKeySpec encryptionKey;
   private final SecretKeySpec macKey;
+  @Nullable
+  private final EdbSecret edbSecret;
 
   public static final Parcelable.Creator<MasterSecret> CREATOR = new Parcelable.Creator<MasterSecret>() {
     @Override
@@ -55,9 +60,10 @@ public class MasterSecret implements Parcelable {
     }
   };
 
-  public MasterSecret(SecretKeySpec encryptionKey, SecretKeySpec macKey) {
+  public MasterSecret(SecretKeySpec encryptionKey, SecretKeySpec macKey, @Nullable EdbSecret edbSecret) {
     this.encryptionKey = encryptionKey;
     this.macKey        = macKey;
+    this.edbSecret     = edbSecret;
   }
 
   private MasterSecret(Parcel in) {
@@ -69,6 +75,7 @@ public class MasterSecret implements Parcelable {
 
     this.encryptionKey = new SecretKeySpec(encryptionKeyBytes, "AES");
     this.macKey        = new SecretKeySpec(macKeyBytes, "HmacSHA1");
+    this.edbSecret = in.readParcelable(EdbSecret.class.getClassLoader());
 
     // SecretKeySpec does an internal copy in its constructor.
     Arrays.fill(encryptionKeyBytes, (byte) 0x00);
@@ -84,12 +91,18 @@ public class MasterSecret implements Parcelable {
     return this.macKey;
   }
 
+  @Nullable
+  public EdbSecret getEdbSecret() {
+    return this.edbSecret;
+  }
+
   @Override
   public void writeToParcel(Parcel out, int flags) {
     out.writeInt(encryptionKey.getEncoded().length);
     out.writeByteArray(encryptionKey.getEncoded());
     out.writeInt(macKey.getEncoded().length);
     out.writeByteArray(macKey.getEncoded());
+    out.writeParcelable(edbSecret, flags);
   }
 
   @Override

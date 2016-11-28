@@ -24,6 +24,8 @@ import android.support.annotation.Nullable;
 import android.text.TextUtils;
 import android.util.Log;
 
+import org.crypto.sse.EdbException;
+import org.thoughtcrime.securesms.database.EdbSecret;
 import org.thoughtcrime.securesms.util.Base64;
 import org.thoughtcrime.securesms.util.Util;
 import org.whispersystems.libsignal.InvalidKeyException;
@@ -112,8 +114,28 @@ public class MasterSecretUtil {
       byte[] encryptionSecret             = Util.split(combinedSecrets, 16, 20)[0];
       byte[] macSecret                    = Util.split(combinedSecrets, 16, 20)[1];
 
+      EdbSecret edbSecret;
+      // XXX
+      //edbSecret = generateEdbSecret(context, passphrase, encryptionSalt, iterations, macSalt);
+
+      byte[] encryptedAndMacdEdbSecret           = retrieve(context, "edb_secret");
+      if (encryptedAndMacdEdbSecret == null) {
+        Log.i("MasterSecretUtil", "getMasterSecret: encryptedEdbSecret: null. ");
+        // This may happen when the master key was generated without the EdbSecret, such as after an app upgrade from one without SSE to one with SSE.
+        edbSecret = generateEdbSecret(context, passphrase, encryptionSalt, iterations, macSalt);
+      } else {
+        Log.i("MasterSecretUtil", "getMasterSecret: encryptedEdbSecret: not null");
+        byte[] encryptedEdbSecret           = verifyMac(macSalt, iterations, encryptedAndMacdEdbSecret, passphrase);
+        byte[] edbSecretBytes               = decryptWithPassphrase(encryptionSalt, iterations, encryptedEdbSecret, passphrase);
+        if (edbSecretBytes.length != EdbSecret.KEY_BYTE_SIZE * EdbSecret.NUM_KEYS) {
+          throw new EdbException("edbSecretBytes.length=" + edbSecretBytes.length + ", expected=" + EdbSecret.KEY_BYTE_SIZE * EdbSecret.NUM_KEYS);
+        }
+        edbSecret = EdbSecret.from(Arrays.asList(Util.splitN(edbSecretBytes, EdbSecret.KEY_BYTE_SIZE, EdbSecret.NUM_KEYS)));
+      }
+
       return new MasterSecret(new SecretKeySpec(encryptionSecret, "AES"),
-                              new SecretKeySpec(macSecret, "HmacSHA1"));
+                              new SecretKeySpec(macSecret, "HmacSHA1"),
+                              edbSecret);
     } catch (GeneralSecurityException e) {
       Log.w("keyutil", e);
       return null; //XXX
@@ -164,6 +186,7 @@ public class MasterSecretUtil {
   }
 
   public static MasterSecret generateMasterSecret(Context context, String passphrase) {
+    Log.i("MasterSecretUtil", "generateMasterSecret");
     try {
       byte[] encryptionSecret             = generateEncryptionSecret();
       byte[] macSecret                    = generateMacSecret();
@@ -174,18 +197,36 @@ public class MasterSecretUtil {
       byte[] macSalt                      = generateSalt();
       byte[] encryptedAndMacdMasterSecret = macWithPassphrase(macSalt, iterations, encryptedMasterSecret, passphrase);
 
+      EdbSecret edbSecret = generateEdbSecret(context, passphrase, encryptionSalt, iterations, macSalt);
+
       save(context, "encryption_salt", encryptionSalt);
       save(context, "mac_salt", macSalt);
       save(context, "passphrase_iterations", iterations);
       save(context, "master_secret", encryptedAndMacdMasterSecret);
       save(context, "passphrase_initialized", true);
 
+
       return new MasterSecret(new SecretKeySpec(encryptionSecret, "AES"),
-                              new SecretKeySpec(macSecret, "HmacSHA1"));
+                              new SecretKeySpec(macSecret, "HmacSHA1"),
+                              edbSecret);
     } catch (GeneralSecurityException e) {
       Log.w("keyutil", e);
       return null;
     }
+  }
+
+  @NonNull
+  private static EdbSecret generateEdbSecret(Context context, String passphrase, byte[] encryptionSalt, int iterations, byte[] macSalt) throws GeneralSecurityException {
+    Log.i("MasterSecretUtil", "generateEdbSecret");
+    EdbSecret edbSecret = EdbSecret.generate(passphrase, iterations);
+    byte[] edbSecretBytes = edbSecret.asEncodedCombined();
+    Log.i("MasterSecretUtil", "generateEdbSecret: edbSecretBytes.length=" + edbSecretBytes.length);
+    byte[] encryptedEdbSecret = encryptWithPassphrase(encryptionSalt, iterations, edbSecretBytes, passphrase);
+    Log.i("MasterSecretUtil", "generateEdbSecret: encryptedEdbSecret.length=" + encryptedEdbSecret.length);
+    byte[] encryptedAndMacdEdbSecret = macWithPassphrase(macSalt, iterations, encryptedEdbSecret, passphrase);
+    Log.i("MasterSecretUtil", "generateEdbSecret: encryptedAndMacdEdbSecret.length=" + encryptedAndMacdEdbSecret.length);
+    save(context, "edb_secret", encryptedAndMacdEdbSecret);
+    return edbSecret;
   }
 
   public static boolean hasAsymmericMasterSecret(Context context) {

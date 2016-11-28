@@ -74,7 +74,7 @@ public class LinkedBlockingDeque<E>
     /*
      * We have "diamond" multiple interface/abstract class inheritance
      * here, and that introduces ambiguities. Often we want the
-     * BlockingDeque javadoc combined with the AbstractQueue
+     * BlockingDeque javadoc asEncodedCombined with the AbstractQueue
      * implementation, so a lot of method specs are duplicated here.
      */
 

@@ -34,9 +34,15 @@ public class ConversationLoader extends AbstractCursorLoader {
     if (queryFilter == null || queryFilter.trim().equals("")) {
       return DatabaseFactory.getMmsSmsDatabase(context).getConversation(threadId, limit);
     } else {
-      MasterSecret masterSecret = KeyCachingService.getMasterSecret(context);
-      List<Long> message_ids = DatabaseFactory.getEncryptingSmsDatabase(context).getMessageIdsFromWord(masterSecret, queryFilter);
-      return DatabaseFactory.getMmsSmsDatabase(context).getConversation(threadId, limit, message_ids);
+      if (DatabaseFactory.getEncryptingSmsDatabase(context).getEdb() != null) {
+        Log.i("ConversationLoader", "edb: not null");
+        MasterSecret masterSecret = KeyCachingService.getMasterSecret(context);
+        List<Long> message_ids = DatabaseFactory.getEncryptingSmsDatabase(context).getMessageIdsFromWord(masterSecret, queryFilter);
+        return DatabaseFactory.getMmsSmsDatabase(context).getConversation(threadId, limit, message_ids);
+      } else {
+        Log.i("ConversationLoader", "edb: null");
+        return DatabaseFactory.getMmsSmsDatabase(context).getConversation(threadId, limit);
+      }
     }
   }
 }
