@@ -15,6 +15,8 @@ import android.view.WindowManager;
 
 import org.thoughtcrime.securesms.crypto.MasterSecret;
 import org.thoughtcrime.securesms.crypto.MasterSecretUtil;
+import org.thoughtcrime.securesms.database.DatabaseFactory;
+import org.thoughtcrime.securesms.database.Edb;
 import org.thoughtcrime.securesms.service.KeyCachingService;
 import org.thoughtcrime.securesms.service.MessageRetrievalService;
 import org.thoughtcrime.securesms.util.TextSecurePreferences;
@@ -59,6 +61,17 @@ public abstract class PassphraseRequiredActionBarActivity extends BaseActionBarA
     KeyCachingService.registerPassphraseActivityStarted(this);
     MessageRetrievalService.registerActivityStarted(this);
     isVisible = true;
+
+
+    // retrieve EDB
+    Edb edb = DatabaseFactory.getEncryptingSmsDatabase(this).getEdb();
+    if (edb == null) {
+      Log.w(TAG, "onResume(): no edb yet, try retrieve edb");
+      edb = Edb.tryRetrieveFromSharedPreferences(this);
+      DatabaseFactory.getEncryptingSmsDatabase(this).setEdb(edb);
+    } else {
+      Log.w(TAG, "onResume(): has edb");
+    }
   }
 
   @Override
@@ -73,6 +86,14 @@ public abstract class PassphraseRequiredActionBarActivity extends BaseActionBarA
   @Override
   protected void onDestroy() {
     Log.w(TAG, "onDestroy()");
+
+    // persist EDB
+    Edb edb = DatabaseFactory.getEncryptingSmsDatabase(this).getEdb();
+    if (edb != null) {
+      Log.w(TAG, "onDestroy() persist EDB");
+      edb.saveToSharedPreferences(this);
+    }
+
     super.onDestroy();
     removeClearKeyReceiver(this);
   }

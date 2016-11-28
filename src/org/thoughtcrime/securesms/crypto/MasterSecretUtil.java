@@ -239,7 +239,7 @@ public class MasterSecretUtil {
     return preferences.getBoolean("passphrase_initialized", false);
   }
 
-  private static void save(Context context, String key, int value) {
+  public static void save(Context context, String key, int value) {
     if (!context.getSharedPreferences(PREFERENCES_NAME, 0)
                 .edit()
                 .putInt(key, value)
@@ -249,7 +249,7 @@ public class MasterSecretUtil {
     }
   }
 
-  private static void save(Context context, String key, byte[] value) {
+  public static void save(Context context, String key, byte[] value) {
     if (!context.getSharedPreferences(PREFERENCES_NAME, 0)
                 .edit()
                 .putString(key, Base64.encodeBytes(value))
@@ -269,7 +269,7 @@ public class MasterSecretUtil {
     }
   }
 
-  private static byte[] retrieve(Context context, String key) throws IOException {
+  public static byte[] retrieve(Context context, String key) throws IOException {
     SharedPreferences settings = context.getSharedPreferences(PREFERENCES_NAME, 0);
     String encodedValue        = settings.getString(key, "");
 
@@ -277,7 +277,7 @@ public class MasterSecretUtil {
     else                                 return Base64.decode(encodedValue);
   }
 
-  private static int retrieve(Context context, String key, int defaultValue) throws IOException {
+  public static int retrieve(Context context, String key, int defaultValue) throws IOException {
     SharedPreferences settings = context.getSharedPreferences(PREFERENCES_NAME, 0);
     return settings.getInt(key, defaultValue);
   }
