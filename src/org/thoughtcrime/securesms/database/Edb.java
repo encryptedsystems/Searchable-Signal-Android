@@ -124,7 +124,9 @@ public class Edb implements Serializable {
             if (edbSecret == null) {
                 throw new EdbException("EdbSecret has not been generated yet: null");
             }
-            byte[][] token = MMGlobal.genToken(edbSecret.getInvertedIndexKey().getEncoded(), word);
+
+            String word_lowercase = word.trim().toLowerCase();
+            byte[][] token = MMGlobal.genToken(edbSecret.getInvertedIndexKey().getEncoded(), word_lowercase);
             values = testSI(token, two_lev.getDictionary(), two_lev.getArray());
         } catch (IOException | NoSuchAlgorithmException | InvalidKeyException | NoSuchPaddingException | NoSuchProviderException | InvalidAlgorithmParameterException e) {
             throw new EdbException(e);
