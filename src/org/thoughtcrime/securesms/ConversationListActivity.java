@@ -36,6 +36,7 @@ import android.widget.Toast;
 import org.thoughtcrime.securesms.components.RatingManager;
 import org.thoughtcrime.securesms.crypto.MasterSecret;
 import org.thoughtcrime.securesms.database.DatabaseFactory;
+import org.thoughtcrime.securesms.database.Edb;
 import org.thoughtcrime.securesms.notifications.MessageNotifier;
 import org.thoughtcrime.securesms.recipients.RecipientFactory;
 import org.thoughtcrime.securesms.recipients.Recipients;
@@ -82,11 +83,29 @@ public class ConversationListActivity extends PassphraseRequiredActionBarActivit
     super.onResume();
     dynamicTheme.onResume(this);
     dynamicLanguage.onResume(this);
+
+    // retrieve EDB
+    Edb edb = DatabaseFactory.getEncryptingSmsDatabase(this).getEdb();
+    if (edb == null) {
+      Log.w(TAG, "onResume(): no edb yet, try retrieve edb");
+      edb = Edb.tryRetrieveFromSharedPreferences(this);
+      DatabaseFactory.getEncryptingSmsDatabase(this).setEdb(edb);
+    } else {
+      Log.w(TAG, "onResume(): has edb");
+    }
   }
 
   @Override
   public void onDestroy() {
     if (observer != null) getContentResolver().unregisterContentObserver(observer);
+
+    // persist EDB
+    Edb edb = DatabaseFactory.getEncryptingSmsDatabase(this).getEdb();
+    if (edb != null) {
+      Log.w(TAG, "onDestroy() persist EDB");
+      edb.saveToSharedPreferences(this);
+    }
+
     super.onDestroy();
   }
 

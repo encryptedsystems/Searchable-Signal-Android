@@ -98,9 +98,19 @@ public class EncryptingSmsDatabase extends SmsDatabase {
   {
     long type = Types.BASE_INBOX_TYPE | Types.ENCRYPTION_SYMMETRIC_BIT;
 
+    String plaintext_body = message.getMessageBody();
     message = message.withMessageBody(getEncryptedBody(masterSecret, message.getMessageBody()));
 
-    return insertMessageInbox(message, type);
+    Pair<Long, Long> messageIdThreadIdPair = insertMessageInbox(message, type);
+
+    // Update EDB for the case of unlocked Signal.  For locked Signal, asymmetric encryption is
+    // used for encrypting incoming messages.  When the user unlocks Signnal with passphrase, the
+    // asymmetrically encrypted incoming messages will be encrypted by symmetric encryptino again.
+    // See description in AsymmetricMasterCipher.
+    // The path is MasterSecretDecryptJob -> getAsymmetricDecryptedBody -> EncryptingSmsDatabase.updateMessageBody
+    edb.insertMessage(masterSecret, messageIdThreadIdPair.first, plaintext_body);
+
+    return messageIdThreadIdPair;
   }
 
   private Pair<Long, Long> insertMessageInbox(@NonNull AsymmetricMasterSecret masterSecret,
@@ -130,16 +140,21 @@ public class EncryptingSmsDatabase extends SmsDatabase {
 
   public void updateMessageBody(MasterSecretUnion masterSecret, long messageId, String body) {
     long type;
+    String encryptedBody;
 
     if (masterSecret.getMasterSecret().isPresent()) {
-      body = getEncryptedBody(masterSecret.getMasterSecret().get(), body);
+      encryptedBody = getEncryptedBody(masterSecret.getMasterSecret().get(), body);
       type = Types.ENCRYPTION_SYMMETRIC_BIT;
     } else {
-      body = getAsymmetricEncryptedBody(masterSecret.getAsymmetricMasterSecret().get(), body);
+      encryptedBody = getAsymmetricEncryptedBody(masterSecret.getAsymmetricMasterSecret().get(), body);
       type = Types.ENCRYPTION_ASYMMETRIC_BIT;
     }
 
-    updateMessageBodyAndType(messageId, body, Types.ENCRYPTION_MASK, type);
+    Pair<Long, Long> messageIdThreadIdPair = updateMessageBodyAndType(messageId, encryptedBody, Types.ENCRYPTION_MASK, type);
+
+    if (masterSecret.getMasterSecret().isPresent()) {
+      edb.insertMessage(masterSecret.getMasterSecret().get(), messageIdThreadIdPair.first, body);
+    }
   }
 
   public Reader getMessages(MasterSecret masterSecret, int skip, int limit) {

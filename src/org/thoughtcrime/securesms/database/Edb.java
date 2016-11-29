@@ -8,6 +8,7 @@ import android.util.Log;
 
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.Multimap;
+import com.google.common.collect.TreeMultimap;
 
 import org.crypto.sse.CryptoPrimitives;
 import org.crypto.sse.DynRH2Lev;
@@ -17,6 +18,7 @@ import org.thoughtcrime.securesms.crypto.MasterSecret;
 import org.thoughtcrime.securesms.crypto.MasterSecretUtil;
 import org.thoughtcrime.securesms.database.model.DisplayRecord;
 import org.thoughtcrime.securesms.database.model.SmsMessageRecord;
+import org.thoughtcrime.securesms.sms.IncomingTextMessage;
 import org.thoughtcrime.securesms.util.Base64;
 
 import java.io.ByteArrayInputStream;
@@ -68,23 +70,15 @@ public class Edb implements Serializable {
         Multimap<String,String> word_id_map = ArrayListMultimap.create();
 
         do {
-            Log.i("edb", "loop");
             if (reader != null)
                 reader.close();
 
             reader = db.getMessages(masterSecret, skip, ROW_LIMIT);
 
             while ((record = reader.getNext()) != null) {
-                Log.i("edb", "read loop");
-                Log.i("edb.recipient", record.getIndividualRecipient().getName() + ", " + record.getIndividualRecipient().getNumber());
                 DisplayRecord.Body body = record.getBody();
                 if (body.isPlaintext()) {
-                    String message_id = String.valueOf(record.getId());
-                    String message_body = body.getBody();
-                    String[] words = message_body.replaceAll("\\p{P}", " ").toLowerCase().split("\\s+"); // remove punctuations
-                    for (String word : words) {
-                        word_id_map.put(word, message_id);
-                    }
+                    putToMap(word_id_map, record.getId(), body.getBody());
                 } else {
                     // Should have been decrypted in EncryptingSmsDatabase.DecryptingReader.getBody()
                     throw new EdbException("message should be decrypted.");
@@ -94,19 +88,12 @@ public class Edb implements Serializable {
             skip += ROW_LIMIT;
         } while (reader.getCount() > 0);
 
-
-        //byte[] secret = masterSecret.getEncryptionKey().getEncoded();
-        //List<byte[]> secrets = new ArrayList<>();
-        //secrets.add(secret);
-
         int bigBlock = 1000;
         int smallBlock = 100;
         int dataSize = 10000;
 
         Edb edb;
         try {
-            //List<byte[]> secrets= IEX2Lev.keyGen(256, "samzhao", "salt/salt", 100);
-            //MMGlobal two_lev = MMGlobal.constructEMMParGMM(secrets.get(0), word_id_map, bigBlock, smallBlock, dataSize);
             EdbSecret edbSecret = masterSecret.getEdbSecret();
             if (edbSecret == null) {
                 throw new EdbException("EdbSecret has not been generated yet: null");
@@ -121,6 +108,34 @@ public class Edb implements Serializable {
         db.setEdb(edb);
     }
 
+    private static void putToMap(Multimap<String, String> word_id_map, long message_id, String message_body) {
+        String[] words = message_body.replaceAll("\\p{P}", " ").toLowerCase().split("\\s+"); // remove punctuations
+        for (String word : words) {
+            word_id_map.put(word, String.valueOf(message_id));
+        }
+    }
+
+    public void insertMessage(MasterSecret masterSecret, long message_id, String message_body) {
+        EdbSecret edbSecret = masterSecret.getEdbSecret();
+        if (edbSecret == null) {
+            throw new EdbException("EdbSecret has not been generated yet: null");
+        }
+        RH2Lev.master = edbSecret.getInvertedIndexKey().getEncoded();
+
+        Multimap<String,String> word_id_map = ArrayListMultimap.create();
+        putToMap(word_id_map, message_id, message_body);
+        TreeMultimap<String, byte[]> tokenUp;
+        try {
+            tokenUp = DynRH2Lev.tokenUpdate(edbSecret.getInvertedIndexKey().getEncoded(), word_id_map);
+        } catch (InvalidKeyException | InvalidAlgorithmParameterException | NoSuchProviderException | NoSuchPaddingException | IOException | NoSuchAlgorithmException e) {
+            throw new EdbException(e);
+        }
+        if (tokenUp == null) {
+            throw new EdbException("null tokenUp");
+        }
+        DynRH2Lev.update(two_lev.getDictionaryUpdates(), tokenUp);
+    }
+
     public List<Long> searchMessageIdsFor(MasterSecret masterSecret, String word) {
         // TODO: use provided masterSecret to retrieve Edb secrets
         List<String> values;
@@ -132,10 +147,13 @@ public class Edb implements Serializable {
             RH2Lev.master = edbSecret.getInvertedIndexKey().getEncoded();
 
             String word_lowercase = word.trim().toLowerCase();
-            byte[][] token = DynRH2Lev.genTokenFS(edbSecret.getInvertedIndexKey().getEncoded(), word_lowercase);
+            //byte[][] token = DynRH2Lev.genTokenFS(edbSecret.getInvertedIndexKey().getEncoded(), word_lowercase);
+            byte[][] token = DynRH2Lev.genToken(edbSecret.getInvertedIndexKey().getEncoded(), word_lowercase);
             values = DynRH2Lev.resolve(
                     CryptoPrimitives.generateCmac(edbSecret.getInvertedIndexKey().getEncoded(), 3 + new String()),
-                    DynRH2Lev.testSIFS(token, two_lev.getDictionary(), two_lev.getArray(), two_lev.getDictionaryUpdates()));
+                    //DynRH2Lev.testSIFS(token, two_lev.getDictionary(), two_lev.getArray(), two_lev.getDictionaryUpdates())
+                    DynRH2Lev.testSI(token, two_lev.getDictionary(), two_lev.getArray(), two_lev.getDictionaryUpdates())
+            );
         } catch (IOException | NoSuchAlgorithmException | InvalidKeyException | NoSuchPaddingException | NoSuchProviderException | InvalidAlgorithmParameterException e) {
             throw new EdbException(e);
         }
