@@ -44,10 +44,7 @@ public abstract class BaseUnitTest {
   public void setUp() throws Exception {
     masterSecret = new MasterSecret(new SecretKeySpec(new byte[16], "AES"),
                                     new SecretKeySpec(new byte[16], "HmacSHA1"),
-                                    EdbSecret.from(Arrays.asList(
-                                            new byte[EdbSecret.KEY_BYTE_SIZE],
-                                            new byte[EdbSecret.KEY_BYTE_SIZE],
-                                            new byte[EdbSecret.KEY_BYTE_SIZE])));
+                                    EdbSecret.from(new byte[EdbSecret.KEY_BYTE_SIZE]));
     mockStatic(Looper.class);
     mockStatic(Log.class);
     mockStatic(Handler.class);

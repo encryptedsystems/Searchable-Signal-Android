@@ -6,6 +6,8 @@ import android.util.Log;
 
 import org.crypto.sse.EdbException;
 import org.crypto.sse.IEX2Lev;
+import org.crypto.sse.MMGlobal;
+import org.crypto.sse.RH2Lev;
 import org.thoughtcrime.securesms.util.Util;
 
 import java.security.NoSuchAlgorithmException;
@@ -23,35 +25,21 @@ import javax.crypto.spec.SecretKeySpec;
 public class EdbSecret implements Parcelable {
     private static final int KEY_BIT_SIZE = 128;
     public static final int KEY_BYTE_SIZE = KEY_BIT_SIZE / 8;
-    public static final int NUM_KEYS = 3;
+    public static final int NUM_KEYS = 1;
     private final SecretKeySpec invertedIndexKey;
-    private final SecretKeySpec indexKey;
-    private final SecretKeySpec encryptionKey;
 
-    private EdbSecret(SecretKeySpec invertedIndexKey, SecretKeySpec indexKey, SecretKeySpec encryptionKey) {
+    private EdbSecret(SecretKeySpec invertedIndexKey) {
         this.invertedIndexKey = invertedIndexKey;
-        this.indexKey = indexKey;
-        this.encryptionKey = encryptionKey;
     }
 
     private EdbSecret(Parcel in) {
         byte[] invertedIndexKeyBytes = new byte[in.readInt()];
         in.readByteArray(invertedIndexKeyBytes);
 
-        byte[] indexKeyBytes = new byte[in.readInt()];
-        in.readByteArray(indexKeyBytes);
-
-        byte[] encryptionKeyBytes = new byte[in.readInt()];
-        in.readByteArray(encryptionKeyBytes);
-
         this.invertedIndexKey = new SecretKeySpec(invertedIndexKeyBytes, "AES");
-        this.indexKey = new SecretKeySpec(indexKeyBytes, "AES");
-        this.encryptionKey = new SecretKeySpec(encryptionKeyBytes, "AES");
 
         // SecretKeySpec does an internal copy in its constructor.
         Arrays.fill(invertedIndexKeyBytes, (byte)0x00);
-        Arrays.fill(indexKeyBytes, (byte)0x00);
-        Arrays.fill(encryptionKeyBytes, (byte) 0x00);
     }
 
     public static final Creator<EdbSecret> CREATOR = new Creator<EdbSecret>() {
@@ -68,39 +56,22 @@ public class EdbSecret implements Parcelable {
 
     public static EdbSecret generate(String passphrase, int iterations) {
         Log.i("EdbSecret", "generate");
-        List<byte[]> twoLevKeys;
+        byte[] twoLevKey;
         try {
-            twoLevKeys = IEX2Lev.keyGen(KEY_BIT_SIZE, passphrase, "salt/salt", iterations);
-            Log.i("EdbSecret", "generate twoLevKeys lengths: " + twoLevKeys.get(0).length + ", " + twoLevKeys.get(1).length + ", " + twoLevKeys.get(2).length);
+            twoLevKey = MMGlobal.keyGenSI(KEY_BIT_SIZE, passphrase, "salt/salt", iterations);
         } catch (InvalidKeySpecException | NoSuchAlgorithmException | NoSuchProviderException e) {
             throw new EdbException(e);
         }
 
-        return from(twoLevKeys);
+        return from(twoLevKey);
     }
 
-    public static EdbSecret from(List<byte[]> twoLevKeys) {
-        if (twoLevKeys.size() != NUM_KEYS) {
-            throw new EdbException("wrong number of two-lev keys: expected=" + NUM_KEYS + ", actual=" + twoLevKeys.size());
-        }
-
-        return new EdbSecret(
-                new SecretKeySpec(twoLevKeys.get(0), "AES"),
-                new SecretKeySpec(twoLevKeys.get(1), "AES"),
-                new SecretKeySpec(twoLevKeys.get(2), "AES")
-        );
+    public static EdbSecret from(byte[] twoLevKey) {
+        return new EdbSecret(new SecretKeySpec(twoLevKey, "AES"));
     }
 
     public SecretKeySpec getInvertedIndexKey() {
         return invertedIndexKey;
-    }
-
-    public SecretKeySpec getIndexKey() {
-        return indexKey;
-    }
-
-    public SecretKeySpec getEncryptionKey() {
-        return encryptionKey;
     }
 
     @Override
@@ -112,15 +83,9 @@ public class EdbSecret implements Parcelable {
     public void writeToParcel(Parcel out, int flags) {
         out.writeInt(invertedIndexKey.getEncoded().length);
         out.writeByteArray(invertedIndexKey.getEncoded());
-
-        out.writeInt(indexKey.getEncoded().length);
-        out.writeByteArray(indexKey.getEncoded());
-
-        out.writeInt(encryptionKey.getEncoded().length);
-        out.writeByteArray(encryptionKey.getEncoded());
     }
 
     public byte[] asEncodedCombined() {
-        return Util.combine(invertedIndexKey.getEncoded(), indexKey.getEncoded(), encryptionKey.getEncoded());
+        return Util.combine(invertedIndexKey.getEncoded());
     }
 }

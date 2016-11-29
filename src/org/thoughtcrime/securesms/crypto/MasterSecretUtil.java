@@ -130,7 +130,7 @@ public class MasterSecretUtil {
         if (edbSecretBytes.length != EdbSecret.KEY_BYTE_SIZE * EdbSecret.NUM_KEYS) {
           throw new EdbException("edbSecretBytes.length=" + edbSecretBytes.length + ", expected=" + EdbSecret.KEY_BYTE_SIZE * EdbSecret.NUM_KEYS);
         }
-        edbSecret = EdbSecret.from(Arrays.asList(Util.splitN(edbSecretBytes, EdbSecret.KEY_BYTE_SIZE, EdbSecret.NUM_KEYS)));
+        edbSecret = EdbSecret.from(edbSecretBytes);
       }
 
       return new MasterSecret(new SecretKeySpec(encryptionSecret, "AES"),

@@ -1,18 +1,23 @@
 package org.thoughtcrime.securesms.database;
 
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.support.annotation.Nullable;
+import android.text.TextUtils;
 import android.util.Log;
 
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.Multimap;
 
+import org.crypto.sse.CryptoPrimitives;
+import org.crypto.sse.DynRH2Lev;
 import org.crypto.sse.EdbException;
-import org.crypto.sse.MMGlobal;
+import org.crypto.sse.RH2Lev;
 import org.thoughtcrime.securesms.crypto.MasterSecret;
 import org.thoughtcrime.securesms.crypto.MasterSecretUtil;
 import org.thoughtcrime.securesms.database.model.DisplayRecord;
 import org.thoughtcrime.securesms.database.model.SmsMessageRecord;
+import org.thoughtcrime.securesms.util.Base64;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -25,7 +30,6 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutput;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
-import java.io.StreamCorruptedException;
 import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
@@ -36,7 +40,7 @@ import java.util.concurrent.ExecutionException;
 
 import javax.crypto.NoSuchPaddingException;
 
-import static org.crypto.sse.MMGlobal.testSI;
+import static org.thoughtcrime.securesms.crypto.MasterSecretUtil.PREFERENCES_NAME;
 
 /**
  * Created by zheguang on 11/16/16.
@@ -47,9 +51,9 @@ public class Edb implements Serializable {
     public static String EDB_FILE = "edb_file";
     public static String EDB_FILE_LEN = "edb_file_len";
 
-    public final MMGlobal two_lev;
+    public final DynRH2Lev two_lev;
 
-    private Edb(MMGlobal two_lev) {
+    private Edb(DynRH2Lev two_lev) {
         this.two_lev = two_lev;
     }
 
@@ -107,7 +111,8 @@ public class Edb implements Serializable {
             if (edbSecret == null) {
                 throw new EdbException("EdbSecret has not been generated yet: null");
             }
-            MMGlobal two_lev = MMGlobal.constructEMMParGMM(edbSecret.getInvertedIndexKey().getEncoded(), word_id_map, bigBlock, smallBlock, dataSize);
+            RH2Lev.master = edbSecret.getInvertedIndexKey().getEncoded();
+            DynRH2Lev two_lev = DynRH2Lev.constructEMMParGMM(edbSecret.getInvertedIndexKey().getEncoded(), word_id_map, bigBlock, smallBlock, dataSize);
             edb = new Edb(two_lev);
         } catch (InterruptedException | ExecutionException | IOException e) {
             throw new EdbException(e);
@@ -124,10 +129,13 @@ public class Edb implements Serializable {
             if (edbSecret == null) {
                 throw new EdbException("EdbSecret has not been generated yet: null");
             }
+            RH2Lev.master = edbSecret.getInvertedIndexKey().getEncoded();
 
             String word_lowercase = word.trim().toLowerCase();
-            byte[][] token = MMGlobal.genToken(edbSecret.getInvertedIndexKey().getEncoded(), word_lowercase);
-            values = testSI(token, two_lev.getDictionary(), two_lev.getArray());
+            byte[][] token = DynRH2Lev.genTokenFS(edbSecret.getInvertedIndexKey().getEncoded(), word_lowercase);
+            values = DynRH2Lev.resolve(
+                    CryptoPrimitives.generateCmac(edbSecret.getInvertedIndexKey().getEncoded(), 3 + new String()),
+                    DynRH2Lev.testSIFS(token, two_lev.getDictionary(), two_lev.getArray(), two_lev.getDictionaryUpdates()));
         } catch (IOException | NoSuchAlgorithmException | InvalidKeyException | NoSuchPaddingException | NoSuchProviderException | InvalidAlgorithmParameterException e) {
             throw new EdbException(e);
         }
@@ -190,7 +198,9 @@ public class Edb implements Serializable {
     }
 
     public void saveToSharedPreferences(Context context) {
-        MasterSecretUtil.save(context, "edb", asBytes());
+        byte[] edb_bytes = asBytes();
+        MasterSecretUtil.save(context, EDB_FILE, edb_bytes);
+        MasterSecretUtil.save(context, EDB_FILE_LEN, edb_bytes.length);
     }
 
     public void saveToFile(Context context) {
@@ -207,17 +217,22 @@ public class Edb implements Serializable {
 
     @Nullable
     public static Edb tryRetrieveFromSharedPreferences(Context context) {
+        //tryRemoveFromSharedPreferences(context); // XXX remove when reopened after locked and exited
         byte[] edb_bytes;
+        int edb_bytes_len;
         try {
-            edb_bytes = MasterSecretUtil.retrieve(context, "edb");
+            edb_bytes = MasterSecretUtil.retrieve(context, EDB_FILE);
+            edb_bytes_len = MasterSecretUtil.retrieve(context, EDB_FILE_LEN, -1);
         } catch (IOException e) {
             throw new EdbException(e);
         }
         if (edb_bytes == null) {
             Log.i("Edb", "retrieveFromSharedPreferences: edb not found");
             return null;
-        }
-        else {
+        } else if (edb_bytes_len == -1 || edb_bytes_len != edb_bytes.length) {
+            Log.i("Edb", "retrieveFromSharedPreferences: edb invalid byte length");
+            throw new EdbException("invalid byte length");
+        } else {
             Log.i("Edb", "retrieveFromSharedPreferences: edb found");
             return fromBytes(edb_bytes);
         }
@@ -246,6 +261,18 @@ public class Edb implements Serializable {
         } else {
             Log.i("Edb", "retrieveFromFile: edb found");
             return Edb.fromBytes(edb_bytes);
+        }
+    }
+
+    public static void tryRemoveFromSharedPreferences(Context context) {
+        Log.i("Edb", "try remove edb");
+        if (!context.getSharedPreferences(PREFERENCES_NAME, 0)
+                .edit()
+                .remove(EDB_FILE)
+                .remove(EDB_FILE_LEN)
+                .commit())
+        {
+            throw new EdbException("failed to remove edb");
         }
     }
 }
