@@ -14,12 +14,14 @@ import org.crypto.sse.CryptoPrimitives;
 import org.crypto.sse.DynRH2Lev;
 import org.crypto.sse.EdbException;
 import org.crypto.sse.RH2Lev;
+import org.thoughtcrime.securesms.crypto.MasterCipher;
 import org.thoughtcrime.securesms.crypto.MasterSecret;
 import org.thoughtcrime.securesms.crypto.MasterSecretUtil;
 import org.thoughtcrime.securesms.database.model.DisplayRecord;
 import org.thoughtcrime.securesms.database.model.SmsMessageRecord;
 import org.thoughtcrime.securesms.sms.IncomingTextMessage;
 import org.thoughtcrime.securesms.util.Base64;
+import org.whispersystems.libsignal.InvalidMessageException;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -49,9 +51,12 @@ import static org.thoughtcrime.securesms.crypto.MasterSecretUtil.PREFERENCES_NAM
  */
 
 public class Edb implements Serializable {
+    private static final long serialVersionUID = 1L;
+
     public static int ROW_LIMIT = 500;
-    public static String EDB_FILE = "edb_file";
+    public static String EDB_FILE = "edb_file_" + serialVersionUID;
     public static String EDB_FILE_LEN = "edb_file_len";
+
 
     public final DynRH2Lev two_lev;
 
@@ -215,18 +220,20 @@ public class Edb implements Serializable {
         return res;
     }
 
-    public void saveToSharedPreferences(Context context) {
-        byte[] edb_bytes = asBytes();
-        MasterSecretUtil.save(context, EDB_FILE, edb_bytes);
-        MasterSecretUtil.save(context, EDB_FILE_LEN, edb_bytes.length);
+    public void saveToSharedPreferences(Context context, MasterSecret masterSecret) {
+        MasterCipher cipher = new MasterCipher(masterSecret);
+        byte[] edb_encrypted_bytes = cipher.encryptBytes(asBytes());
+        MasterSecretUtil.save(context, EDB_FILE, edb_encrypted_bytes);
+        MasterSecretUtil.save(context, EDB_FILE_LEN, edb_encrypted_bytes.length);
     }
 
-    public void saveToFile(Context context) {
+    public void saveToFile(Context context, MasterSecret masterSecret) {
         try {
             FileOutputStream fos = context.openFileOutput(EDB_FILE, Context.MODE_PRIVATE);
-            byte[] edb_bytes = asBytes();
-            MasterSecretUtil.save(context, EDB_FILE_LEN, edb_bytes.length);
-            fos.write(asBytes());
+            MasterCipher cipher = new MasterCipher(masterSecret);
+            byte[] edb_encrypted_bytes = cipher.encryptBytes(asBytes());
+            MasterSecretUtil.save(context, EDB_FILE_LEN, edb_encrypted_bytes.length);
+            fos.write(edb_encrypted_bytes);
             fos.close();
         } catch (IOException e) {
             throw new EdbException(e);
@@ -234,8 +241,7 @@ public class Edb implements Serializable {
     }
 
     @Nullable
-    public static Edb tryRetrieveFromSharedPreferences(Context context) {
-        //tryRemoveFromSharedPreferences(context); // XXX remove when reopened after locked and exited
+    public static Edb tryRetrieveFromSharedPreferences(Context context, MasterSecret masterSecret) {
         byte[] edb_bytes;
         int edb_bytes_len;
         try {
@@ -252,12 +258,24 @@ public class Edb implements Serializable {
             throw new EdbException("invalid byte length");
         } else {
             Log.i("Edb", "retrieveFromSharedPreferences: edb found");
-            return fromBytes(edb_bytes);
+
+            MasterCipher cipher = new MasterCipher(masterSecret);
+            byte[] edb_decrypted_bytes;
+            try {
+                edb_decrypted_bytes = cipher.decryptBytes(edb_bytes);
+            } catch (InvalidMessageException e) {
+                throw new EdbException(e);
+            }
+
+            if (edb_decrypted_bytes == null) {
+                throw new EdbException("edb decrypted was null");
+            }
+            return fromBytes(edb_decrypted_bytes);
         }
     }
 
     @Nullable
-    public static Edb tryRetrieveFromFile(Context context) {
+    public static Edb tryRetrieveFromFile(Context context, MasterSecret masterSecret) {
         byte[] edb_bytes;
         try {
             FileInputStream fis = context.openFileInput(EDB_FILE);
@@ -278,7 +296,19 @@ public class Edb implements Serializable {
             return null;
         } else {
             Log.i("Edb", "retrieveFromFile: edb found");
-            return Edb.fromBytes(edb_bytes);
+
+            MasterCipher cipher = new MasterCipher(masterSecret);
+            byte[] edb_decrypted_bytes;
+            try {
+                edb_decrypted_bytes = cipher.decryptBytes(edb_bytes);
+            } catch (InvalidMessageException e) {
+                throw new EdbException(e);
+            }
+
+            if (edb_decrypted_bytes == null) {
+                throw new EdbException("edb decrypted was null");
+            }
+            return Edb.fromBytes(edb_decrypted_bytes);
         }
     }
 

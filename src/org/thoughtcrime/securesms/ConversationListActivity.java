@@ -88,7 +88,7 @@ public class ConversationListActivity extends PassphraseRequiredActionBarActivit
     Edb edb = DatabaseFactory.getEncryptingSmsDatabase(this).getEdb();
     if (edb == null) {
       Log.w(TAG, "onResume(): no edb yet, try retrieve edb");
-      edb = Edb.tryRetrieveFromSharedPreferences(this);
+      edb = Edb.tryRetrieveFromSharedPreferences(this, masterSecret);
       DatabaseFactory.getEncryptingSmsDatabase(this).setEdb(edb);
     } else {
       Log.w(TAG, "onResume(): has edb");
@@ -103,7 +103,7 @@ public class ConversationListActivity extends PassphraseRequiredActionBarActivit
     Edb edb = DatabaseFactory.getEncryptingSmsDatabase(this).getEdb();
     if (edb != null) {
       Log.w(TAG, "onDestroy() persist EDB");
-      edb.saveToSharedPreferences(this);
+      edb.saveToSharedPreferences(this, masterSecret);
     }
 
     super.onDestroy();
