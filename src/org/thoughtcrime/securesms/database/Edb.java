@@ -51,7 +51,7 @@ import static org.thoughtcrime.securesms.crypto.MasterSecretUtil.PREFERENCES_NAM
  */
 
 public class Edb implements Serializable {
-    private static final long serialVersionUID = 1L;
+    private static final long serialVersionUID = 2L;
 
     public static int ROW_LIMIT = 500;
     public static String EDB_FILE = "edb_file_" + serialVersionUID;

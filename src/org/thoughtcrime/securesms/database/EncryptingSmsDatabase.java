@@ -72,6 +72,7 @@ public class EncryptingSmsDatabase extends SmsDatabase {
   {
     long type = Types.BASE_OUTBOX_TYPE;
 
+    String plaintext_body = message.getMessageBody();
     if (masterSecret.getMasterSecret().isPresent()) {
       message = message.withBody(getEncryptedBody(masterSecret.getMasterSecret().get(), message.getMessageBody()));
       type   |= Types.ENCRYPTION_SYMMETRIC_BIT;
@@ -80,7 +81,13 @@ public class EncryptingSmsDatabase extends SmsDatabase {
       type   |= Types.ENCRYPTION_ASYMMETRIC_BIT;
     }
 
-    return insertMessageOutbox(threadId, message, type, forceSms, timestamp);
+    long message_id = insertMessageOutbox(threadId, message, type, forceSms, timestamp);
+
+    if (masterSecret.getMasterSecret().isPresent() && getEdb() != null) {
+      edb.insertMessage(masterSecret.getMasterSecret().get(), message_id, plaintext_body);
+    }
+
+    return message_id;
   }
 
   public Pair<Long, Long> insertMessageInbox(@NonNull MasterSecretUnion masterSecret,
@@ -108,7 +115,9 @@ public class EncryptingSmsDatabase extends SmsDatabase {
     // asymmetrically encrypted incoming messages will be encrypted by symmetric encryptino again.
     // See description in AsymmetricMasterCipher.
     // The path is MasterSecretDecryptJob -> getAsymmetricDecryptedBody -> EncryptingSmsDatabase.updateMessageBody
-    edb.insertMessage(masterSecret, messageIdThreadIdPair.first, plaintext_body);
+    if (getEdb() != null) {
+      edb.insertMessage(masterSecret, messageIdThreadIdPair.first, plaintext_body);
+    }
 
     return messageIdThreadIdPair;
   }
@@ -152,7 +161,7 @@ public class EncryptingSmsDatabase extends SmsDatabase {
 
     Pair<Long, Long> messageIdThreadIdPair = updateMessageBodyAndType(messageId, encryptedBody, Types.ENCRYPTION_MASK, type);
 
-    if (masterSecret.getMasterSecret().isPresent()) {
+    if (masterSecret.getMasterSecret().isPresent() && getEdb() != null) {
       edb.insertMessage(masterSecret.getMasterSecret().get(), messageIdThreadIdPair.first, body);
     }
   }
