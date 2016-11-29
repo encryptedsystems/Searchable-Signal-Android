@@ -147,12 +147,12 @@ public class Edb implements Serializable {
             RH2Lev.master = edbSecret.getInvertedIndexKey().getEncoded();
 
             String word_lowercase = word.trim().toLowerCase();
-            //byte[][] token = DynRH2Lev.genTokenFS(edbSecret.getInvertedIndexKey().getEncoded(), word_lowercase);
-            byte[][] token = DynRH2Lev.genToken(edbSecret.getInvertedIndexKey().getEncoded(), word_lowercase);
+            byte[][] token = DynRH2Lev.genTokenFS(edbSecret.getInvertedIndexKey().getEncoded(), word_lowercase);
+            //byte[][] token = DynRH2Lev.genToken(edbSecret.getInvertedIndexKey().getEncoded(), word_lowercase);
             values = DynRH2Lev.resolve(
                     CryptoPrimitives.generateCmac(edbSecret.getInvertedIndexKey().getEncoded(), 3 + new String()),
-                    //DynRH2Lev.testSIFS(token, two_lev.getDictionary(), two_lev.getArray(), two_lev.getDictionaryUpdates())
-                    DynRH2Lev.testSI(token, two_lev.getDictionary(), two_lev.getArray(), two_lev.getDictionaryUpdates())
+                    DynRH2Lev.testSIFS(token, two_lev.getDictionary(), two_lev.getArray(), two_lev.getDictionaryUpdates())
+                    //DynRH2Lev.testSI(token, two_lev.getDictionary(), two_lev.getArray(), two_lev.getDictionaryUpdates())
             );
         } catch (IOException | NoSuchAlgorithmException | InvalidKeyException | NoSuchPaddingException | NoSuchProviderException | InvalidAlgorithmParameterException e) {
             throw new EdbException(e);
