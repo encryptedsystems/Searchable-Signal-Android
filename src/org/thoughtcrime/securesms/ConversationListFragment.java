@@ -62,6 +62,7 @@ import org.thoughtcrime.securesms.components.reminder.ReminderView.OnDismissList
 import org.thoughtcrime.securesms.components.reminder.ShareReminder;
 import org.thoughtcrime.securesms.components.reminder.SystemSmsImportReminder;
 import org.thoughtcrime.securesms.crypto.MasterSecret;
+import org.thoughtcrime.securesms.database.CursorRecyclerViewAdapter;
 import org.thoughtcrime.securesms.database.DatabaseFactory;
 import org.thoughtcrime.securesms.database.MessagingDatabase;
 import org.thoughtcrime.securesms.database.MessagingDatabase.MarkedMessageInfo;
@@ -96,6 +97,10 @@ public class ConversationListFragment extends Fragment
   private Locale               locale;
   private String               queryFilter  = "";
   private boolean              archive;
+
+  private ConversationListAdapter conversationAdapter;
+  private SearchResultListAdapter searchResultAdapter;
+  private boolean isSearching = false;
 
   @Override
   public void onCreate(Bundle icicle) {
@@ -142,7 +147,7 @@ public class ConversationListFragment extends Fragment
         startActivity(new Intent(getActivity(), NewConversationActivity.class));
       }
     });
-    initializeListAdapter();
+    initializeListAdapters();
   }
 
   @Override
@@ -151,10 +156,6 @@ public class ConversationListFragment extends Fragment
 
     updateReminders();
     list.getAdapter().notifyDataSetChanged();
-  }
-
-  public ConversationListAdapter getListAdapter() {
-    return (ConversationListAdapter) list.getAdapter();
   }
 
   public void setQueryFilter(String query) {
@@ -198,13 +199,25 @@ public class ConversationListFragment extends Fragment
     }.execute(getActivity());
   }
 
-  private void initializeListAdapter() {
-    list.setAdapter(new ConversationListAdapter(getActivity(), masterSecret, locale, null, this));
+  private void initializeListAdapters() {
+    conversationAdapter = new ConversationListAdapter(getActivity(), masterSecret, locale, null, this);
+    searchResultAdapter = new SearchResultListAdapter(getActivity(), masterSecret, locale, null, null);
+
+    list.setAdapter(conversationAdapter);
     getLoaderManager().restartLoader(0, null, this);
   }
 
+  protected RecyclerView.Adapter getListAdapter() {
+    return list.getAdapter();
+  }
+
   private void handleArchiveAllSelected() {
-    final Set<Long> selectedConversations = new HashSet<>(getListAdapter().getBatchSelections());
+    if (isSearching) {
+      return;
+    }
+
+    ConversationListAdapter adapter = (ConversationListAdapter) list.getAdapter();
+    final Set<Long> selectedConversations = new HashSet<>(adapter.getBatchSelections());
     final boolean   archive               = this.archive;
 
     int snackBarTitleId;
@@ -250,8 +263,13 @@ public class ConversationListFragment extends Fragment
   }
 
   private void handleDeleteAllSelected() {
-    int                 conversationsCount = getListAdapter().getBatchSelections().size();
-    AlertDialog.Builder alert              = new AlertDialog.Builder(getActivity());
+    if (isSearching) {
+      return;
+    }
+
+    ConversationListAdapter adapter = (ConversationListAdapter) list.getAdapter();
+    int conversationsCount = adapter.getBatchSelections().size();
+    AlertDialog.Builder alert = new AlertDialog.Builder(getActivity());
     alert.setIconAttribute(R.attr.dialog_alert_icon);
     alert.setTitle(getActivity().getResources().getQuantityString(R.plurals.ConversationListFragment_delete_selected_conversations,
                                                                   conversationsCount, conversationsCount));
@@ -262,8 +280,8 @@ public class ConversationListFragment extends Fragment
     alert.setPositiveButton(R.string.delete, new DialogInterface.OnClickListener() {
       @Override
       public void onClick(DialogInterface dialog, int which) {
-        final Set<Long> selectedConversations = (getListAdapter())
-            .getBatchSelections();
+        ConversationListAdapter adapter = (ConversationListAdapter) list.getAdapter();
+        final Set<Long> selectedConversations = adapter.getBatchSelections();
 
         if (!selectedConversations.isEmpty()) {
           new AsyncTask<Void, Void, Void>() {
@@ -302,9 +320,14 @@ public class ConversationListFragment extends Fragment
   }
 
   private void handleSelectAllThreads() {
-    getListAdapter().selectAllThreads();
+    if (isSearching) {
+      return;
+    }
+
+    ConversationListAdapter adapter = (ConversationListAdapter) list.getAdapter();
+    adapter.selectAllThreads();
     actionMode.setSubtitle(getString(R.string.conversation_fragment_cab__batch_selection_amount,
-                                     getListAdapter().getBatchSelections().size()));
+            adapter.getBatchSelections().size()));
   }
 
   private void handleCreateConversation(long threadId, Recipients recipients, int distributionType, String queryFilter) {
@@ -318,12 +341,24 @@ public class ConversationListFragment extends Fragment
 
   @Override
   public void onLoadFinished(Loader<Cursor> arg0, Cursor cursor) {
-    getListAdapter().changeCursor(cursor);
+    if (queryFilter != null && queryFilter.trim().length() > 0) {
+      isSearching = true;
+      list.setAdapter(searchResultAdapter);
+      searchResultAdapter.changeCursor(cursor);
+    } else {
+      isSearching = false;
+      list.setAdapter(conversationAdapter);
+      conversationAdapter.changeCursor(cursor);
+    }
   }
 
   @Override
   public void onLoaderReset(Loader<Cursor> arg0) {
-    getListAdapter().changeCursor(null);
+    if (isSearching) {
+      searchResultAdapter.changeCursor(null);
+    } else {
+      conversationAdapter.changeCursor(null);
+    }
   }
 
   @Override
@@ -332,7 +367,7 @@ public class ConversationListFragment extends Fragment
       handleCreateConversation(item.getThreadId(), item.getRecipients(),
                                item.getDistributionType(), queryFilter);
     } else {
-      ConversationListAdapter adapter = (ConversationListAdapter)list.getAdapter();
+      ConversationListAdapter adapter = (ConversationListAdapter) list.getAdapter();
       adapter.toggleThreadInBatchSet(item.getThreadId());
 
       if (adapter.getBatchSelections().size() == 0) {
@@ -348,11 +383,16 @@ public class ConversationListFragment extends Fragment
 
   @Override
   public void onItemLongClick(ConversationListItem item) {
+    if (isSearching) {
+      return;
+    }
+
     actionMode = ((AppCompatActivity)getActivity()).startSupportActionMode(ConversationListFragment.this);
 
-    getListAdapter().initializeBatchMode(true);
-    getListAdapter().toggleThreadInBatchSet(item.getThreadId());
-    getListAdapter().notifyDataSetChanged();
+    ConversationListAdapter adapter = (ConversationListAdapter) list.getAdapter();
+    adapter.initializeBatchMode(true);
+    adapter.toggleThreadInBatchSet(item.getThreadId());
+    adapter.notifyDataSetChanged();
   }
 
   @Override
@@ -402,7 +442,12 @@ public class ConversationListFragment extends Fragment
 
   @Override
   public void onDestroyActionMode(ActionMode mode) {
-    getListAdapter().initializeBatchMode(false);
+    if (isSearching) {
+      return;
+    }
+
+    ConversationListAdapter adapter = (ConversationListAdapter) list.getAdapter();
+    adapter.initializeBatchMode(false);
 
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
       TypedArray color = getActivity().getTheme().obtainStyledAttributes(new int[] {android.R.attr.statusBarColor});
