@@ -298,6 +298,23 @@ public class ThreadDatabase extends Database {
     notifyConversationListListeners();
   }
 
+  @Nullable
+  public ThreadRecord getConversationById(long id, MasterCipher masterCipher) {
+    SQLiteDatabase db = databaseHelper.getReadableDatabase();
+
+    String selection = ID + " = ?";
+    String[] selectionArgs = new String[] {String.valueOf(id)};
+
+    Cursor cursor = db.query(TABLE_NAME, null, selection, selectionArgs, null, null, DATE + " DESC");
+    if (cursor != null && cursor.moveToFirst()) {
+      ThreadRecord record = readerFor(cursor, masterCipher).getCurrent();
+      cursor.close();
+      return record;
+    }
+
+    return null;
+  }
+
   public Cursor getFilteredConversationList(List<String> filter) {
     StringBuilder b_filter = new StringBuilder();
     for (String f : filter) {

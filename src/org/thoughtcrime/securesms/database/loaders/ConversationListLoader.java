@@ -31,7 +31,7 @@ public class ConversationListLoader extends AbstractCursorLoader {
 
   @Override
   public Cursor getCursor() {
-    if      (filter != null && filter.trim().length() != 0) return getFilteredConversationList(filter);
+    if      (filter != null && filter.trim().length() != 0) return getFilteredMessageList(filter);
     else if (!archived)                                     return getUnarchivedConversationList();
     else                                                    return getArchivedConversationList();
   }
@@ -82,5 +82,22 @@ public class ConversationListLoader extends AbstractCursorLoader {
 
     Log.i("ConversationListLoader", "all_numbers: " + TextUtils.join(",", all_numbers));
     return DatabaseFactory.getThreadDatabase(context).getFilteredConversationList(all_numbers);
+  }
+
+  private Cursor getFilteredMessageList(String filter) {
+    Log.i("ConversationListLoader", "getFilteredMessageList, filter: " + filter);
+    // search through messages in EDB.
+    List<Long> messageIds = new ArrayList<>();
+
+    if (DatabaseFactory.getEncryptingSmsDatabase(context).getEdb() != null) {
+      MasterSecret masterSecret = KeyCachingService.getMasterSecret(context);
+      messageIds = DatabaseFactory.getEncryptingSmsDatabase(context).getMessageIdsFromWord(masterSecret, filter);
+      Log.i("ConversationListLoader", "edb: not null");
+    } else {
+      Log.i("ConversationListLoader", "edb: null");
+    }
+
+    Log.i("ConversationListLoader", "message IDs: " + TextUtils.join(",", messageIds));
+    return DatabaseFactory.getMmsSmsDatabase(context).getMessages(messageIds);
   }
 }

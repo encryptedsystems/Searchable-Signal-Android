@@ -22,6 +22,7 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.FragmentActivity;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -33,8 +34,10 @@ import org.thoughtcrime.securesms.crypto.MasterCipher;
 import org.thoughtcrime.securesms.crypto.MasterSecret;
 import org.thoughtcrime.securesms.database.CursorRecyclerViewAdapter;
 import org.thoughtcrime.securesms.database.DatabaseFactory;
+import org.thoughtcrime.securesms.database.MmsSmsDatabase;
 import org.thoughtcrime.securesms.database.ThreadDatabase;
 import org.thoughtcrime.securesms.database.model.ThreadRecord;
+import org.thoughtcrime.securesms.database.model.MessageRecord;
 
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -50,15 +53,12 @@ import java.util.Set;
  */
 public class SearchResultListAdapter extends CursorRecyclerViewAdapter<SearchResultListAdapter.ViewHolder> {
 
-  private static final int MESSAGE_TYPE_SWITCH_ARCHIVE = 1;
-  private static final int MESSAGE_TYPE_THREAD         = 2;
-
-  private final          ThreadDatabase    threadDatabase;
+  private final MmsSmsDatabase messageDatabase;
   private final          MasterSecret      masterSecret;
   private final          MasterCipher      masterCipher;
   private final          Locale            locale;
   private final          LayoutInflater    inflater;
-  private final          ItemClickListener clickListener;
+  private final          SearchResultClickListener clickListener;
   private final @NonNull MessageDigest     digest;
 
   private final Set<Long> batchSet  = Collections.synchronizedSet(new HashSet<Long>());
@@ -67,39 +67,33 @@ public class SearchResultListAdapter extends CursorRecyclerViewAdapter<SearchRes
 
 
   protected static class ViewHolder extends RecyclerView.ViewHolder {
-    public <V extends View & BindableConversationListItem> ViewHolder(final @NonNull V itemView)
+    public <V extends View & BindableSearchResultListItem> ViewHolder(final @NonNull V itemView)
     {
       super(itemView);
     }
 
-    public BindableConversationListItem getItem() {
-      return (BindableConversationListItem)itemView;
+    public BindableSearchResultListItem getItem() {
+      return (BindableSearchResultListItem)itemView;
     }
   }
 
   @Override
   public long getItemId(@NonNull Cursor cursor) {
-    ThreadRecord  record  = getThreadRecord(cursor);
-    StringBuilder builder = new StringBuilder("" + record.getThreadId());
-
-    for (long recipientId : record.getRecipients().getIds()) {
-      builder.append("::").append(recipientId);
-    }
-
-    return Conversions.byteArrayToLong(digest.digest(builder.toString().getBytes()));
+    MessageRecord record = getMessageRecord(cursor);
+    return record.getId();
   }
 
   public SearchResultListAdapter(@NonNull Context context,
                                  @NonNull MasterSecret masterSecret,
                                  @NonNull Locale locale,
                                  @Nullable Cursor cursor,
-                                 @Nullable ItemClickListener clickListener)
+                                 @Nullable SearchResultClickListener clickListener)
   {
     super(context, cursor);
     try {
       this.masterSecret   = masterSecret;
       this.masterCipher   = new MasterCipher(masterSecret);
-      this.threadDatabase = DatabaseFactory.getThreadDatabase(context);
+      this.messageDatabase = DatabaseFactory.getMmsSmsDatabase(context);
       this.locale         = locale;
       this.inflater       = LayoutInflater.from(context);
       this.clickListener  = clickListener;
@@ -112,39 +106,17 @@ public class SearchResultListAdapter extends CursorRecyclerViewAdapter<SearchRes
 
   @Override
   public ViewHolder onCreateItemViewHolder(ViewGroup parent, int viewType) {
-    if (viewType == MESSAGE_TYPE_SWITCH_ARCHIVE) {
-      ConversationListItemAction action = (ConversationListItemAction)inflater.inflate(R.layout.conversation_list_item_action,
-                                                                                       parent, false);
+    Log.i("SearchResultListAdapter", "Creating viewtype " + String.valueOf(viewType));
+    final SearchResultListItem item = (SearchResultListItem)inflater.inflate(R.layout.search_result_list_item_view, parent, false);
 
-      action.setOnClickListener(new OnClickListener() {
-        @Override
-        public void onClick(View v) {
-          if (clickListener != null) clickListener.onSwitchToArchive();
-        }
-      });
+    item.setOnClickListener(new OnClickListener() {
+      @Override
+      public void onClick(View view) {
+        if (clickListener != null) clickListener.onSearchResultClick(item);
+      }
+    });
 
-      return new ViewHolder(action);
-    } else {
-      final ConversationListItem item = (ConversationListItem)inflater.inflate(R.layout.conversation_list_item_view,
-                                                                               parent, false);
-
-      item.setOnClickListener(new OnClickListener() {
-        @Override
-        public void onClick(View view) {
-          if (clickListener != null) clickListener.onItemClick(item);
-        }
-      });
-
-      item.setOnLongClickListener(new OnLongClickListener() {
-        @Override
-        public boolean onLongClick(View view) {
-          if (clickListener != null) clickListener.onItemLongClick(item);
-          return true;
-        }
-      });
-
-      return new ViewHolder(item);
-    }
+    return new ViewHolder(item);
   }
 
   @Override
@@ -154,57 +126,19 @@ public class SearchResultListAdapter extends CursorRecyclerViewAdapter<SearchRes
 
   @Override
   public void onBindItemViewHolder(ViewHolder viewHolder, @NonNull Cursor cursor) {
-    viewHolder.getItem().bind(masterSecret, getThreadRecord(cursor), locale, batchSet, batchMode);
+    viewHolder.getItem().bind(masterSecret, masterCipher, getMessageRecord(cursor), locale, batchSet, batchMode);
   }
 
   @Override
   public int getItemViewType(@NonNull Cursor cursor) {
-    ThreadRecord threadRecord = getThreadRecord(cursor);
-
-    if (threadRecord.getDistributionType() == ThreadDatabase.DistributionTypes.ARCHIVE) {
-      return MESSAGE_TYPE_SWITCH_ARCHIVE;
-    } else {
-      return MESSAGE_TYPE_THREAD;
-    }
+    return 3;
   }
 
-  private ThreadRecord getThreadRecord(@NonNull Cursor cursor) {
-    return threadDatabase.readerFor(cursor, masterCipher).getCurrent();
+  private MessageRecord getMessageRecord(@NonNull Cursor cursor) {
+    return messageDatabase.readerFor(cursor, masterSecret).getCurrent();
   }
 
-  public void toggleThreadInBatchSet(long threadId) {
-    if (batchSet.contains(threadId)) {
-      batchSet.remove(threadId);
-    } else if (threadId != -1) {
-      batchSet.add(threadId);
-    }
-  }
-
-  public Set<Long> getBatchSelections() {
-    return batchSet;
-  }
-
-  public void initializeBatchMode(boolean toggle) {
-    this.batchMode = toggle;
-    unselectAllThreads();
-  }
-
-  public void unselectAllThreads() {
-    this.batchSet.clear();
-    this.notifyDataSetChanged();
-  }
-
-  public void selectAllThreads() {
-    for (int i = 0; i < getItemCount(); i++) {
-      long threadId = getThreadRecord(getCursorAtPositionOrThrow(i)).getThreadId();
-      if (threadId != -1) batchSet.add(threadId);
-    }
-    this.notifyDataSetChanged();
-  }
-
-  public interface ItemClickListener {
-    void onItemClick(ConversationListItem item);
-    void onItemLongClick(ConversationListItem item);
-    void onSwitchToArchive();
+  public interface SearchResultClickListener {
+    void onSearchResultClick(SearchResultListItem item);
   }
 }

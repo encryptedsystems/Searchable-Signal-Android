@@ -99,6 +99,17 @@ public class MmsSmsDatabase extends Database {
     return cursor;
   }
 
+  public Cursor getMessages(List<Long> messageIds) {
+    Log.i(TAG, "getConversation with messageIds: " + TextUtils.join(",", messageIds));
+    String order     = MmsSmsColumns.NORMALIZED_DATE_RECEIVED + " DESC";
+    String messageIdsStr = TextUtils.join(",", messageIds);
+    String sms_selection = SmsDatabase.TABLE_NAME + "." + SmsDatabase.ID + " IN (" + messageIdsStr + ")";
+    String mms_selection = MmsDatabase.TABLE_NAME + "." + MmsDatabase.ID + " IN (" + messageIdsStr + ")";
+
+    Cursor cursor = queryTables(PROJECTION, sms_selection, mms_selection, order, null);
+    return cursor;
+  }
+
   public Cursor getConversation(long threadId) {
     return getConversation(threadId, 0);
   }
