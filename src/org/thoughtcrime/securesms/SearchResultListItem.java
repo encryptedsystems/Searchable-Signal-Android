@@ -70,6 +70,7 @@ public class SearchResultListItem extends RelativeLayout
   private Set<Long>          selectedThreads;
   private Recipients         recipients;
   private long               threadId;
+  private long               messageId;
   private TextView           subjectView;
   private FromTextView       fromView;
   private TextView           dateView;
@@ -124,6 +125,7 @@ public class SearchResultListItem extends RelativeLayout
     this.threadId         = message.getThreadId();
     this.read             = thread.isRead();
     this.distributionType = thread.getDistributionType();
+    this.messageId = message.getId();
 
     this.recipients.addListener(this);
     this.fromView.setText(recipients, read);
@@ -167,6 +169,8 @@ public class SearchResultListItem extends RelativeLayout
   public long getThreadId() {
     return threadId;
   }
+
+  public long getMessageId() { return messageId; }
 
   public boolean getRead() {
     return read;

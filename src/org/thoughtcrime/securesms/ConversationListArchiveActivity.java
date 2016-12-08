@@ -66,6 +66,19 @@ public class ConversationListArchiveActivity extends PassphraseRequiredActionBar
   }
 
   @Override
+  public void onCreateConversation(long threadId, Recipients recipients, int distributionType, long messageId) {
+    Intent intent = new Intent(this, ConversationActivity.class);
+    intent.putExtra(ConversationActivity.RECIPIENTS_EXTRA, recipients.getIds());
+    intent.putExtra(ConversationActivity.THREAD_ID_EXTRA, threadId);
+    intent.putExtra(ConversationActivity.IS_ARCHIVED_EXTRA, true);
+    intent.putExtra(ConversationActivity.DISTRIBUTION_TYPE_EXTRA, distributionType);
+    intent.putExtra(ConversationActivity.MESSAGE_ID_FROM_SEARCH, messageId);
+
+    startActivity(intent);
+    overridePendingTransition(R.anim.slide_from_right, R.anim.fade_scale_out);
+  }
+
+  @Override
   public void onSwitchToArchive() {
     throw new AssertionError();
   }

@@ -44,12 +44,14 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
+import android.view.ViewTreeObserver;
 import android.view.Window;
 import android.widget.Toast;
 
 import org.thoughtcrime.securesms.ConversationAdapter.ItemClickListener;
 import org.thoughtcrime.securesms.crypto.MasterSecret;
 import org.thoughtcrime.securesms.database.DatabaseFactory;
+import org.thoughtcrime.securesms.database.MmsSmsColumns;
 import org.thoughtcrime.securesms.database.MmsSmsDatabase;
 import org.thoughtcrime.securesms.database.loaders.ConversationLoader;
 import org.thoughtcrime.securesms.database.model.MediaMmsMessageRecord;
@@ -91,6 +93,8 @@ public class ConversationFragment extends Fragment
   private RecyclerView list;
   private View         loadMoreView;
   private View         composeDivider;
+
+  private int position = -1;
 
   @Override
   public void onCreate(Bundle icicle) {
@@ -245,6 +249,20 @@ public class ConversationFragment extends Fragment
     });
   }
 
+  private int getItemPositionByObjectId(final long id)
+  {
+    ConversationAdapter adapter = getListAdapter();
+    Cursor cursor = adapter.getCursor();
+    for (int i = 0; i < adapter.getItemCount(); i++) {
+      cursor.moveToPosition(i);
+      int index = cursor.getColumnIndex(MmsSmsColumns.ID);
+      if (cursor.getLong(index) == id) {
+        return i;
+      }
+    }
+    return -1;
+  }
+
   private void handleCopyMessage(final Set<MessageRecord> messageRecords) {
     List<MessageRecord> messageList = new LinkedList<>(messageRecords);
     Collections.sort(messageList, new Comparator<MessageRecord>() {
@@ -389,6 +407,23 @@ public class ConversationFragment extends Fragment
         getListAdapter().setFooterView(null);
       }
       getListAdapter().changeCursor(cursor);
+
+      long messageId = ((ConversationActivity) getActivity()).getMessageIdFromSearch();
+      Log.i("ConversationFragment", "Loader finished, looking for message ID: " + String.valueOf(messageId));
+      if (messageId != -1) {
+        position = getItemPositionByObjectId(messageId);
+        Log.i("ConversationFragment", "Scrolling to position " + String.valueOf(position));
+        ((LinearLayoutManager) list.getLayoutManager()).scrollToPositionWithOffset(position, 0);
+        new android.os.Handler().postDelayed(new Runnable() {
+          @Override
+          public void run() {
+            if (position != -1) {
+              ((LinearLayoutManager) list.getLayoutManager()).scrollToPositionWithOffset(position, 0);
+              position = -1;
+            }
+          }
+        }, 1000);
+      }
     }
   }
 

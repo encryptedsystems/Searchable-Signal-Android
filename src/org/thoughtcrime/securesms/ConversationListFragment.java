@@ -43,6 +43,7 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.helper.ItemTouchHelper;
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -84,7 +85,7 @@ import java.util.Set;
 
 
 public class ConversationListFragment extends Fragment
-  implements LoaderManager.LoaderCallbacks<Cursor>, ActionMode.Callback, ItemClickListener
+  implements LoaderManager.LoaderCallbacks<Cursor>, ActionMode.Callback, ItemClickListener, SearchResultListAdapter.SearchResultClickListener
 {
 
   public static final String ARCHIVE = "archive";
@@ -201,7 +202,7 @@ public class ConversationListFragment extends Fragment
 
   private void initializeListAdapters() {
     conversationAdapter = new ConversationListAdapter(getActivity(), masterSecret, locale, null, this);
-    searchResultAdapter = new SearchResultListAdapter(getActivity(), masterSecret, locale, null, null);
+    searchResultAdapter = new SearchResultListAdapter(getActivity(), masterSecret, locale, null, this);
 
     list.setAdapter(conversationAdapter);
     getLoaderManager().restartLoader(0, null, this);
@@ -362,6 +363,13 @@ public class ConversationListFragment extends Fragment
   }
 
   @Override
+  public void onSearchResultClick(SearchResultListItem item) {
+    handleCreateConversation(item.getThreadId(), item.getRecipients(), item.getDistributionType(), "");
+    Log.i("ConversationListFragmnt", "Clicked message with ID: " + String.valueOf(item.getMessageId()));
+    ((ConversationSelectedListener)getActivity()).onCreateConversation(item.getThreadId(), item.getRecipients(), item.getDistributionType(), item.getMessageId());
+  }
+
+  @Override
   public void onItemClick(ConversationListItem item) {
     if (actionMode == null) {
       handleCreateConversation(item.getThreadId(), item.getRecipients(),
@@ -402,6 +410,7 @@ public class ConversationListFragment extends Fragment
 
   public interface ConversationSelectedListener {
     void onCreateConversation(long threadId, Recipients recipients, int distributionType, String queryFilter);
+    void onCreateConversation(long threadId, Recipients recipients, int distributionType, long messageId);
     void onSwitchToArchive();
 }
 
