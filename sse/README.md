@@ -33,7 +33,7 @@ The EDB encryption key is generated during the [EDB setup](#setup) and is stored
 [search]: https://github.com/zheguang/Signal-Android/blob/master/sse/search.png
 
 ## Future Work
-As noted under **Motivation** at the top of this document, we'd like to expand the use of searchable encryption to hide plaintext metadata fields in Signal's SQLite database.  With these fields encrypted, an attacker would not be able to gain important contextual information above messages and conversations.
+As noted under [Motivation](#motivation) at the top of this document, we'd like to expand the use of searchable encryption to hide plaintext metadata fields in Signal's SQLite database.  With these fields encrypted, an attacker would not be able to gain important contextual information above messages and conversations.
 
 We would also like to expand the current search function to support some of the metadata fields in Signal's database.  For instance, it would be useful to search by contacts' names.  Another interesting expansion of the search feature would be the automatic tagging of images sent in conversations, enabling users to search for images as well.
 
