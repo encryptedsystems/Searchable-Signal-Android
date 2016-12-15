@@ -1,10 +1,10 @@
-# Searchable symmetric encryption of Signal
-This report descrbies our [CS2950][3] project on searchable symmetric encryption for Signal.
+# Searchable Symmetric Encryption for Signal
+This report describes our [CS2950][3] project on searchable symmetric encryption for Signal.
 
 ## Motivation
 Signal does not support search on messages.  We think the reason is that enabling private message search is nontrivial.  So in this work, we leverage the dynamic searchable symmetric encryption (SSE) scheme that is described in [Cash et al][1] and implemented in [Clusion][2], to build the secure search of messages on Signal.
 
-There are several benefits of adding secure search to Signal.  For one, the user can now search the messages. Seny's example is that at times he would like to look up his daughter's photo that his wife sent him a while ago on Signal when they were at the park.  On the other hand, the metadata of the messages that are currently unencrypted on Signal (e.g. date and time of the message, sender, sender device, etc.) can now be encrypted and still remain searchable by Signal for different purposes.
+There are several benefits of adding secure search to Signal.  For one, the user can now search over all their messages. Seny's example is that at times he would like to look up his daughter's photo that his wife sent him a while ago on Signal when they were at the park.  On the other hand, the metadata of the messages that are currently unencrypted on Signal (e.g. date and time of the message, sender, sender device, etc.) can now be encrypted and still remain searchable by Signal for different purposes.
 
 Currently, we have implemented the search on messages only.
 
