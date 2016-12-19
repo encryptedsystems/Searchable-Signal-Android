@@ -37,6 +37,13 @@ As noted under [Motivation](#motivation) at the top of this document, we'd like 
 
 We would also like to expand the current search function to support some of the metadata fields in Signal's database.  For instance, it would be useful to search by contacts' names.  Another interesting expansion of the search feature would be the automatic tagging of images sent in conversations, enabling users to search for images as well.
 
+## How To Build & Run
+1. Download and install Android Studio
+2. Clone this repository and open the project in Android Studio
+3. Run the project (either in a simulator or on an attached Android device)
+4. Navigate to "Settings" -> "Import/Export" -> "Export" and select "Set up EDB"
+5. All messages will now be searchable
+
 ## Credit
 This is a joint work of Tarik Moataz (@orochi89), Sam Zhao (@zheguang), Joe Engelman (@joengelm), and Seny Kamara (@senykam).
 
