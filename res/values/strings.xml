@@ -828,7 +828,7 @@
     <!-- database_upgrade_activity -->
     <string name="database_upgrade_activity__updating_database">Updating database...</string>
 
-    <string name="export_fragment__export_plaintext_backup">Export plaintext backup!</string>
+    <string name="export_fragment__export_plaintext_backup">Export plaintext backup</string>
     <string name="export_fragment__export_a_plaintext_backup_compatible_with">Export a plaintext backup compatible with \'SMS Backup &amp; Restore\' to storage</string>
     <string name="export_fragment__set_up_edb">Set up EDB</string>
     <string name="export_fragment__set_up_edb_from">Set up EDB from existing Signal SMS</string>
