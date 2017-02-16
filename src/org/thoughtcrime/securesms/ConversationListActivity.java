@@ -74,7 +74,6 @@ public class ConversationListActivity extends PassphraseRequiredActionBarActivit
 
     initializeContactUpdatesReceiver();
 
-    DirectoryRefreshListener.schedule(this);
     RatingManager.showRatingDialogIfNecessary(this);
   }
 
@@ -200,6 +199,7 @@ public class ConversationListActivity extends PassphraseRequiredActionBarActivit
     intent.putExtra(ConversationActivity.RECIPIENTS_EXTRA, recipients.getIds());
     intent.putExtra(ConversationActivity.THREAD_ID_EXTRA, threadId);
     intent.putExtra(ConversationActivity.DISTRIBUTION_TYPE_EXTRA, distributionType);
+    intent.putExtra(ConversationActivity.TIMING_EXTRA, System.currentTimeMillis());
     intent.putExtra(ConversationActivity.MESSAGE_ID_FROM_SEARCH, messageId);
 
     startActivity(intent);
@@ -249,7 +249,7 @@ public class ConversationListActivity extends PassphraseRequiredActionBarActivit
 
   private void handleHelp() {
     try {
-      startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse("http://support.whispersystems.org")));
+      startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse("https://support.whispersystems.org")));
     } catch (ActivityNotFoundException e) {
       Toast.makeText(this, R.string.ConversationListActivity_there_is_no_browser_installed_on_your_device, Toast.LENGTH_LONG).show();
     }

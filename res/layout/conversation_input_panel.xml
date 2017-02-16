@@ -65,7 +65,7 @@
                         android:layout_gravity="bottom"
                         android:src="?quick_camera_icon"
                         android:background="@drawable/touch_highlight_background"
-                        android:contentDescription="@string/conversation_activity__quick_attachment_drawer_toggle_description"
+                        android:contentDescription="@string/conversation_activity__quick_attachment_drawer_toggle_camera_description"
                         android:padding="10dp"/>
 
                 <org.thoughtcrime.securesms.components.MicrophoneRecorderView
@@ -82,7 +82,7 @@
                             android:layout_gravity="bottom"
                             android:src="?quick_mic_icon"
                             android:background="@null"
-                            android:contentDescription="@string/conversation_activity__quick_attachment_drawer_toggle_description"
+                            android:contentDescription="@string/conversation_activity__quick_attachment_drawer_record_and_send_audio_description"
                             android:padding="10dp"/>
 
                     <ImageView android:id="@+id/quick_audio_fab"
@@ -110,6 +110,7 @@
                       android:layout_height="wrap_content"
                       android:ellipsize="none"
                       android:layout_marginLeft="20dp"
+                      android:layout_marginStart="20dp"
                       android:text="00:00"
                       android:textColor="#61737b"
                       android:textSize="20dp"
@@ -126,6 +127,7 @@
                           android:layout_height="match_parent"
                           android:gravity="center"
                           android:drawableLeft="@drawable/ic_keyboard_arrow_left_grey600_24dp"
+                          android:drawableStart="@drawable/ic_keyboard_arrow_left_grey600_24dp"
                           android:text="@string/conversation_input_panel__slide_to_cancel"
                           android:textAllCaps="true"
                           android:textColor="#61737b"
@@ -133,6 +135,7 @@
                           android:ellipsize="none"
                           android:singleLine="true"
                           android:paddingLeft="20dp"
+                          android:paddingStart="20dp"
                           android:visibility="gone"
                           tools:visibility="visible"/>
 

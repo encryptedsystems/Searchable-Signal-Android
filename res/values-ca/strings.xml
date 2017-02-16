@@ -102,7 +102,6 @@
   <string name="ConversationActivity_message_is_empty_exclamation">El missatge és buit!</string>
   <string name="ConversationActivity_group_members">Membres del grup</string>
   <string name="ConversationActivity_group_conversation">Conversa en grup</string>
-  <string name="ConversationActivity_unnamed_group">Grup sense nom</string>
   <plurals name="ConversationActivity_d_recipients_in_group">
     <item quantity="one">1 membre</item>
     <item quantity="other">%d membres</item>
@@ -118,7 +117,6 @@
   <string name="ConversationActivity_transport_signal">Signal</string>
   <string name="ConversationActivity_lets_switch_to_signal">Canviem a Signal %1$s</string>
   <string name="ConversationActivity_lets_use_this_to_chat">Fem servir això per xerrar %1$s</string>
-  <string name="ConversationActivity_error_leaving_group">Error al sortir del grup</string>
   <string name="ConversationActivity_mms_not_supported_title">MMS no disponibles</string>
   <string name="ConversationActivity_mms_not_supported_message">Aquest missatge no ha pogut ser enviat perquè el seu operador de telefonia no accepta MMS.</string>
   <string name="ConversationActivity_specify_recipient">Escull un contacte, si us plau.</string>
@@ -127,7 +125,6 @@
   <string name="ConversationActivity_attachment_exceeds_size_limits">L\'arxiu adjunt excedeix la mida màxima pel tipus de missatge que estàs enviant.</string>
   <string name="ConversationActivity_quick_camera_unavailable">Càmara no disponible</string>
   <string name="ConversationActivity_unable_to_record_audio">No s\'ha pogut gravar el so!</string>
-  <string name="ConversationActivity_error_sending_voice_message">Error enviant el missatge de veu...</string>
   <!--ConversationFragment-->
   <string name="ConversationFragment_message_details">Detalls del missatge</string>
   <string name="ConversationFragment_transport_s_sent_received_s">Trànsit: %1$s\nEnviat/Rebut: %2$s</string>
@@ -149,7 +146,6 @@
     <item quantity="one">Error al desar l\'arxiu adjunt a l\'emmagatzematge!</item>
     <item quantity="other">Error al desar els arxius adjunts a l\'emmagatzematge!</item>
   </plurals>
-  <string name="ConversationFragment_file_saved_successfully">Arxiu desat correctament.</string>
   <string name="ConversationFragment_unable_to_write_to_sd_card_exclamation">No s\'ha pogut escriure a emmagatzematge!</string>
   <plurals name="ConversationFragment_saving_n_attachments">
     <item quantity="one">Desant arxiu adjunt</item>
@@ -167,7 +163,7 @@
   <string name="ConversationFragment_deleting">Esborrant</string>
   <string name="ConversationFragment_deleting_messages">Esborrant missatges...</string>
   <!--ConversationListActivity-->
-  <string name="ConversationListActivity_search">Cercar...</string>
+  <string name="ConversationListActivity_search">Cerca</string>
   <!--ConversationListFragment-->
   <plurals name="ConversationListFragment_delete_selected_conversations">
     <item quantity="one">Esborrar la conversa seleccionada?</item>
@@ -189,7 +185,6 @@
     <item quantity="other">S\'han mogut %d converses a la safat d\'entrada</item>
   </plurals>
   <!--ConversationListItem-->
-  <string name="ConversationListItem_key_exchange_message">Missatge d\'intercanvi de clau...</string>
   <!--ConversationListItemAction-->
   <string name="ConversationListItemAction_archived_conversations_d">Converses arxivades (%d)</string>
   <!--CustomDefaultPreference-->
@@ -197,12 +192,11 @@
   <string name="CustomDefaultPreference_using_default">Usant predeterminat: %s</string>
   <string name="CustomDefaultPreference_none">No n\'hi ha</string>
   <!--DateUtils-->
-  <string name="DateUtils_now">Ara</string>
   <string name="DateUtils_minutes_ago">%d min</string>
+  <string name="DateUtils_today">Avui</string>
   <!--DeviceListActivity-->
   <string name="DeviceListActivity_unlink_s">Desenllaçar \'%s\'?</string>
   <string name="DeviceListActivity_by_unlinking_this_device_it_will_no_longer_be_able_to_send_or_receive">Si desenllaces aquest dispositiu, no es podran ni rebre ni enviar missatges.</string>
-  <string name="DeviceListActivity_network_connection_failed">Ha fallat la connexió...</string>
   <string name="DeviceListActivity_try_again">Torna a provar</string>
   <string name="DeviceListActivity_unlinking_device">Desenllaçant dispositiu...</string>
   <string name="DeviceListActivity_unlinking_device_no_ellipsis">Desenllaçant dispositiu</string>
@@ -305,8 +299,6 @@ a la còpia de seguretat.</string>
   <string name="MessageDetailsRecipient_failed_to_send">No s\'ha pogut enviar</string>
   <!--MmsDownloader-->
   <string name="MmsDownloader_error_storing_mms">Error emmagatzemant MMS!</string>
-  <string name="MmsDownloader_error_connecting_to_mms_provider">Error connectant amb l\'operador de MMS...</string>
-  <string name="MmsDownloader_error_reading_mms_settings">Error llegint els ajustaments MMS de l\'operador inalàmbric\u2026</string>
   <!--- NotificationBarManager-->
   <string name="NotificationBarManager_signal_call_in_progress">Trucada Signal en procés</string>
   <string name="NotificationBarManager_missed_call_from_s">Trucada perduda de %s</string>
@@ -327,7 +319,6 @@ a la còpia de seguretat.</string>
   <string name="MessageRecord_called_s">Has trucat a %s</string>
   <string name="MessageRecord_missed_call_from">Trucada perduda de %s</string>
   <string name="MessageRecord_s_is_on_signal_say_hey">%s és a Signal, diga-li ei!</string>
-  <string name="MessageRecord_you">Tu</string>
   <!--PassphraseChangeActivity-->
   <string name="PassphraseChangeActivity_passphrases_dont_match_exclamation">Les contrasenyes no coincideixen!</string>
   <string name="PassphraseChangeActivity_incorrect_old_passphrase_exclamation">Frase contrasenya antiga incorrecta!</string>
@@ -347,7 +338,6 @@ a la còpia de seguretat.</string>
   <string name="DeviceProvisioningActivity_content_progress_no_device">No es troba dispositiu.</string>
   <string name="DeviceProvisioningActivity_content_progress_network_error">Error de xarxa.</string>
   <string name="DeviceProvisioningActivity_content_progress_key_error">Codi QR no vàlid.</string>
-  <string name="DeviceProvisioningActivity_sorry_you_have_too_many_devices_linked_already">Disculpa, tens masses dispositius enllaçats, prova desenllaçant-ne alguns...</string>
   <string name="DeviceActivity_sorry_this_is_not_a_valid_device_link_qr_code">Disculpa, això no és un codi QR amb enllaç vàlid.</string>
   <string name="DeviceProvisioningActivity_link_a_signal_device">Enllaçar a un dispositiu Signal?</string>
   <string name="DeviceProvisioningActivity_it_looks_like_youre_trying_to_link_a_signal_device_using_a_3rd_party_scanner">Sembla que estàs intentant enllaçar un dispositiu Signal usant un escannejador extern, 3rd party. Per la teva protecció, escanneja el codi una altra vegada dins de Signal.</string>
@@ -372,6 +362,7 @@ a la còpia de seguretat.</string>
   <string name="RecipientPreferenceActivity_unblock">Desbloca</string>
   <string name="RecipientPreferenceActivity_enabled">Habilitat</string>
   <string name="RecipientPreferenceActivity_disabled">Inhabilitat</string>
+  <!--RecipientProvider-->
   <!--RedPhone-->
   <string name="RedPhone_answering">Contestant</string>
   <string name="RedPhone_ending_call">Penjant la trucada</string>
@@ -415,7 +406,6 @@ Comprova que aquest és el teu número! Anem a verificar-ho amb un SMS.</string>
   <string name="RegistrationProgressActivity_verifying_number">Verificant número</string>
   <string name="RegistrationProgressActivity_edit_s">Edita %s</string>
   <string name="RegistrationProgressActivity_registration_complete">Registre complet!</string>
-  <string name="RegistrationProgressActivity_you_must_enter_the_code_you_received_first">Primer has d\'introduir el codi que has rebut...</string>
   <string name="RegistrationProgressActivity_connecting">Connectant</string>
   <string name="RegistrationProgressActivity_connecting_for_verification">Connectant per verificar...</string>
   <string name="RegistrationProgressActivity_network_error">La xarxa ha fallat! </string>
@@ -446,7 +436,6 @@ Comprova que aquest és el teu número! Anem a verificar-ho amb un SMS.</string>
   <string name="SmsMessageRecord_received_key_exchange_message_for_invalid_protocol_version">S\'ha rebut un missatge d\'intercanvi de claus per una versió del protocol invàlida.</string>
   <string name="SmsMessageRecord_duplicate_message">Duplicar missatge.</string>
   <!--ThreadRecord-->
-  <string name="ThreadRecord_left_the_group">Ha deixat el grup...</string>
   <string name="ThreadRecord_secure_session_reset">Resseteja la sessió segura.</string>
   <string name="ThreadRecord_draft">Esborranys:</string>
   <string name="ThreadRecord_called">Has trucat</string>
@@ -455,13 +444,12 @@ Comprova que aquest és el teu número! Anem a verificar-ho amb un SMS.</string>
   <string name="ThreadRecord_media_message">Missatge multimèdia</string>
   <string name="ThreadRecord_s_is_on_signal_say_hey">%s és a Signal, diga-li hola!</string>
   <!--VerifyIdentityActivity-->
+  <string name="VerifyIdentityActivity_no_app_to_share_to">Sembla que no tens apps a on compartir-ho.</string>
   <!--KeyExchangeInitiator-->
   <string name="KeyExchangeInitiator_initiate_despite_existing_request_question">Iniciar encara que hi hagi una petició de tancament?</string>
   <string name="KeyExchangeInitiator_send">Envia</string>
   <!--MessageDisplayHelper-->
-  <string name="MessageDisplayHelper_bad_encrypted_message">Missatge mal encriptat...</string>
   <string name="MessageDisplayHelper_decrypting_please_wait">Desencriptant, si us plau espera...</string>
-  <string name="MessageDisplayHelper_message_encrypted_for_non_existing_session">Missatge encriptat per una sessió no existent...</string>
   <!--EncryptingSmsDatabase-->
   <string name="EncryptingSmsDatabase_error_decrypting_message">Error desencriptant el missatge.</string>
   <!--ThreadDatabase-->
@@ -475,8 +463,6 @@ Comprova que aquest és el teu número! Anem a verificar-ho amb un SMS.</string>
   <string name="MmsDatabase_error_decrypting_message">Error desencriptant el missatge.</string>
   <!--MmsMessageRecord-->
   <string name="MmsMessageRecord_decrypting_mms_please_wait">Desencriptant MMS, si us plau espera...</string>
-  <string name="MmsMessageRecord_bad_encrypted_mms_message">Missatge MMS mal encriptat...</string>
-  <string name="MmsMessageRecord_mms_message_encrypted_for_non_existing_session">Missatge MMS encriptat per una sessió no existent...</string>
   <!--MuteDialog-->
   <string name="MuteDialog_mute_notifications">Silencia les notificacions</string>
   <!--ApplicationMigrationService-->
@@ -492,7 +478,6 @@ Comprova que aquest és el teu número! Anem a verificar-ho amb un SMS.</string>
   <!--MessageNotifier-->
   <string name="MessageNotifier_d_new_messages_in_d_conversations">%1$d nous missatges a %2$d converses</string>
   <string name="MessageNotifier_most_recent_from_s">Més recent de: %1$s</string>
-  <string name="MessageNotifier_locked_message">Missatge bloquejat...</string>
   <string name="MessageNotifier_media_message_with_text">Missatge multimèdia: %s</string>
   <string name="MessageNotifier_no_subject">(Sense títol)</string>
   <string name="MessageNotifier_message_delivery_failed">Entrega del missatge fallida.</string>
@@ -508,6 +493,8 @@ Comprova que aquest és el teu número! Anem a verificar-ho amb un SMS.</string>
   <!--SingleRecipientNotificationBuilder-->
   <string name="SingleRecipientNotificationBuilder_signal">Signal</string>
   <string name="SingleRecipientNotificationBuilder_new_message">Nou missatge</string>
+  <!--WebRtcCallScreen-->
+  <!--WebRtcCallControls-->
   <!--attachment_type_selector-->
   <string name="attachment_type_selector__image">Imatge</string>
   <string name="attachment_type_selector__audio">Àudio</string>
@@ -529,7 +516,6 @@ Comprova que aquest és el teu número! Anem a verificar-ho amb un SMS.</string>
   <!--ContactSelectionListFragment-->
   <string name="ContactSelectionlistFragment_select_for">Selecciona per</string>
   <!--blocked_contacts_fragment-->
-  <string name="blocked_contacts_fragment__no_blocked_contacts">No teniu cap contacte blocat...</string>
   <!--contact_selection_recent_activity-->
   <string name="contact_selection_recent_activity__no_recent_calls">Sense trucades recents.</string>
   <!--conversation_title_view-->
@@ -545,7 +531,6 @@ Comprova que aquest és el teu número! Anem a verificar-ho amb un SMS.</string>
   <string name="conversation_activity__compose_description">Cos del missatge</string>
   <string name="conversation_activity__emoji_toggle_description">Canvia al teclat d\'emojis</string>
   <string name="conversation_activity__attachment_thumbnail">Miniatura de l\'adjunt</string>
-  <string name="conversation_activity__quick_attachment_drawer_toggle_description">Desplega la pestanya d\'adjunts</string>
   <!--conversation_input_panel-->
   <string name="conversation_input_panel__slide_to_cancel">LLISCA PER CANCEL·LAR</string>
   <!--conversation_item-->
@@ -562,9 +547,11 @@ Comprova que aquest és el teu número! Anem a verificar-ho amb un SMS.</string>
   <string name="conversation_item_received__download">Descàrrega</string>
   <string name="conversation_item_received__contact_photo_description">Foto del contacte</string>
   <string name="conversation_item_received__downloading">Descarregant</string>
+  <!--audio_view-->
   <!--conversation_fragment_cab-->
   <string name="conversation_fragment_cab__batch_selection_mode">Mode de selecció per lots</string>
   <string name="conversation_fragment_cab__batch_selection_amount">%s seleccionats</string>
+  <!--conversation_fragment-->
   <!--country_selection_fragment-->
   <string name="country_selection_fragment__loading_countries">Carregant països...</string>
   <string name="country_selection_fragment__search">Cerca</string>
@@ -573,7 +560,6 @@ Comprova que aquest és el teu número! Anem a verificar-ho amb un SMS.</string>
   <!--device_link_fragment-->
   <string name="device_link_fragment__link_device">Enllaça un dispositiu</string>
   <!--device_list_fragment-->
-  <string name="device_list_fragment__no_devices_linked">No hi ha dispositius enllaçats...</string>
   <string name="device_list_fragment__link_new_device">Enllaça un nou dispositiu</string>
   <!--experience_upgrade_activity-->
   <string name="experience_upgrade_activity__continue">continua</string>
@@ -702,6 +688,7 @@ La verificació per SMS ha tardat massa temps, s\'ha superat el temps màxim d\'
   <!--recipients_panel-->
   <string name="recipients_panel__to"><small>Introdueix un nom o número</small></string>
   <!--verify_display_fragment-->
+  <!--verify_identity-->
   <!--message_details_header-->
   <string name="message_details_header__issues_need_your_attention">Alguns problemes necessiten la teva atenció</string>
   <string name="message_details_header__sent">Enviat</string>
@@ -928,6 +915,7 @@ La verificació per SMS ha tardat massa temps, s\'ha superat el temps màxim d\'
   <string name="text_secure_normal__mark_all_as_read">Marca\'ls tots com a llegits</string>
   <string name="text_secure_normal__invite_friends">Convida a amics/gues</string>
   <string name="text_secure_normal__help">Ajuda</string>
+  <!--verify_display_fragment-->
   <!--reminder_header-->
   <string name="reminder_header_outdated_build">La versió de Signal que tens està obsoleta</string>
   <plurals name="reminder_header_outdated_build_details">

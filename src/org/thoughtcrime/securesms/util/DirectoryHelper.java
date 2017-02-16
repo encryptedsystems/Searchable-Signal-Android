@@ -10,7 +10,6 @@ import android.provider.ContactsContract;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.util.Log;
-import android.util.Pair;
 
 import org.thoughtcrime.securesms.ApplicationContext;
 import org.thoughtcrime.securesms.R;
@@ -18,10 +17,11 @@ import org.thoughtcrime.securesms.crypto.MasterSecret;
 import org.thoughtcrime.securesms.crypto.SessionUtil;
 import org.thoughtcrime.securesms.database.DatabaseFactory;
 import org.thoughtcrime.securesms.database.NotInDirectoryException;
+import org.thoughtcrime.securesms.database.MessagingDatabase.InsertResult;
 import org.thoughtcrime.securesms.database.TextSecureDirectory;
 import org.thoughtcrime.securesms.jobs.MultiDeviceContactUpdateJob;
 import org.thoughtcrime.securesms.notifications.MessageNotifier;
-import org.thoughtcrime.securesms.push.TextSecureCommunicationFactory;
+import org.thoughtcrime.securesms.push.AccountManagerFactory;
 import org.thoughtcrime.securesms.recipients.Recipients;
 import org.thoughtcrime.securesms.sms.IncomingJoinedMessage;
 import org.thoughtcrime.securesms.util.DirectoryHelper.UserCapabilities.Capability;
@@ -40,8 +40,8 @@ public class DirectoryHelper {
 
   public static class UserCapabilities {
 
-    public static final UserCapabilities UNKNOWN     = new UserCapabilities(Capability.UNKNOWN, Capability.UNKNOWN);
-    public static final UserCapabilities UNSUPPORTED = new UserCapabilities(Capability.UNSUPPORTED, Capability.UNSUPPORTED);
+    public static final UserCapabilities UNKNOWN     = new UserCapabilities(Capability.UNKNOWN, Capability.UNKNOWN, Capability.UNKNOWN);
+    public static final UserCapabilities UNSUPPORTED = new UserCapabilities(Capability.UNSUPPORTED, Capability.UNSUPPORTED, Capability.UNSUPPORTED);
 
     public enum Capability {
       UNKNOWN, SUPPORTED, UNSUPPORTED
@@ -49,10 +49,12 @@ public class DirectoryHelper {
 
     private final Capability text;
     private final Capability voice;
+    private final Capability video;
 
-    public UserCapabilities(Capability text, Capability voice) {
+    public UserCapabilities(Capability text, Capability voice, Capability video) {
       this.text  = text;
       this.voice = voice;
+      this.video = video;
     }
 
     public Capability getTextCapability() {
@@ -62,6 +64,10 @@ public class DirectoryHelper {
     public Capability getVoiceCapability() {
       return voice;
     }
+
+    public Capability getVideoCapability() {
+      return video;
+    }
   }
 
   private static final String TAG = DirectoryHelper.class.getSimpleName();
@@ -69,22 +75,24 @@ public class DirectoryHelper {
   public static void refreshDirectory(@NonNull Context context, @Nullable MasterSecret masterSecret)
       throws IOException
   {
-    List<String> newUsers = refreshDirectory(context,
-                                             TextSecureCommunicationFactory.createManager(context),
-                                             TextSecurePreferences.getLocalNumber(context));
+    RefreshResult result = refreshDirectory(context,
+                                            AccountManagerFactory.createManager(context),
+                                            TextSecurePreferences.getLocalNumber(context));
 
-    if (!newUsers.isEmpty() && TextSecurePreferences.isMultiDevice(context)) {
+    if (!result.getNewUsers().isEmpty() && TextSecurePreferences.isMultiDevice(context)) {
       ApplicationContext.getInstance(context)
                         .getJobManager()
                         .add(new MultiDeviceContactUpdateJob(context));
     }
 
-    notifyNewUsers(context, masterSecret, newUsers);
+    if (!result.isFresh()) {
+      notifyNewUsers(context, masterSecret, result.getNewUsers());
+    }
   }
 
-  public static @NonNull List<String> refreshDirectory(@NonNull Context context,
-                                                       @NonNull SignalServiceAccountManager accountManager,
-                                                       @NonNull String localNumber)
+  public static @NonNull RefreshResult refreshDirectory(@NonNull Context context,
+                                                        @NonNull SignalServiceAccountManager accountManager,
+                                                        @NonNull String localNumber)
       throws IOException
   {
     TextSecureDirectory       directory              = TextSecureDirectory.getInstance(context);
@@ -101,7 +109,7 @@ public class DirectoryHelper {
       return updateContactsDatabase(context, localNumber, activeTokens, true);
     }
 
-    return new LinkedList<>();
+    return new RefreshResult(new LinkedList<String>(), false);
   }
 
   public static UserCapabilities refreshDirectoryFor(@NonNull  Context context,
@@ -112,22 +120,26 @@ public class DirectoryHelper {
   {
     try {
       TextSecureDirectory           directory      = TextSecureDirectory.getInstance(context);
-      SignalServiceAccountManager   accountManager = TextSecureCommunicationFactory.createManager(context);
+      SignalServiceAccountManager   accountManager = AccountManagerFactory.createManager(context);
       String                        number         = Util.canonicalizeNumber(context, recipients.getPrimaryRecipient().getNumber());
       Optional<ContactTokenDetails> details        = accountManager.getContact(number);
 
       if (details.isPresent()) {
         directory.setNumber(details.get(), true);
 
-        List<String> newUsers = updateContactsDatabase(context, localNumber, details.get());
+        RefreshResult result = updateContactsDatabase(context, localNumber, details.get());
 
-        if (!newUsers.isEmpty() && TextSecurePreferences.isMultiDevice(context)) {
+        if (!result.getNewUsers().isEmpty() && TextSecurePreferences.isMultiDevice(context)) {
           ApplicationContext.getInstance(context).getJobManager().add(new MultiDeviceContactUpdateJob(context));
         }
 
-        notifyNewUsers(context, masterSecret, newUsers);
+        if (!result.isFresh()) {
+          notifyNewUsers(context, masterSecret, result.getNewUsers());
+        }
 
-        return new UserCapabilities(Capability.SUPPORTED, details.get().isVoice() ? Capability.SUPPORTED : Capability.UNSUPPORTED);
+        return new UserCapabilities(Capability.SUPPORTED,
+                                    details.get().isVoice() ? Capability.SUPPORTED : Capability.UNSUPPORTED,
+                                    details.get().isVideo() ? Capability.SUPPORTED : Capability.UNSUPPORTED);
       } else {
         ContactTokenDetails absent = new ContactTokenDetails();
         absent.setNumber(number);
@@ -157,7 +169,7 @@ public class DirectoryHelper {
       }
 
       if (recipients.isGroupRecipient()) {
-        return new UserCapabilities(Capability.SUPPORTED, Capability.UNSUPPORTED);
+        return new UserCapabilities(Capability.SUPPORTED, Capability.UNSUPPORTED, Capability.UNSUPPORTED);
       }
 
       final String number = recipients.getPrimaryRecipient().getNumber();
@@ -169,9 +181,11 @@ public class DirectoryHelper {
       String  e164number  = Util.canonicalizeNumber(context, number);
       boolean secureText  = TextSecureDirectory.getInstance(context).isSecureTextSupported(e164number);
       boolean secureVoice = TextSecureDirectory.getInstance(context).isSecureVoiceSupported(e164number);
+      boolean secureVideo = TextSecureDirectory.getInstance(context).isSecureVideoSupported(e164number);
 
       return new UserCapabilities(secureText  ? Capability.SUPPORTED : Capability.UNSUPPORTED,
-                                  secureVoice ? Capability.SUPPORTED : Capability.UNSUPPORTED);
+                                  secureVoice ? Capability.SUPPORTED : Capability.UNSUPPORTED,
+                                  secureVideo ? Capability.SUPPORTED : Capability.UNSUPPORTED);
 
     } catch (InvalidNumberException e) {
       Log.w(TAG, e);
@@ -181,32 +195,34 @@ public class DirectoryHelper {
     }
   }
 
-  private static @NonNull List<String> updateContactsDatabase(@NonNull Context context,
-                                                              @NonNull String localNumber,
-                                                              @NonNull final ContactTokenDetails activeToken)
+  private static @NonNull RefreshResult updateContactsDatabase(@NonNull Context context,
+                                                               @NonNull String localNumber,
+                                                               @NonNull final ContactTokenDetails activeToken)
   {
     return updateContactsDatabase(context, localNumber,
                                   new LinkedList<ContactTokenDetails>() {{add(activeToken);}},
                                   false);
   }
 
-  private static @NonNull List<String> updateContactsDatabase(@NonNull Context context,
-                                                              @NonNull String localNumber,
-                                                              @NonNull List<ContactTokenDetails> activeTokens,
-                                                              boolean removeMissing)
+  private static @NonNull RefreshResult updateContactsDatabase(@NonNull Context context,
+                                                               @NonNull String localNumber,
+                                                               @NonNull List<ContactTokenDetails> activeTokens,
+                                                               boolean removeMissing)
   {
-    Optional<Account> account = getOrCreateAccount(context);
+    Optional<AccountHolder> account = getOrCreateAccount(context);
 
     if (account.isPresent()) {
       try {
-        return  DatabaseFactory.getContactsDatabase(context)
-                               .setRegisteredUsers(account.get(), localNumber, activeTokens, removeMissing);
+        List<String> newUsers = DatabaseFactory.getContactsDatabase(context)
+                                               .setRegisteredUsers(account.get().getAccount(), localNumber, activeTokens, removeMissing);
+
+        return new RefreshResult(newUsers, account.get().isFresh());
       } catch (RemoteException | OperationApplicationException e) {
         Log.w(TAG, e);
       }
     }
 
-    return new LinkedList<>();
+    return new RefreshResult(new LinkedList<String>(), false);
   }
 
   private static void notifyNewUsers(@NonNull  Context context,
@@ -217,46 +233,88 @@ public class DirectoryHelper {
 
     for (String newUser : newUsers) {
       if (!SessionUtil.hasSession(context, masterSecret, newUser) && !Util.isOwnNumber(context, newUser)) {
-        IncomingJoinedMessage message        = new IncomingJoinedMessage(newUser);
-        Pair<Long, Long>      smsAndThreadId = DatabaseFactory.getSmsDatabase(context).insertMessageInbox(message);
+        IncomingJoinedMessage  message      = new IncomingJoinedMessage(newUser);
+        Optional<InsertResult> insertResult = DatabaseFactory.getSmsDatabase(context).insertMessageInbox(message);
 
-        int hour = Calendar.getInstance().get(Calendar.HOUR_OF_DAY);
-        if (hour >= 9 && hour < 23) {
-          MessageNotifier.updateNotification(context, masterSecret, false, smsAndThreadId.second, true);
-        } else {
-          MessageNotifier.updateNotification(context, masterSecret, false, smsAndThreadId.second, false);
+        if (insertResult.isPresent()) {
+          int hour = Calendar.getInstance().get(Calendar.HOUR_OF_DAY);
+          if (hour >= 9 && hour < 23) {
+            MessageNotifier.updateNotification(context, masterSecret, false, insertResult.get().getThreadId(), true);
+          } else {
+            MessageNotifier.updateNotification(context, masterSecret, false, insertResult.get().getThreadId(), false);
+          }
         }
       }
     }
   }
 
-  private static Optional<Account> getOrCreateAccount(Context context) {
+  private static Optional<AccountHolder> getOrCreateAccount(Context context) {
     AccountManager accountManager = AccountManager.get(context);
     Account[]      accounts       = accountManager.getAccountsByType("org.thoughtcrime.securesms");
 
-    Optional<Account> account;
+    Optional<AccountHolder> account;
 
     if (accounts.length == 0) account = createAccount(context);
-    else                      account = Optional.of(accounts[0]);
+    else                      account = Optional.of(new AccountHolder(accounts[0], false));
 
-    if (account.isPresent() && !ContentResolver.getSyncAutomatically(account.get(), ContactsContract.AUTHORITY)) {
-      ContentResolver.setSyncAutomatically(account.get(), ContactsContract.AUTHORITY, true);
+    if (account.isPresent() && !ContentResolver.getSyncAutomatically(account.get().getAccount(), ContactsContract.AUTHORITY)) {
+      ContentResolver.setSyncAutomatically(account.get().getAccount(), ContactsContract.AUTHORITY, true);
     }
 
     return account;
   }
 
-  private static Optional<Account> createAccount(Context context) {
+  private static Optional<AccountHolder> createAccount(Context context) {
     AccountManager accountManager = AccountManager.get(context);
     Account        account        = new Account(context.getString(R.string.app_name), "org.thoughtcrime.securesms");
 
     if (accountManager.addAccountExplicitly(account, null, null)) {
       Log.w(TAG, "Created new account...");
       ContentResolver.setIsSyncable(account, ContactsContract.AUTHORITY, 1);
-      return Optional.of(account);
+      return Optional.of(new AccountHolder(account, true));
     } else {
       Log.w(TAG, "Failed to create account!");
       return Optional.absent();
     }
   }
+
+  private static class AccountHolder {
+
+    private final boolean fresh;
+    private final Account account;
+
+    private AccountHolder(Account account, boolean fresh) {
+      this.fresh   = fresh;
+      this.account = account;
+    }
+
+    public boolean isFresh() {
+      return fresh;
+    }
+
+    public Account getAccount() {
+      return account;
+    }
+
+  }
+
+  private static class RefreshResult {
+
+    private final List<String> newUsers;
+    private final boolean      fresh;
+
+    private RefreshResult(List<String> newUsers, boolean fresh) {
+      this.newUsers = newUsers;
+      this.fresh = fresh;
+    }
+
+    public List<String> getNewUsers() {
+      return newUsers;
+    }
+
+    public boolean isFresh() {
+      return fresh;
+    }
+  }
+
 }

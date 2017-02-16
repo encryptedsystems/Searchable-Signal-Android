@@ -5,7 +5,6 @@ import android.content.Context;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.util.Log;
-import android.util.Pair;
 
 import com.google.protobuf.ByteString;
 
@@ -15,7 +14,9 @@ import org.thoughtcrime.securesms.database.DatabaseFactory;
 import org.thoughtcrime.securesms.database.EncryptingSmsDatabase;
 import org.thoughtcrime.securesms.database.GroupDatabase;
 import org.thoughtcrime.securesms.database.MmsDatabase;
+import org.thoughtcrime.securesms.database.MessagingDatabase.InsertResult;
 import org.thoughtcrime.securesms.jobs.AvatarDownloadJob;
+import org.thoughtcrime.securesms.jobs.PushGroupUpdateJob;
 import org.thoughtcrime.securesms.mms.OutgoingGroupMediaMessage;
 import org.thoughtcrime.securesms.notifications.MessageNotifier;
 import org.thoughtcrime.securesms.recipients.RecipientFactory;
@@ -29,6 +30,7 @@ import org.whispersystems.signalservice.api.messages.SignalServiceAttachment;
 import org.whispersystems.signalservice.api.messages.SignalServiceDataMessage;
 import org.whispersystems.signalservice.api.messages.SignalServiceEnvelope;
 import org.whispersystems.signalservice.api.messages.SignalServiceGroup;
+import org.whispersystems.signalservice.api.messages.SignalServiceGroup.Type;
 
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -61,12 +63,14 @@ public class GroupMessageProcessor {
     byte[]             id       = group.getGroupId();
     GroupRecord        record   = database.getGroup(id);
 
-    if (record != null && group.getType() == SignalServiceGroup.Type.UPDATE) {
+    if (record != null && group.getType() == Type.UPDATE) {
       return handleGroupUpdate(context, masterSecret, envelope, group, record, outgoing);
-    } else if (record == null && group.getType() == SignalServiceGroup.Type.UPDATE) {
+    } else if (record == null && group.getType() == Type.UPDATE) {
       return handleGroupCreate(context, masterSecret, envelope, group, outgoing);
-    } else if (record != null && group.getType() == SignalServiceGroup.Type.QUIT) {
+    } else if (record != null && group.getType() == Type.QUIT) {
       return handleGroupLeave(context, masterSecret, envelope, group, record, outgoing);
+    } else if (record != null && group.getType() == Type.REQUEST_INFO) {
+      return handleGroupInfoRequest(context, envelope, group, record);
     } else {
       Log.w(TAG, "Received unknown type, ignoring...");
       return null;
@@ -144,6 +148,20 @@ public class GroupMessageProcessor {
     return storeMessage(context, masterSecret, envelope, group, builder.build(), outgoing);
   }
 
+  private static Long handleGroupInfoRequest(@NonNull Context context,
+                                             @NonNull SignalServiceEnvelope envelope,
+                                             @NonNull SignalServiceGroup group,
+                                             @NonNull GroupRecord record)
+  {
+    if (record.getMembers().contains(envelope.getSource())) {
+      ApplicationContext.getInstance(context)
+                        .getJobManager()
+                        .add(new PushGroupUpdateJob(context, envelope.getSource(), group.getGroupId()));
+    }
+
+    return null;
+  }
+
   private static Long handleGroupLeave(@NonNull Context               context,
                                        @NonNull MasterSecretUnion     masterSecret,
                                        @NonNull SignalServiceEnvelope envelope,
@@ -189,7 +207,7 @@ public class GroupMessageProcessor {
         long                      threadId        = DatabaseFactory.getThreadDatabase(context).getThreadIdFor(recipients);
         long                      messageId       = mmsDatabase.insertMessageOutbox(masterSecret, outgoingMessage, threadId, false);
 
-        mmsDatabase.markAsSent(messageId);
+        mmsDatabase.markAsSent(messageId, true);
 
         return threadId;
       } else {
@@ -198,10 +216,14 @@ public class GroupMessageProcessor {
         IncomingTextMessage   incoming     = new IncomingTextMessage(envelope.getSource(), envelope.getSourceDevice(), envelope.getTimestamp(), body, Optional.of(group), 0);
         IncomingGroupMessage  groupMessage = new IncomingGroupMessage(incoming, storage, body);
 
-        Pair<Long, Long> messageAndThreadId = smsDatabase.insertMessageInbox(masterSecret, groupMessage);
-        MessageNotifier.updateNotification(context, masterSecret.getMasterSecret().orNull(), messageAndThreadId.second);
+        Optional<InsertResult> insertResult = smsDatabase.insertMessageInbox(masterSecret, groupMessage);
 
-        return messageAndThreadId.second;
+        if (insertResult.isPresent()) {
+          MessageNotifier.updateNotification(context, masterSecret.getMasterSecret().orNull(), insertResult.get().getThreadId());
+          return insertResult.get().getThreadId();
+        } else {
+          return null;
+        }
       }
     } catch (MmsException e) {
       Log.w(TAG, e);

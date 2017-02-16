@@ -36,7 +36,7 @@ import org.thoughtcrime.securesms.jobs.PushMediaSendJob;
 import org.thoughtcrime.securesms.jobs.PushTextSendJob;
 import org.thoughtcrime.securesms.jobs.SmsSendJob;
 import org.thoughtcrime.securesms.mms.OutgoingMediaMessage;
-import org.thoughtcrime.securesms.push.TextSecureCommunicationFactory;
+import org.thoughtcrime.securesms.push.AccountManagerFactory;
 import org.thoughtcrime.securesms.recipients.Recipient;
 import org.thoughtcrime.securesms.recipients.Recipients;
 import org.thoughtcrime.securesms.service.ExpiringMessageManager;
@@ -171,8 +171,7 @@ public class MessageSender {
   private static void sendTextSelf(Context context, long messageId, long expiresIn) {
     EncryptingSmsDatabase database = DatabaseFactory.getEncryptingSmsDatabase(context);
 
-    database.markAsSent(messageId);
-    database.markAsPush(messageId);
+    database.markAsSent(messageId, true);
 
     Pair<Long, Long> messageAndThreadId = database.copyMessageInbox(messageId);
     database.markAsPush(messageAndThreadId.first);
@@ -192,11 +191,8 @@ public class MessageSender {
     ExpiringMessageManager expiringMessageManager = ApplicationContext.getInstance(context).getExpiringMessageManager();
     MmsDatabase            database               = DatabaseFactory.getMmsDatabase(context);
 
-    database.markAsSent(messageId);
-    database.markAsPush(messageId);
-
-    long newMessageId = database.copyMessageInbox(masterSecret, messageId);
-    database.markAsPush(newMessageId);
+    database.markAsSent(messageId, true);
+    database.copyMessageInbox(masterSecret, messageId);
 
     if (expiresIn > 0) {
       database.markExpireStarted(messageId);
@@ -296,7 +292,7 @@ public class MessageSender {
       return directory.isSecureTextSupported(destination);
     } catch (NotInDirectoryException e) {
       try {
-        SignalServiceAccountManager   accountManager = TextSecureCommunicationFactory.createManager(context);
+        SignalServiceAccountManager   accountManager = AccountManagerFactory.createManager(context);
         Optional<ContactTokenDetails> registeredUser = accountManager.getContact(destination);
 
         if (!registeredUser.isPresent()) {

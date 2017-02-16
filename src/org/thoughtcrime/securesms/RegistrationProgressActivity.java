@@ -31,7 +31,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import org.thoughtcrime.securesms.crypto.MasterSecret;
-import org.thoughtcrime.securesms.push.TextSecureCommunicationFactory;
+import org.thoughtcrime.securesms.push.AccountManagerFactory;
 import org.thoughtcrime.securesms.service.RegistrationService;
 import org.thoughtcrime.securesms.util.Dialogs;
 import org.thoughtcrime.securesms.util.TextSecurePreferences;
@@ -518,10 +518,11 @@ public class RegistrationProgressActivity extends BaseActionBarActivity {
         @Override
         protected Integer doInBackground(Void... params) {
           try {
-            SignalServiceAccountManager accountManager = TextSecureCommunicationFactory.createManager(context, e164number, password);
+            SignalServiceAccountManager accountManager = AccountManagerFactory.createManager(context, e164number, password);
             int                         registrationId = TextSecurePreferences.getLocalRegistrationId(context);
+            boolean                     video          = TextSecurePreferences.isWebrtcCallingEnabled(context);
 
-            accountManager.verifyAccountWithCode(code, signalingKey, registrationId, true);
+            accountManager.verifyAccountWithCode(code, signalingKey, registrationId, true, video);
 
             return SUCCESS;
           } catch (ExpectationFailedException e) {
@@ -611,15 +612,15 @@ public class RegistrationProgressActivity extends BaseActionBarActivity {
         @Override
         protected Integer doInBackground(Void... params) {
           try {
-            SignalServiceAccountManager accountManager = TextSecureCommunicationFactory.createManager(context, e164number, password);
+            SignalServiceAccountManager accountManager = AccountManagerFactory.createManager(context, e164number, password);
             accountManager.requestVoiceVerificationCode();
 
             return SUCCESS;
           } catch (RateLimitException e) {
-            Log.w("RegistrationProgressActivity", e);
+            Log.w(TAG, e);
             return RATE_LIMIT_EXCEEDED;
           } catch (IOException e) {
-            Log.w("RegistrationProgressActivity", e);
+            Log.w(TAG, e);
             return NETWORK_ERROR;
           }
         }

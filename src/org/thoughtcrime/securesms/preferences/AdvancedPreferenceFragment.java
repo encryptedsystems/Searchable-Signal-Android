@@ -6,6 +6,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.preference.CheckBoxPreference;
 import android.preference.Preference;
@@ -22,6 +23,7 @@ import com.google.android.gms.gcm.GoogleCloudMessaging;
 import org.thoughtcrime.redphone.signaling.RedPhoneAccountManager;
 import org.thoughtcrime.redphone.signaling.RedPhoneTrustStore;
 import org.thoughtcrime.redphone.signaling.UnauthorizedException;
+import org.thoughtcrime.securesms.ApplicationContext;
 import org.thoughtcrime.securesms.ApplicationPreferencesActivity;
 import org.thoughtcrime.securesms.BuildConfig;
 import org.thoughtcrime.securesms.LogSubmitActivity;
@@ -30,7 +32,8 @@ import org.thoughtcrime.securesms.RegistrationActivity;
 import org.thoughtcrime.securesms.contacts.ContactAccessor;
 import org.thoughtcrime.securesms.contacts.ContactIdentityManager;
 import org.thoughtcrime.securesms.crypto.MasterSecret;
-import org.thoughtcrime.securesms.push.TextSecureCommunicationFactory;
+import org.thoughtcrime.securesms.jobs.RefreshAttributesJob;
+import org.thoughtcrime.securesms.push.AccountManagerFactory;
 import org.thoughtcrime.securesms.util.task.ProgressDialogAsyncTask;
 import org.thoughtcrime.securesms.util.TextSecurePreferences;
 import org.whispersystems.libsignal.util.guava.Optional;
@@ -68,6 +71,7 @@ public class AdvancedPreferenceFragment extends PreferenceFragment {
     ((ApplicationPreferencesActivity) getActivity()).getSupportActionBar().setTitle(R.string.preferences__advanced);
 
     initializePushMessagingToggle();
+    initializeWebrtcCallingToggle();
   }
 
   @Override
@@ -92,6 +96,16 @@ public class AdvancedPreferenceFragment extends PreferenceFragment {
     }
 
     preference.setOnPreferenceChangeListener(new PushMessagingClickListener());
+  }
+
+  private void initializeWebrtcCallingToggle() {
+    if (Build.VERSION.SDK_INT >= 11) {
+      this.findPreference(TextSecurePreferences.WEBRTC_CALLING_PREF)
+          .setOnPreferenceChangeListener(new WebRtcClickListener());
+    } else {
+      this.findPreference(TextSecurePreferences.WEBRTC_CALLING_PREF)
+          .setEnabled(false);
+    }
   }
 
   private void initializeIdentitySelection() {
@@ -156,6 +170,18 @@ public class AdvancedPreferenceFragment extends PreferenceFragment {
     }
   }
 
+  private class WebRtcClickListener implements Preference.OnPreferenceChangeListener {
+
+    @Override
+    public boolean onPreferenceChange(Preference preference, Object newValue) {
+      TextSecurePreferences.setWebrtcCallingEnabled(getContext(), (Boolean)newValue);
+      ApplicationContext.getInstance(getContext())
+                        .getJobManager()
+                        .add(new RefreshAttributesJob(getContext()));
+      return true;
+    }
+  }
+
   private class PushMessagingClickListener implements Preference.OnPreferenceChangeListener {
     private static final int SUCCESS       = 0;
     private static final int NETWORK_ERROR = 1;
@@ -188,7 +214,7 @@ public class AdvancedPreferenceFragment extends PreferenceFragment {
       protected Integer doInBackground(Void... params) {
         try {
           Context                     context                = getActivity();
-          SignalServiceAccountManager accountManager         = TextSecureCommunicationFactory.createManager(context);
+          SignalServiceAccountManager accountManager         = AccountManagerFactory.createManager(context);
           RedPhoneAccountManager      redPhoneAccountManager = new RedPhoneAccountManager(BuildConfig.REDPHONE_MASTER_URL,
                                                                                           new RedPhoneTrustStore(context),
                                                                                           TextSecurePreferences.getLocalNumber(context),

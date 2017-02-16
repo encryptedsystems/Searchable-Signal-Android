@@ -30,29 +30,29 @@ import android.media.RingtoneManager;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Build;
+import android.service.notification.StatusBarNotification;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.v4.app.NotificationManagerCompat;
 import android.text.Spannable;
 import android.text.SpannableString;
 import android.text.TextUtils;
 import android.text.style.StyleSpan;
 import android.util.Log;
 
-import org.thoughtcrime.securesms.ApplicationContext;
+import org.thoughtcrime.redphone.ui.NotificationBarManager;
+import org.thoughtcrime.redphone.util.Util;
 import org.thoughtcrime.securesms.ConversationActivity;
 import org.thoughtcrime.securesms.R;
 import org.thoughtcrime.securesms.crypto.MasterSecret;
 import org.thoughtcrime.securesms.database.DatabaseFactory;
-import org.thoughtcrime.securesms.database.MessagingDatabase;
 import org.thoughtcrime.securesms.database.MessagingDatabase.MarkedMessageInfo;
-import org.thoughtcrime.securesms.database.MessagingDatabase.SyncMessageId;
 import org.thoughtcrime.securesms.database.MmsSmsDatabase;
 import org.thoughtcrime.securesms.database.PushDatabase;
 import org.thoughtcrime.securesms.database.SmsDatabase;
 import org.thoughtcrime.securesms.database.ThreadDatabase;
 import org.thoughtcrime.securesms.database.model.MediaMmsMessageRecord;
 import org.thoughtcrime.securesms.database.model.MessageRecord;
-import org.thoughtcrime.securesms.jobs.MultiDeviceReadUpdateJob;
 import org.thoughtcrime.securesms.mms.SlideDeck;
 import org.thoughtcrime.securesms.recipients.Recipient;
 import org.thoughtcrime.securesms.recipients.RecipientFactory;
@@ -63,9 +63,14 @@ import org.thoughtcrime.securesms.util.SpanUtil;
 import org.thoughtcrime.securesms.util.TextSecurePreferences;
 import org.whispersystems.signalservice.api.messages.SignalServiceEnvelope;
 
+import java.util.HashSet;
 import java.util.List;
 import java.util.ListIterator;
+import java.util.Set;
+import java.util.concurrent.Executor;
+import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import me.leolin.shortcutbadger.ShortcutBadger;
 
@@ -81,14 +86,24 @@ public class MessageNotifier {
 
   private static final String TAG = MessageNotifier.class.getSimpleName();
 
-  public static final int NOTIFICATION_ID = 1338;
+  public static final  String EXTRA_REMOTE_REPLY = "extra_remote_reply";
 
-  private volatile static long visibleThread = -1;
+  private static final  int   SUMMARY_NOTIFICATION_ID   = 1338;
+  private static final String NOTIFICATION_GROUP        = "messages";
+  private static final long   MIN_AUDIBLE_PERIOD_MILLIS = TimeUnit.SECONDS.toMillis(2);
+  private static final long   DESKTOP_ACTIVITY_PERIOD   = TimeUnit.MINUTES.toMillis(1);
 
-  public static final String EXTRA_VOICE_REPLY = "extra_voice_reply";
+  private volatile static       long               visibleThread                = -1;
+  private volatile static       long               lastDesktopActivityTimestamp = -1;
+  private volatile static       long               lastAudibleNotification      = -1;
+  private          static final CancelableExecutor executor                     = new CancelableExecutor();
 
   public static void setVisibleThread(long threadId) {
     visibleThread = threadId;
+  }
+
+  public static void setLastDesktopActivityTimestamp(long timestamp) {
+    lastDesktopActivityTimestamp = timestamp;
   }
 
   public static void notifyMessageDeliveryFailed(Context context, Recipients recipients, long threadId) {
@@ -106,6 +121,60 @@ public class MessageNotifier {
     }
   }
 
+  public static void cancelDelayedNotifications() {
+    executor.cancel();
+  }
+
+  private static void cancelActiveNotifications(@NonNull Context context) {
+    NotificationManager notifications = ServiceUtil.getNotificationManager(context);
+    notifications.cancel(SUMMARY_NOTIFICATION_ID);
+
+    if (Build.VERSION.SDK_INT >= 23) {
+      try {
+        StatusBarNotification[] activeNotifications = notifications.getActiveNotifications();
+
+        for (StatusBarNotification activeNotification : activeNotifications) {
+          if (activeNotification.getId() != NotificationBarManager.RED_PHONE_NOTIFICATION) {
+            notifications.cancel(activeNotification.getId());
+          }
+        }
+      } catch (Throwable e) {
+        // XXX Appears to be a ROM bug, see #6043
+        Log.w(TAG, e);
+        notifications.cancelAll();
+      }
+    }
+  }
+
+  private static void cancelOrphanedNotifications(@NonNull Context context, NotificationState notificationState) {
+    if (Build.VERSION.SDK_INT >= 23) {
+      try {
+        NotificationManager     notifications       = ServiceUtil.getNotificationManager(context);
+        StatusBarNotification[] activeNotifications = notifications.getActiveNotifications();
+
+        for (StatusBarNotification notification : activeNotifications) {
+          boolean validNotification = false;
+
+          if (notification.getId() != SUMMARY_NOTIFICATION_ID && notification.getId() != NotificationBarManager.RED_PHONE_NOTIFICATION) {
+            for (NotificationItem item : notificationState.getNotifications()) {
+              if (notification.getId() == (SUMMARY_NOTIFICATION_ID + item.getThreadId())) {
+                validNotification = true;
+                break;
+              }
+            }
+
+            if (!validNotification) {
+              notifications.cancel(notification.getId());
+            }
+          }
+        }
+      } catch (Throwable e) {
+        // XXX Android ROM Bug, see #6043
+        Log.w(TAG, e);
+      }
+    }
+  }
+
   public static void updateNotification(@NonNull Context context, @Nullable MasterSecret masterSecret) {
     if (!TextSecurePreferences.isNotificationsEnabled(context)) {
       return;
@@ -118,7 +187,12 @@ public class MessageNotifier {
                                         @Nullable MasterSecret masterSecret,
                                         long threadId)
   {
-    updateNotification(context, masterSecret, false, threadId);
+    if (System.currentTimeMillis() - lastDesktopActivityTimestamp < DESKTOP_ACTIVITY_PERIOD) {
+      Log.w(TAG, "Scheduling delayed notification...");
+      executor.execute(new DelayedNotification(context, masterSecret, threadId));
+    } else {
+      updateNotification(context, masterSecret, false, threadId, true);
+    }
   }
 
   public static void updateNotification(@NonNull  Context context,
@@ -175,8 +249,7 @@ public class MessageNotifier {
       if ((telcoCursor == null || telcoCursor.isAfterLast()) &&
           (pushCursor == null || pushCursor.isAfterLast()))
       {
-        ((NotificationManager)context.getSystemService(Context.NOTIFICATION_SERVICE))
-          .cancel(NOTIFICATION_ID);
+        cancelActiveNotifications(context);
         updateBadge(context, 0);
         clearReminder(context);
         return;
@@ -188,12 +261,25 @@ public class MessageNotifier {
         appendPushNotificationState(context, notificationState, pushCursor);
       }
 
-      if (notificationState.hasMultipleThreads()) {
-        sendMultipleThreadNotification(context, notificationState, signal);
-      } else {
-        sendSingleThreadNotification(context, masterSecret, notificationState, signal);
+      if (signal && (System.currentTimeMillis() - lastAudibleNotification) < MIN_AUDIBLE_PERIOD_MILLIS) {
+        signal = false;
+      } else if (signal) {
+        lastAudibleNotification = System.currentTimeMillis();
       }
 
+      if (notificationState.hasMultipleThreads()) {
+        if (Build.VERSION.SDK_INT >= 23) {
+          for (long threadId : notificationState.getThreads()) {
+            sendSingleThreadNotification(context, masterSecret, new NotificationState(notificationState.getNotificationsForThread(threadId)), false, true);
+          }
+        }
+
+        sendMultipleThreadNotification(context, notificationState, signal);
+      } else {
+        sendSingleThreadNotification(context, masterSecret, notificationState, signal, false);
+      }
+
+      cancelOrphanedNotifications(context, notificationState);
       updateBadge(context, notificationState.getMessageCount());
 
       if (signal) {
@@ -208,31 +294,36 @@ public class MessageNotifier {
   private static void sendSingleThreadNotification(@NonNull  Context context,
                                                    @Nullable MasterSecret masterSecret,
                                                    @NonNull  NotificationState notificationState,
-                                                   boolean signal)
+                                                   boolean signal, boolean bundled)
   {
     if (notificationState.getNotifications().isEmpty()) {
-      ((NotificationManager)context.getSystemService(Context.NOTIFICATION_SERVICE))
-          .cancel(NOTIFICATION_ID);
+      if (!bundled) cancelActiveNotifications(context);
       return;
     }
 
-    SingleRecipientNotificationBuilder builder       = new SingleRecipientNotificationBuilder(context, masterSecret, TextSecurePreferences.getNotificationPrivacy(context));
-    List<NotificationItem>             notifications = notificationState.getNotifications();
-    Recipients                         recipients    = notifications.get(0).getRecipients();
+    SingleRecipientNotificationBuilder builder        = new SingleRecipientNotificationBuilder(context, masterSecret, TextSecurePreferences.getNotificationPrivacy(context));
+    List<NotificationItem>             notifications  = notificationState.getNotifications();
+    Recipients                         recipients     = notifications.get(0).getRecipients();
+    int                                notificationId = (int) (SUMMARY_NOTIFICATION_ID + (bundled ? notifications.get(0).getThreadId() : 0));
+
 
     builder.setThread(notifications.get(0).getRecipients());
     builder.setMessageCount(notificationState.getMessageCount());
     builder.setPrimaryMessageBody(recipients, notifications.get(0).getIndividualRecipient(),
                                   notifications.get(0).getText(), notifications.get(0).getSlideDeck());
     builder.setContentIntent(notifications.get(0).getPendingIntent(context));
+    builder.setGroup(NOTIFICATION_GROUP);
 
     long timestamp = notifications.get(0).getTimestamp();
     if (timestamp != 0) builder.setWhen(timestamp);
 
     builder.addActions(masterSecret,
-                       notificationState.getMarkAsReadIntent(context),
+                       notificationState.getMarkAsReadIntent(context, notificationId),
                        notificationState.getQuickReplyIntent(context, notifications.get(0).getRecipients()),
-                       notificationState.getWearableReplyIntent(context, notifications.get(0).getRecipients()));
+                       notificationState.getRemoteReplyIntent(context, notifications.get(0).getRecipients()));
+
+    builder.addAndroidAutoAction(notificationState.getAndroidAutoReplyIntent(context, notifications.get(0).getRecipients()),
+                                 notificationState.getAndroidAutoHeardIntent(context, notificationId), notifications.get(0).getTimestamp());
 
     ListIterator<NotificationItem> iterator = notifications.listIterator(notifications.size());
 
@@ -247,8 +338,11 @@ public class MessageNotifier {
                         notifications.get(0).getText());
     }
 
-    ((NotificationManager)context.getSystemService(Context.NOTIFICATION_SERVICE))
-      .notify(NOTIFICATION_ID, builder.build());
+    if (!bundled) {
+      builder.setGroupSummary(true);
+    }
+
+    NotificationManagerCompat.from(context).notify(notificationId, builder.build());
   }
 
   private static void sendMultipleThreadNotification(@NonNull  Context context,
@@ -260,11 +354,12 @@ public class MessageNotifier {
 
     builder.setMessageCount(notificationState.getMessageCount(), notificationState.getThreadCount());
     builder.setMostRecentSender(notifications.get(0).getIndividualRecipient());
+    builder.setGroup(NOTIFICATION_GROUP);
 
     long timestamp = notifications.get(0).getTimestamp();
     if (timestamp != 0) builder.setWhen(timestamp);
 
-    builder.addActions(notificationState.getMarkAsReadIntent(context));
+    builder.addActions(notificationState.getMarkAsReadIntent(context, SUMMARY_NOTIFICATION_ID));
 
     ListIterator<NotificationItem> iterator = notifications.listIterator(notifications.size());
 
@@ -279,8 +374,7 @@ public class MessageNotifier {
                         notifications.get(0).getText());
     }
 
-    ((NotificationManager)context.getSystemService(Context.NOTIFICATION_SERVICE))
-      .notify(NOTIFICATION_ID, builder.build());
+    NotificationManagerCompat.from(context).notify(SUMMARY_NOTIFICATION_ID, builder.build());
   }
 
   private static void sendInThreadNotification(Context context, Recipients recipients) {
@@ -406,7 +500,8 @@ public class MessageNotifier {
 
   private static void updateBadge(Context context, int count) {
     try {
-      ShortcutBadger.setBadge(context.getApplicationContext(), count);
+      if (count == 0) ShortcutBadger.removeCount(context);
+      else            ShortcutBadger.applyCount(context, count);
     } catch (Throwable t) {
       // NOTE :: I don't totally trust this thing, so I'm catching
       // everything.
@@ -462,6 +557,83 @@ public class MessageNotifier {
     @Override
     public void onReceive(Context context, Intent intent) {
       clearReminder(context);
+    }
+  }
+
+  private static class DelayedNotification implements Runnable {
+
+    private static final long DELAY = TimeUnit.SECONDS.toMillis(5);
+
+    private final AtomicBoolean canceled = new AtomicBoolean(false);
+
+    private final Context      context;
+    private final MasterSecret masterSecret;
+
+    private final long         threadId;
+    private final long         delayUntil;
+
+    private DelayedNotification(Context context, MasterSecret masterSecret, long threadId) {
+      this.context      = context;
+      this.masterSecret = masterSecret;
+      this.threadId     = threadId;
+      this.delayUntil   = System.currentTimeMillis() + DELAY;
+    }
+
+    @Override
+    public void run() {
+      MessageNotifier.updateNotification(context, masterSecret);
+
+      long delayMillis = delayUntil - System.currentTimeMillis();
+      Log.w(TAG, "Waiting to notify: " + delayMillis);
+
+      if (delayMillis > 0) {
+        Util.sleep(delayMillis);
+      }
+
+      if (!canceled.get()) {
+        Log.w(TAG, "Not canceled, notifying...");
+        MessageNotifier.updateNotification(context, masterSecret, false, threadId, true);
+        MessageNotifier.cancelDelayedNotifications();
+      } else {
+        Log.w(TAG, "Canceled, not notifying...");
+      }
+    }
+
+    public void cancel() {
+      canceled.set(true);
+    }
+  }
+
+  private static class CancelableExecutor {
+
+    private final Executor                 executor = Executors.newSingleThreadExecutor();
+    private final Set<DelayedNotification> tasks    = new HashSet<>();
+
+    public void execute(final DelayedNotification runnable) {
+      synchronized (tasks) {
+        tasks.add(runnable);
+      }
+
+      Runnable wrapper = new Runnable() {
+        @Override
+        public void run() {
+          runnable.run();
+
+          synchronized (tasks) {
+            tasks.remove(runnable);
+          }
+        }
+      };
+
+      executor.execute(wrapper);
+    }
+
+    public void cancel() {
+      synchronized (tasks) {
+        for (DelayedNotification task : tasks) {
+          task.cancel();
+        }
+      }
     }
   }
 }

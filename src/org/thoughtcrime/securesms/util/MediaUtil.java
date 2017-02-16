@@ -9,6 +9,8 @@ import android.text.TextUtils;
 import android.util.Log;
 import android.webkit.MimeTypeMap;
 
+import com.bumptech.glide.Glide;
+
 import org.thoughtcrime.securesms.R;
 import org.thoughtcrime.securesms.attachments.Attachment;
 import org.thoughtcrime.securesms.crypto.MasterSecret;
@@ -16,6 +18,7 @@ import org.thoughtcrime.securesms.mms.AudioSlide;
 import org.thoughtcrime.securesms.mms.DecryptableStreamUriLoader.DecryptableUri;
 import org.thoughtcrime.securesms.mms.GifSlide;
 import org.thoughtcrime.securesms.mms.ImageSlide;
+import org.thoughtcrime.securesms.mms.MmsSlide;
 import org.thoughtcrime.securesms.mms.PartAuthority;
 import org.thoughtcrime.securesms.mms.Slide;
 import org.thoughtcrime.securesms.mms.VideoSlide;
@@ -28,6 +31,7 @@ import java.util.concurrent.ExecutionException;
 import ws.com.google.android.mms.ContentType;
 
 public class MediaUtil {
+
   private static final String TAG = MediaUtil.class.getSimpleName();
 
   public static @Nullable ThumbnailData generateThumbnail(Context context, MasterSecret masterSecret, String contentType, Uri uri)
@@ -52,8 +56,18 @@ public class MediaUtil {
   private static Bitmap generateImageThumbnail(Context context, MasterSecret masterSecret, Uri uri)
       throws BitmapDecodingException
   {
-    int maxSize = context.getResources().getDimensionPixelSize(R.dimen.media_bubble_height);
-    return BitmapUtil.createScaledBitmap(context, new DecryptableUri(masterSecret, uri), maxSize, maxSize);
+    try {
+      int maxSize = context.getResources().getDimensionPixelSize(R.dimen.media_bubble_height);
+      return Glide.with(context)
+                  .load(new DecryptableUri(masterSecret, uri))
+                  .asBitmap()
+                  .centerCrop()
+                  .into(maxSize, maxSize)
+                  .get();
+    } catch (InterruptedException | ExecutionException e) {
+      Log.w(TAG, e);
+      throw new BitmapDecodingException(e);
+    }
   }
 
   public static Slide getSlideForAttachment(Context context, Attachment attachment) {
@@ -66,6 +80,8 @@ public class MediaUtil {
       slide = new VideoSlide(context, attachment);
     } else if (ContentType.isAudioType(attachment.getContentType())) {
       slide = new AudioSlide(context, attachment);
+    } else if (isMms(attachment.getContentType())) {
+      slide = new MmsSlide(context, attachment);
     }
 
     return slide;
@@ -113,6 +129,10 @@ public class MediaUtil {
     in.close();
 
     return size;
+  }
+
+  public static boolean isMms(String contentType) {
+    return !TextUtils.isEmpty(contentType) && contentType.trim().equals("application/mms");
   }
 
   public static boolean isGif(String contentType) {

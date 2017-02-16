@@ -15,7 +15,13 @@
     <item quantity="other">%d пораки по разговор</item>
   </plurals>
   <string name="ApplicationPreferencesActivity_delete_all_old_messages_now">Избришете ги сите стари пораки?</string>
+  <plurals name="ApplicationPreferencesActivity_this_will_immediately_trim_all_conversations_to_the_d_most_recent_messages">
+    <item quantity="one">Да ви остане само последнита порака на сите ваши разговори.</item>
+    <item quantity="other">Да ви останат само последните %d пораки на сите ваши разговори.</item>
+  </plurals>
   <string name="ApplicationPreferencesActivity_delete">Избриши</string>
+  <string name="ApplicationPreferencesActivity_disable_passphrase">Избриши ја лозинката</string>
+  <string name="ApplicationPreferencesActivity_this_will_permanently_unlock_signal_and_message_notifications">Трајно овозможи ги нотификациите на Signal апликацијата.</string>
   <string name="ApplicationPreferencesActivity_disable">Оневозможи</string>
   <string name="ApplicationPreferencesActivity_unregistering">Одјавување</string>
   <string name="ApplicationPreferencesActivity_error_connecting_to_server">Грешка при поврзување со серверот!</string>
@@ -73,7 +79,6 @@
   <string name="ConversationActivity_message_is_empty_exclamation">Пораката е празна!</string>
   <string name="ConversationActivity_group_members">Членови на групата</string>
   <string name="ConversationActivity_group_conversation">Групен разговор</string>
-  <string name="ConversationActivity_unnamed_group">Неименувана група</string>
   <string name="ConversationActivity_saved_draft">Скицата е снимена.</string>
   <string name="ConversationActivity_invalid_recipient">Погрешен примател!</string>
   <string name="ConversationActivity_calls_not_supported">Неподдржан повик</string>
@@ -83,7 +88,6 @@
   <string name="ConversationActivity_transport_insecure_sms">Незаштитена SMS порака</string>
   <string name="ConversationActivity_transport_insecure_mms">Незаштитена MMS порака</string>
   <string name="ConversationActivity_transport_signal">Signal</string>
-  <string name="ConversationActivity_error_leaving_group">Грешка при напуштање на групата...</string>
   <string name="ConversationActivity_mms_not_supported_title">MMS не е поддржан</string>
   <string name="ConversationActivity_mms_not_supported_message">Оваа порака не може да се испрати, бидејќи вашиот провајдер не поддржува MMS.</string>
   <string name="ConversationActivity_specify_recipient">Изберете контакт</string>
@@ -91,7 +95,6 @@
   <string name="ConversationActivity_unblock">Одблокирај</string>
   <string name="ConversationActivity_quick_camera_unavailable">Камерата е недостапна</string>
   <string name="ConversationActivity_unable_to_record_audio">Не може да се снима аудио!</string>
-  <string name="ConversationActivity_error_sending_voice_message">Грешка при праќањето на говорна порака...</string>
   <!--ConversationFragment-->
   <string name="ConversationFragment_message_details">Детали за пораката</string>
   <string name="ConversationFragment_transport_s_sent_received_s">Трансфер: %1$s\nИспратено/Примено: %2$s</string>
@@ -104,18 +107,16 @@
   <string name="ConversationFragment_deleting">Бришење</string>
   <string name="ConversationFragment_deleting_messages">Бришење на пораките...</string>
   <!--ConversationListActivity-->
-  <string name="ConversationListActivity_search">Барај...</string>
+  <string name="ConversationListActivity_search">Барај</string>
   <!--ConversationListFragment-->
   <string name="ConversationListFragment_deleting">Бришење</string>
   <!--ConversationListItem-->
-  <string name="ConversationListItem_key_exchange_message">Порака за размена на клучеви...</string>
   <!--ConversationListItemAction-->
   <!--CustomDefaultPreference-->
   <string name="CustomDefaultPreference_using_custom">Користејќи прилагодено: %s</string>
   <string name="CustomDefaultPreference_using_default">Користејќи стандардно: %s</string>
   <string name="CustomDefaultPreference_none">Ниедна</string>
   <!--DateUtils-->
-  <string name="DateUtils_now">Сега</string>
   <string name="DateUtils_minutes_ago">%d минути</string>
   <!--DeviceListActivity-->
   <!--DeviceListItem-->
@@ -176,8 +177,6 @@
   <string name="MessageDetailsRecipient_failed_to_send">Неуспешно праќање</string>
   <!--MmsDownloader-->
   <string name="MmsDownloader_error_storing_mms">Грешка при снимањето на MMS!</string>
-  <string name="MmsDownloader_error_connecting_to_mms_provider">Грешка при поврзувањето со MMS провајдерот...</string>
-  <string name="MmsDownloader_error_reading_mms_settings">Грешка при читање на подесувањата на wireless провајдерот за MMS...</string>
   <!--- NotificationBarManager-->
   <string name="NotificationBarManager_missed_call_from_s">Пропуштен повик од %s</string>
   <string name="NotificationBarManager_missed_signal_call">Пропуштен Signal повик</string>
@@ -197,7 +196,6 @@
   <string name="MessageRecord_called_s">Повикан %s</string>
   <string name="MessageRecord_missed_call_from">Пропуштен повик од %s</string>
   <string name="MessageRecord_s_is_on_signal_say_hey">%s има инсталирано Signal, кажи му здраво! </string>
-  <string name="MessageRecord_you">Вие</string>
   <!--PassphraseChangeActivity-->
   <string name="PassphraseChangeActivity_passphrases_dont_match_exclamation">Тајните фрази не се идентични!</string>
   <string name="PassphraseChangeActivity_incorrect_old_passphrase_exclamation">Погрешна стара лозинка!</string>
@@ -239,6 +237,7 @@
   <string name="RecipientPreferenceActivity_unblock">Одблокирај</string>
   <string name="RecipientPreferenceActivity_enabled">Овозможено</string>
   <string name="RecipientPreferenceActivity_disabled">Оневозможено</string>
+  <!--RecipientProvider-->
   <!--RedPhone-->
   <string name="RedPhone_ending_call">Завршување на повик</string>
   <string name="RedPhone_dialing">Повикување</string>
@@ -277,7 +276,6 @@
   <string name="RegistrationProgressActivity_verifying_number">Верификација на бројот</string>
   <string name="RegistrationProgressActivity_edit_s">Измени %s</string>
   <string name="RegistrationProgressActivity_registration_complete">Регистрацијата е завршена!</string>
-  <string name="RegistrationProgressActivity_you_must_enter_the_code_you_received_first">Мора да го внесете кодот што го добивте претходно...</string>
   <string name="RegistrationProgressActivity_connecting">Конектира</string>
   <string name="RegistrationProgressActivity_connecting_for_verification">Конектирање за верификација...</string>
   <string name="RegistrationProgressActivity_network_error">Проблем со мрежата!</string>
@@ -305,7 +303,6 @@
 Примена е порака за размена на клучеви за погрешна верзија на протоколот.</string>
   <string name="SmsMessageRecord_duplicate_message">Дупла порака.</string>
   <!--ThreadRecord-->
-  <string name="ThreadRecord_left_the_group">Ја напушти групата...</string>
   <string name="ThreadRecord_draft">Скица:</string>
   <string name="ThreadRecord_s_is_on_signal_say_hey">%s има инсталирано Signal, кажи му здраво! </string>
   <!--VerifyIdentityActivity-->
@@ -313,9 +310,7 @@
   <string name="KeyExchangeInitiator_initiate_despite_existing_request_question">Иницирај и покрај постоечкото барање?</string>
   <string name="KeyExchangeInitiator_send">Испратено</string>
   <!--MessageDisplayHelper-->
-  <string name="MessageDisplayHelper_bad_encrypted_message">Погрешно шифрирана порака...</string>
   <string name="MessageDisplayHelper_decrypting_please_wait">Дешифрирање, ве молиме почекајте...</string>
-  <string name="MessageDisplayHelper_message_encrypted_for_non_existing_session">Пораката е шифрирана за непостоечка сесија...</string>
   <!--EncryptingSmsDatabase-->
   <string name="EncryptingSmsDatabase_error_decrypting_message">Грешка при дешифрирање на пораката.</string>
   <!--ThreadDatabase-->
@@ -329,8 +324,6 @@
   <string name="MmsDatabase_error_decrypting_message">Грешка при дешифрирање на пораката.</string>
   <!--MmsMessageRecord-->
   <string name="MmsMessageRecord_decrypting_mms_please_wait">Дешифрирање на MMS пораката, ве молиме почекајте...</string>
-  <string name="MmsMessageRecord_bad_encrypted_mms_message">Погрешно шифрирана MMS порака...</string>
-  <string name="MmsMessageRecord_mms_message_encrypted_for_non_existing_session">MMS пораката е шифрирана за непостоечка сесија...</string>
   <!--MuteDialog-->
   <string name="MuteDialog_mute_notifications">Безвучни известувања</string>
   <!--ApplicationMigrationService-->
@@ -351,6 +344,8 @@
   <!--SingleRecipientNotificationBuilder-->
   <string name="SingleRecipientNotificationBuilder_signal">Signal</string>
   <string name="SingleRecipientNotificationBuilder_new_message">Нова порака</string>
+  <!--WebRtcCallScreen-->
+  <!--WebRtcCallControls-->
   <!--attachment_type_selector-->
   <string name="attachment_type_selector__audio">Звук</string>
   <string name="attachment_type_selector__camera">камера</string>
@@ -364,7 +359,6 @@
   <!--ContactSelectionListFragment-->
   <string name="ContactSelectionlistFragment_select_for">Изберете за</string>
   <!--blocked_contacts_fragment-->
-  <string name="blocked_contacts_fragment__no_blocked_contacts">Нема блокирани контакти...</string>
   <!--contact_selection_recent_activity-->
   <string name="contact_selection_recent_activity__no_recent_calls">Нема скорешни повици.</string>
   <!--conversation_title_view-->
@@ -393,9 +387,11 @@
   <string name="conversation_item_received__download">Превземање</string>
   <string name="conversation_item_received__contact_photo_description">Слика на контакт</string>
   <string name="conversation_item_received__downloading">Превземање</string>
+  <!--audio_view-->
   <!--conversation_fragment_cab-->
   <string name="conversation_fragment_cab__batch_selection_mode">Повеќекратно селектирање</string>
   <string name="conversation_fragment_cab__batch_selection_amount">%s избрано</string>
+  <!--conversation_fragment-->
   <!--country_selection_fragment-->
   <string name="country_selection_fragment__loading_countries">Вчитување на држави...</string>
   <string name="country_selection_fragment__search">Барај</string>
@@ -493,6 +489,7 @@
   <!--recipients_panel-->
   <string name="recipients_panel__to"><small>Внесете име или број</small></string>
   <!--verify_display_fragment-->
+  <!--verify_identity-->
   <!--message_details_header-->
   <string name="message_details_header__issues_need_your_attention">Некои проблеми барааат ваше внимание.</string>
   <string name="message_details_header__sent">Испратено</string>
@@ -671,6 +668,7 @@
   <string name="text_secure_normal__mark_all_as_read">Обележи ги сите како прочитани</string>
   <string name="text_secure_normal__invite_friends">Покани пријатели</string>
   <string name="text_secure_normal__help">Помош</string>
+  <!--verify_display_fragment-->
   <!--reminder_header-->
   <string name="reminder_header_outdated_build">Вашата верзија на Signal е застарена.</string>
   <string name="reminder_header_sms_default_title">Користи како стандардна СМС апликација</string>

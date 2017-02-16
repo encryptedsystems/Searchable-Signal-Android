@@ -74,13 +74,8 @@
     <string name="CallScreen_Incoming_call">Incoming call</string>
 
     <!-- ConfirmIdentityDialog -->
-    <string name="ConfirmIdentityDialog_the_signature_on_this_key_exchange_is_different">The
-        safety numbers for %1$s have changed. This could either mean that someone is trying to
-        intercept your communication, or that %2$s simply re-installed Signal.
-    </string>
-    <string name="ConfirmIdentityDialog_you_may_wish_to_verify_this_contact">You may wish to verify
-        safety numbers for this contact.
-    </string>
+    <string name="ConfirmIdentityDialog_your_safety_number_with_s_has_changed">Your safety number with %1$s has changed. This could either mean that someone is trying to intercept your communication, or that %2$s simply reinstalled Signal.</string>
+    <string name="ConfirmIdentityDialog_you_may_wish_to_verify_your_safety_number_with_this_contact">You may wish to verify your safety number with this contact.</string>
     <string name="ConfirmIdentityDialog_accept">Accept</string>
 
     <!-- ContactsDatabase -->
@@ -122,7 +117,7 @@
     <string name="ConversationActivity_message_is_empty_exclamation">Message is empty!</string>
     <string name="ConversationActivity_group_members">Group members</string>
     <string name="ConversationActivity_group_conversation">Group conversation</string>
-    <string name="ConversationActivity_unnamed_group">Unnamed group</string>
+
     <plurals name="ConversationActivity_d_recipients_in_group">
         <item quantity="one">1 member</item>
         <item quantity="other">%d members</item>
@@ -138,7 +133,7 @@
     <string name="ConversationActivity_transport_signal">Signal</string>
     <string name="ConversationActivity_lets_switch_to_signal">Let\'s switch to Signal %1$s</string>
     <string name="ConversationActivity_lets_use_this_to_chat">Let\'s use this to chat: %1$s</string>
-    <string name="ConversationActivity_error_leaving_group">Error leaving group...</string>
+    <string name="ConversationActivity_error_leaving_group">Error leaving group</string>
     <string name="ConversationActivity_mms_not_supported_title">MMS not supported</string>
     <string name="ConversationActivity_mms_not_supported_message">This message cannot be sent since your carrier doesn\'t support MMS.</string>
     <string name="ConversationActivity_specify_recipient">Please choose a contact</string>
@@ -148,7 +143,7 @@
     <string name="ConversationActivity_attachment_exceeds_size_limits">Attachment exceeds size limits for the type of message you\'re sending.</string>
     <string name="ConversationActivity_quick_camera_unavailable">Camera unavailable</string>
     <string name="ConversationActivity_unable_to_record_audio">Unable to record audio!</string>
-    <string name="ConversationActivity_error_sending_voice_message">Error sending voice message...</string>
+    <string name="ConversationActivity_error_sending_voice_message">Error sending voice message</string>
     <string name="ConversationActivity_there_is_no_app_available_to_handle_this_link_on_your_device">There is no app available to handle this link on your device.</string>
 
     <!-- ConversationFragment -->
@@ -172,7 +167,10 @@
         <item quantity="one">Error while saving attachment to storage!</item>
         <item quantity="other">Error while saving attachments to storage!</item>
     </plurals>
-    <string name="ConversationFragment_file_saved_successfully">File saved successfully.</string>
+    <plurals name="ConversationFragment_files_saved_successfully">
+        <item quantity="one">File saved successfully.</item>
+        <item quantity="other">Files saved successfully.</item>
+    </plurals>
     <string name="ConversationFragment_unable_to_write_to_sd_card_exclamation">Unable to write to storage!</string>
     <plurals name="ConversationFragment_saving_n_attachments">
         <item quantity="one">Saving attachment</item>
@@ -191,7 +189,7 @@
     <string name="ConversationFragment_deleting_messages">Deleting messages...</string>
 
     <!-- ConversationListActivity -->
-    <string name="ConversationListActivity_search">Search...</string>
+    <string name="ConversationListActivity_search">Search</string>
     <string name="ConversationListActivity_there_is_no_browser_installed_on_your_device">There is no browser installed on your device.</string>
 
     <!-- ConversationListFragment -->
@@ -216,7 +214,7 @@
     </plurals>
 
     <!-- ConversationListItem -->
-    <string name="ConversationListItem_key_exchange_message">Key exchange message...</string>
+    <string name="ConversationListItem_key_exchange_message">Key exchange message</string>
 
     <!-- ConversationListItemAction -->
     <string name="ConversationListItemAction_archived_conversations_d">Archived conversations (%d)</string>
@@ -227,13 +225,15 @@
     <string name="CustomDefaultPreference_none">None</string>
 
     <!-- DateUtils -->
-    <string name="DateUtils_now">Now</string>
+    <string name="DateUtils_just_now">Just now</string>
     <string name="DateUtils_minutes_ago">%d min</string>
+    <string name="DateUtils_today">Today</string>
+    <string name="DateUtils_yesterday">Yesterday</string>
 
     <!-- DeviceListActivity -->
     <string name="DeviceListActivity_unlink_s">Unlink \'%s\'?</string>
     <string name="DeviceListActivity_by_unlinking_this_device_it_will_no_longer_be_able_to_send_or_receive">By unlinking this device, it will no longer be able to send or receive messages.</string>
-    <string name="DeviceListActivity_network_connection_failed">Network connection failed...</string>
+    <string name="DeviceListActivity_network_connection_failed">Network connection failed</string>
     <string name="DeviceListActivity_try_again">Try again</string>
     <string name="DeviceListActivity_unlinking_device">Unlinking device...</string>
     <string name="DeviceListActivity_unlinking_device_no_ellipsis">Unlinking device</string>
@@ -276,7 +276,7 @@
 
 
     <!-- GiphyActivity -->
-    <string name="GiphyActivity_error_while_retrieving_full_resolution_gif">Error while retrieving full resolution GiF...</string>
+    <string name="GiphyActivity_error_while_retrieving_full_resolution_gif">Error while retrieving full resolution GIF</string>
 
     <!-- GiphyFragmentPageAdapter -->
     <string name="GiphyFragmentPagerAdapter_gifs">GIFs</string>
@@ -367,12 +367,12 @@
 
     <!-- MessageDetailsRecipient -->
     <string name="MessageDetailsRecipient_failed_to_send">Failed to send</string>
-    <string name="MessageDetailsRecipient_new_safety_numbers">New safety numbers</string>
+    <string name="MessageDetailsRecipient_new_safety_number">New safety number</string>
 
     <!-- MmsDownloader -->
     <string name="MmsDownloader_error_storing_mms">Error storing MMS!</string>
-    <string name="MmsDownloader_error_connecting_to_mms_provider">Error connecting to MMS provider...</string>
-    <string name="MmsDownloader_error_reading_mms_settings">Error reading wireless provider MMS settings...</string>
+    <string name="MmsDownloader_error_connecting_to_mms_provider">Error connecting to MMS provider</string>
+    <string name="MmsDownloader_error_reading_mms_settings">Error reading wireless provider MMS settings</string>
 
     <!--- NotificationBarManager -->
     <string name="NotificationBarManager_signal_call_in_progress">Signal call in progress</string>
@@ -387,6 +387,8 @@
 
     <!-- NotificationMmsMessageRecord -->
     <string name="NotificationMmsMessageRecord_multimedia_message">Multimedia message</string>
+    <string name="NotificationMmsMessageRecord_downloading_mms_message">Downloading MMS message</string>
+    <string name="NotificationMmsMessageRecord_error_downloading_mms_message">Error downloading MMS message, tap to retry</string>
 
     <!-- MessageRecord -->
     <string name="MessageRecord_message_encrypted_with_a_legacy_protocol_version_that_is_no_longer_supported">Received a message encrypted using an old version of Signal that is no longer supported. Please ask the sender to update to the most recent version and resend the message.</string>
@@ -396,9 +398,9 @@
     <string name="MessageRecord_called_s">Called %s</string>
     <string name="MessageRecord_missed_call_from">Missed call from %s</string>
     <string name="MessageRecord_s_is_on_signal_say_hey">%s is on Signal, say hey!</string>
-    <string name="MessageRecord_you">You</string>
-    <string name="MessageRecord_s_set_disappearing_message_time_to_s">%1$s set disappearing message time to %2$s</string>
-    <string name="MessageRecord_your_safety_numbers_with_s_have_changed">Your safety numbers with %s have changed</string>
+    <string name="MessageRecord_you_set_disappearing_message_time_to_s">You set disappearing message time to %1$s.</string>
+    <string name="MessageRecord_s_set_disappearing_message_time_to_s">%1$s set disappearing message time to %2$s.</string>
+    <string name="MessageRecord_your_safety_number_with_s_has_changed">Your safety number with %s has changed.</string>
 
 
     <!-- PassphraseChangeActivity -->
@@ -422,7 +424,7 @@
     <string name="DeviceProvisioningActivity_content_progress_no_device">No device found.</string>
     <string name="DeviceProvisioningActivity_content_progress_network_error">Network error.</string>
     <string name="DeviceProvisioningActivity_content_progress_key_error">Invalid QR code.</string>
-    <string name="DeviceProvisioningActivity_sorry_you_have_too_many_devices_linked_already">Sorry, you have too many devices linked already, try removing some...</string>
+    <string name="DeviceProvisioningActivity_sorry_you_have_too_many_devices_linked_already">Sorry, you have too many devices linked already, try removing some</string>
     <string name="DeviceActivity_sorry_this_is_not_a_valid_device_link_qr_code">Sorry, this is not a valid device link QR code.</string>
     <string name="DeviceProvisioningActivity_link_a_signal_device">Link a Signal device?</string>
     <string name="DeviceProvisioningActivity_it_looks_like_youre_trying_to_link_a_signal_device_using_a_3rd_party_scanner">It looks like you\'re trying to link a Signal device using a 3rd party scanner.  For your protection, please scan the code again from within Signal.</string>
@@ -458,6 +460,10 @@
     <string name="RecipientPreferenceActivity_unblock">Unblock</string>
     <string name="RecipientPreferenceActivity_enabled">Enabled</string>
     <string name="RecipientPreferenceActivity_disabled">Disabled</string>
+    <string name="RecipientPreferenceActivity_available_once_a_message_has_been_sent_or_received">Available once a message has been sent or received.</string>
+
+    <!-- RecipientProvider -->
+    <string name="RecipientProvider_unnamed_group">Unnamed group</string>
 
     <!-- RedPhone -->
     <string name="RedPhone_answering">Answering</string>
@@ -513,7 +519,7 @@
     <string name="RegistrationProgressActivity_verifying_number">Verifying number</string>
     <string name="RegistrationProgressActivity_edit_s">Edit %s</string>
     <string name="RegistrationProgressActivity_registration_complete">Registration complete!</string>
-    <string name="RegistrationProgressActivity_you_must_enter_the_code_you_received_first">You must enter the code you received first...</string>
+    <string name="RegistrationProgressActivity_you_must_enter_the_code_you_received_first">You must enter the code you received first</string>
     <string name="RegistrationProgressActivity_connecting">Connecting</string>
     <string name="RegistrationProgressActivity_connecting_for_verification">Connecting for verification...</string>
     <string name="RegistrationProgressActivity_network_error">Network error!</string>
@@ -549,13 +555,13 @@
     <string name="SmsMessageRecord_received_key_exchange_message_for_invalid_protocol_version">
         Received key exchange message for invalid protocol version.
     </string>
-    <string name="SmsMessageRecord_received_message_with_new_safety_numbers_tap_to_process">Received message with new safety numbers. Tap to process and display.</string>
+    <string name="SmsMessageRecord_received_message_with_new_safety_number_tap_to_process">Received message with new safety number. Tap to process and display.</string>
     <string name="SmsMessageRecord_secure_session_reset">You reset the secure session.</string>
     <string name="SmsMessageRecord_secure_session_reset_s">%s reset the secure session.</string>
     <string name="SmsMessageRecord_duplicate_message">Duplicate message.</string>
 
     <!-- ThreadRecord -->
-    <string name="ThreadRecord_left_the_group">Left the group...</string>
+    <string name="ThreadRecord_left_the_group">Left the group</string>
     <string name="ThreadRecord_secure_session_reset">Secure session reset.</string>
     <string name="ThreadRecord_draft">Draft:</string>
     <string name="ThreadRecord_called">You called</string>
@@ -564,21 +570,25 @@
     <string name="ThreadRecord_media_message">Media message</string>
     <string name="ThreadRecord_s_is_on_signal_say_hey">%s is on Signal, say hey!</string>
     <string name="ThreadRecord_disappearing_message_time_updated_to_s">Disappearing message time set to %s</string>
-    <string name="ThreadRecord_your_safety_numbers_with_s_have_changed">Your safety numbers with %s have changed</string>
+    <string name="ThreadRecord_your_safety_number_with_s_has_changed">Your safety number with %s has changed.</string>
 
     <!-- VerifyIdentityActivity -->
-    <string name="VerifyIdentityActivity_your_contact_is_running_an_old_version_of_signal">Your contact is running an old version of Signal, please ask them to update before verifying safety numbers.</string>
-    <string name="VerifyIdentityActivity_you_re_attempting_to_verify_safety_numbers_with">You\'re attempting to verify safety numbers with %1$s, but scanned %2$s instead.</string>
-    <string name="VerifyIdentityActivity_the_scanned_qr_code_is_not_a_correctly_formatted_safety_number">The scanned QR code is not a correctly formatted safety number verification code.  Please try scanning again.</string>
+    <string name="VerifyIdentityActivity_your_contact_is_running_an_old_version_of_signal">Your contact is running an old version of Signal. Please ask them to update before verifying your safety number.</string>
+    <string name="VerifyIdentityActivity_your_contact_is_running_a_newer_version_of_Signal">Your contact is running a newer version of Signal with an incompatible QR code format. Please update to compare.</string>
+    <string name="VerifyIdentityActivity_the_scanned_qr_code_is_not_a_correctly_formatted_safety_number">The scanned QR code is not a correctly formatted safety number verification code. Please try scanning again.</string>
+    <string name="VerifyIdentityActivity_share_safety_number_via">Share safety number via...</string>
+    <string name="VerifyIdentityActivity_our_signal_safety_number">Our Signal safety number:</string>
+    <string name="VerifyIdentityActivity_no_app_to_share_to">It looks like you don\'t have any apps to share to.</string>
+    <string name="VerifyIdentityActivity_no_safety_number_to_compare_was_found_in_the_clipboard">No safety number to compare was found in the clipboard</string>
 
     <!-- KeyExchangeInitiator -->
     <string name="KeyExchangeInitiator_initiate_despite_existing_request_question">Initiate despite existing request?</string>
     <string name="KeyExchangeInitiator_send">Send</string>
 
     <!-- MessageDisplayHelper -->
-    <string name="MessageDisplayHelper_bad_encrypted_message">Bad encrypted message...</string>
+    <string name="MessageDisplayHelper_bad_encrypted_message">Bad encrypted message</string>
     <string name="MessageDisplayHelper_decrypting_please_wait">Decrypting, please wait...</string>
-    <string name="MessageDisplayHelper_message_encrypted_for_non_existing_session">Message encrypted for non-existing session...</string>
+    <string name="MessageDisplayHelper_message_encrypted_for_non_existing_session">Message encrypted for non-existing session</string>
 
     <!-- EncryptingSmsDatabase -->
     <string name="EncryptingSmsDatabase_error_decrypting_message">Error decrypting message.</string>
@@ -596,8 +606,8 @@
 
     <!-- MmsMessageRecord -->
     <string name="MmsMessageRecord_decrypting_mms_please_wait">Decrypting MMS, please wait...</string>
-    <string name="MmsMessageRecord_bad_encrypted_mms_message">Bad encrypted MMS message...</string>
-    <string name="MmsMessageRecord_mms_message_encrypted_for_non_existing_session">MMS message encrypted for non-existing session...</string>
+    <string name="MmsMessageRecord_bad_encrypted_mms_message">Bad encrypted MMS message</string>
+    <string name="MmsMessageRecord_mms_message_encrypted_for_non_existing_session">MMS message encrypted for non-existing session</string>
 
     <!-- MuteDialog -->
     <string name="MuteDialog_mute_notifications">Mute notifications</string>
@@ -617,7 +627,7 @@
     <!-- MessageNotifier -->
     <string name="MessageNotifier_d_new_messages_in_d_conversations">%1$d new messages in %2$d conversations</string>
     <string name="MessageNotifier_most_recent_from_s">Most recent from: %1$s</string>
-    <string name="MessageNotifier_locked_message">Locked message...</string>
+    <string name="MessageNotifier_locked_message">Locked message</string>
     <string name="MessageNotifier_media_message_with_text">Media message: %s</string>
     <string name="MessageNotifier_no_subject">(No subject)</string>
     <string name="MessageNotifier_message_delivery_failed">Message delivery failed.</string>
@@ -636,13 +646,32 @@
     <string name="SingleRecipientNotificationBuilder_signal">Signal</string>
     <string name="SingleRecipientNotificationBuilder_new_message">New message</string>
 
+    <!-- WebRtcCallScreen -->
+    <string name="WebRtcCallScreen_new_safety_numbers">The safety numbers for your conversation with %1$s have changed. This could either mean that someone is trying to intercept your communication, or that %2$s simply re-installed Signal.</string>
+    <string name="WebRtcCallScreen_you_may_wish_to_verify_this_contact">You may wish to verify
+        safety numbers for this contact.
+    </string>
+    <string name="WebRtcCallScreen_new_safety_numbers_title">New safety numbers</string>
+
+    <!-- WebRtcCallControls -->
+    <string name="WebRtcCallControls_tap_to_enable_your_video">Tap to enable your video</string>
+
     <!-- attachment_type_selector -->
     <string name="attachment_type_selector__image">Image</string>
+    <string name="attachment_type_selector__image_description">Image</string>
     <string name="attachment_type_selector__audio">Audio</string>
+    <string name="attachment_type_selector__audio_description">Audio</string>
     <string name="attachment_type_selector__video">Video</string>
+    <string name="attachment_type_selector__video_description">Video</string>
     <string name="attachment_type_selector__contact">Contact</string>
+    <string name="attachment_type_selector__contact_description">Contact</string>
     <string name="attachment_type_selector__camera">Camera</string>
+    <string name="attachment_type_selector__camera_description">Camera</string>
     <string name="attachment_type_selector__location">Location</string>
+    <string name="attachment_type_selector__location_description">Location</string>
+    <string name="attachment_type_selector__gif">GIF</string>
+    <string name="attachment_type_selector__gif_description">Gif</string>
+    <string name="attachment_type_selector__drawer_description">Toggle attachment drawer</string>
 
     <!-- change_passphrase_activity -->
     <string name="change_passphrase_activity__old_passphrase">Old passphrase</string>
@@ -663,7 +692,7 @@
     <string name="ContactSelectionlistFragment_select_for">Select for</string>
 
     <!-- blocked_contacts_fragment -->
-    <string name="blocked_contacts_fragment__no_blocked_contacts">No blocked contacts...</string>
+    <string name="blocked_contacts_fragment__no_blocked_contacts">No blocked contacts</string>
 
     <!-- contact_selection_recent_activity -->
     <string name="contact_selection_recent_activity__no_recent_calls">No recent calls.</string>
@@ -682,7 +711,9 @@
     <string name="conversation_activity__compose_description">Message composition</string>
     <string name="conversation_activity__emoji_toggle_description">Toggle emoji keyboard</string>
     <string name="conversation_activity__attachment_thumbnail">Attachment Thumbnail</string>
-    <string name="conversation_activity__quick_attachment_drawer_toggle_description">Toggle attachment drawer</string>
+    <string name="conversation_activity__quick_attachment_drawer_toggle_camera_description">Toggle quick camera attachment drawer</string>
+    <string name="conversation_activity__quick_attachment_drawer_record_and_send_audio_description">Record and send audio attachment</string>
+    <string name="conversation_activity__enable_signal_for_sms">Enable Signal for SMS</string>
 
     <!-- conversation_input_panel -->
     <string name="conversation_input_panel__slide_to_cancel">SLIDE TO CANCEL</string>
@@ -704,9 +735,17 @@
     <string name="conversation_item_received__contact_photo_description">Contact photo</string>
     <string name="conversation_item_received__downloading">Downloading</string>
 
+    <!-- audio_view -->
+    <string name="audio_view__play_accessibility_description">Play</string>
+    <string name="audio_view__pause_accessibility_description">Pause</string>
+    <string name="audio_view__download_accessibility_description">Download</string>
+
     <!-- conversation_fragment_cab -->
     <string name="conversation_fragment_cab__batch_selection_mode">Batch selection mode</string>
     <string name="conversation_fragment_cab__batch_selection_amount">%s selected</string>
+
+    <!-- conversation_fragment -->
+    <string name="conversation_fragment__scroll_to_the_bottom_content_description">Scroll to the bottom</string>
 
     <!-- country_selection_fragment -->
     <string name="country_selection_fragment__loading_countries">Loading countries...</string>
@@ -719,7 +758,7 @@
     <string name="device_link_fragment__link_device">Link device</string>
 
     <!-- device_list_fragment -->
-    <string name="device_list_fragment__no_devices_linked">No devices linked...</string>
+    <string name="device_list_fragment__no_devices_linked">No devices linked</string>
     <string name="device_list_fragment__link_new_device">Link new device</string>
 
     <!-- experience_upgrade_activity -->
@@ -768,7 +807,7 @@
     <string name="giphy_activity_toolbar__search_gifs_and_stickers">Search GIFs and stickers</string>
 
     <!-- giphy_fragment -->
-    <string name="giphy_fragment__no_results_found">No results found.</string>
+    <string name="giphy_fragment__nothing_found">Nothing found</string>
 
 
     <!-- log_submit_activity -->
@@ -844,7 +883,7 @@
     <string name="recipient_preferences__block">Block</string>
     <string name="recipient_preferences__color">Color</string>
     <string name="recipient_preferences__color_for_this_contact">Color for this contact</string>
-    <string name="recipient_preferences__verify_safety_numbers">Verify safety numbers</string>
+    <string name="recipient_preferences__verify_safety_number">Verify safety number</string>
 
     <!--- redphone_call_controls -->
     <string name="redphone_call_card__signal_call">Signal Call</string>
@@ -941,8 +980,11 @@
     <string name="recipients_panel__add_members">Add members</string>
 
     <!-- verify_display_fragment -->
-    <string name="verify_display_fragment__scan_the_code_on_your_contact_s_phone_or_ask_them_to_scan_your_code_to_verify_that_your_messages_are_end_to_end_encrypted_you_can_alternately_compare_the_number_above">If you wish to verify the security of your end-to-end encryption with %s, compare the numbers above with the numbers on their device. Alternately, you can scan the code on their phone, or ask them to scan your code.</string>
+    <string name="verify_display_fragment__if_you_wish_to_verify_the_security_of_your_end_to_end_encryption_with_s"><![CDATA[If you wish to verify the security of your end-to-end encryption with %s, compare the number above with the number on their device. Alternatively, you can scan the code on their phone, or ask them to scan your code. <a href="https://whispersystems.org/redirect/safety-numbers">Learn more about verifying safety numbers</a>]]></string>
     <string name="verify_display_fragment__tap_to_scan">Tap to scan</string>
+
+    <!-- verify_identity -->
+    <string name="verify_identity__share_safety_number">Share safety number</string>
     
     <!-- message_details_header -->
     <string name="message_details_header__issues_need_your_attention">Some issues need your attention.</string>
@@ -960,7 +1002,7 @@
     <string name="AndroidManifest__select_contacts">Select contacts</string>
     <string name="AndroidManifest__signal_detected">Signal detected</string>
     <string name="AndroidManifest__change_passphrase">Change passphrase</string>
-    <string name="AndroidManifest__verify_safety_numbers">Verify safety numbers</string>
+    <string name="AndroidManifest__verify_safety_number">Verify safety number</string>
     <string name="AndroidManifest__log_submit">Submit debug log</string>
     <string name="AndroidManifest__media_preview">Media preview</string>
     <string name="AndroidManifest__media_overview">All images</string>
@@ -1104,6 +1146,9 @@
     <string name="preferences_chats__message_trimming">Message trimming</string>
     <string name="preferences_advanced__use_system_emoji">Use system emoji</string>
     <string name="preferences_advanced__disable_signal_built_in_emoji_support">Disable Signal\'s built-in emoji support</string>
+    <string name="preferences_advanced__video_calling_beta">Video calling beta</string>
+    <string name="preferences_advanced__enable_support_for_next_generation_video_and_voice_calls">Support for next-generation video and voice calls when enabled by both parties. This feature is in beta.</string>
+
 
     <!-- **************************************** -->
     <!-- menus -->
@@ -1210,6 +1255,10 @@
     <string name="text_secure_normal__invite_friends">Invite friends</string>
     <string name="text_secure_normal__help">Help</string>
 
+    <!-- verify_display_fragment -->
+    <string name="verify_display_fragment_context_menu__copy_to_clipboard">Copy to clipboard</string>
+    <string name="verify_display_fragment_context_menu__compare_with_clipboard">Compare with clipboard</string>
+
     <!-- reminder_header -->
     <string name="reminder_header_outdated_build">Your version of Signal is outdated</string>
     <plurals name="reminder_header_outdated_build_details">
@@ -1244,6 +1293,8 @@
 
     <!-- media_preview -->
     <string name="media_preview__save_title">Save</string>
+    <string name="media_preview__forward_title">Forward</string>
+    <string name="media_preview__overview_title">All images</string>
 
     <!-- media_overview -->
     <string name="media_overview__save_all">Save all</string>

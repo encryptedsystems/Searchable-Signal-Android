@@ -22,7 +22,7 @@ public class IdentityUpdateJob extends MasterSecretJob {
 
   public IdentityUpdateJob(Context context, long recipientId) {
     super(context, JobParameters.newBuilder()
-                                .withGroupId(IdentityUpdateJob.class.getName())
+                                .withGroupId("IdentityUpdateJob")
                                 .withPersistence()
                                 .create());
     this.recipientId = recipientId;
@@ -42,7 +42,7 @@ public class IdentityUpdateJob extends MasterSecretJob {
     GroupDatabase.GroupRecord groupRecord;
 
     while ((groupRecord = reader.getNext()) != null) {
-      if (groupRecord.getMembers().contains(number)) {
+      if (groupRecord.getMembers().contains(number) && groupRecord.isActive()) {
         SignalServiceGroup            group       = new SignalServiceGroup(groupRecord.getId());
         IncomingTextMessage           incoming    = new IncomingTextMessage(number, 1, time, null, Optional.of(group), 0);
         IncomingIdentityUpdateMessage groupUpdate = new IncomingIdentityUpdateMessage(incoming);

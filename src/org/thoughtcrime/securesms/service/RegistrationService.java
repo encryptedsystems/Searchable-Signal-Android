@@ -21,7 +21,7 @@ import org.thoughtcrime.securesms.crypto.IdentityKeyUtil;
 import org.thoughtcrime.securesms.crypto.PreKeyUtil;
 import org.thoughtcrime.securesms.database.DatabaseFactory;
 import org.thoughtcrime.securesms.jobs.GcmRefreshJob;
-import org.thoughtcrime.securesms.push.TextSecureCommunicationFactory;
+import org.thoughtcrime.securesms.push.AccountManagerFactory;
 import org.thoughtcrime.securesms.recipients.Recipient;
 import org.thoughtcrime.securesms.recipients.RecipientFactory;
 import org.thoughtcrime.securesms.util.DirectoryHelper;
@@ -161,7 +161,7 @@ public class RegistrationService extends Service {
     String signalingKey = intent.getStringExtra("signaling_key");
 
     try {
-      SignalServiceAccountManager accountManager = TextSecureCommunicationFactory.createManager(this, number, password);
+      SignalServiceAccountManager accountManager = AccountManagerFactory.createManager(this, number, password);
 
       handleCommonRegistration(accountManager, number, password, signalingKey);
 
@@ -198,12 +198,12 @@ public class RegistrationService extends Service {
       initializeChallengeListener();
 
       setState(new RegistrationState(RegistrationState.STATE_CONNECTING, number));
-      SignalServiceAccountManager accountManager = TextSecureCommunicationFactory.createManager(this, number, password);
+      SignalServiceAccountManager accountManager = AccountManagerFactory.createManager(this, number, password);
       accountManager.requestSmsVerificationCode();
 
       setState(new RegistrationState(RegistrationState.STATE_VERIFYING, number));
       String challenge = waitForChallenge();
-      accountManager.verifyAccountWithCode(challenge, signalingKey, registrationId, true);
+      accountManager.verifyAccountWithCode(challenge, signalingKey, registrationId, true, TextSecurePreferences.isWebrtcCallingEnabled(this));
 
       handleCommonRegistration(accountManager, number, password, signalingKey);
       markAsVerified(number, password, signalingKey);
@@ -239,7 +239,7 @@ public class RegistrationService extends Service {
     IdentityKeyPair    identityKey  = IdentityKeyUtil.getIdentityKeyPair(this);
     List<PreKeyRecord> records      = PreKeyUtil.generatePreKeys(this);
     PreKeyRecord       lastResort   = PreKeyUtil.generateLastResortKey(this);
-    SignedPreKeyRecord signedPreKey = PreKeyUtil.generateSignedPreKey(this, identityKey);
+    SignedPreKeyRecord signedPreKey = PreKeyUtil.generateSignedPreKey(this, identityKey, true);
     accountManager.setPreKeys(identityKey.getPublicKey(),lastResort, signedPreKey, records);
 
     setState(new RegistrationState(RegistrationState.STATE_GCM_REGISTERING, number));
@@ -261,6 +261,7 @@ public class RegistrationService extends Service {
     redPhoneAccountManager.createAccount(verificationToken, new RedPhoneAccountAttributes(signalingKey, gcmRegistrationId));
 
     DirectoryRefreshListener.schedule(this);
+    RotateSignedPreKeyListener.schedule(this);
   }
 
   private synchronized String waitForChallenge() throws AccountVerificationTimeoutException {

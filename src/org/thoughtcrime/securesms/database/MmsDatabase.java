@@ -34,6 +34,7 @@ import org.thoughtcrime.securesms.ApplicationContext;
 import org.thoughtcrime.securesms.R;
 import org.thoughtcrime.securesms.attachments.Attachment;
 import org.thoughtcrime.securesms.attachments.DatabaseAttachment;
+import org.thoughtcrime.securesms.attachments.MmsNotificationAttachment;
 import org.thoughtcrime.securesms.crypto.AsymmetricMasterCipher;
 import org.thoughtcrime.securesms.crypto.MasterCipher;
 import org.thoughtcrime.securesms.crypto.MasterSecret;
@@ -138,6 +139,7 @@ public class MmsDatabase extends MessagingDatabase {
       AttachmentDatabase.MMS_ID,
       AttachmentDatabase.SIZE,
       AttachmentDatabase.DATA,
+      AttachmentDatabase.THUMBNAIL,
       AttachmentDatabase.CONTENT_TYPE,
       AttachmentDatabase.CONTENT_LOCATION,
       AttachmentDatabase.CONTENT_DISPOSITION,
@@ -381,11 +383,11 @@ public class MmsDatabase extends MessagingDatabase {
     notifyConversationListeners(threadId);
   }
 
-  public void markAsSending(long messageId) {
-    long threadId = getThreadIdForMessage(messageId);
-    updateMailboxBitmask(messageId, Types.BASE_TYPE_MASK, Types.BASE_SENDING_TYPE, Optional.of(threadId));
-    notifyConversationListeners(threadId);
-  }
+//  public void markAsSending(long messageId) {
+//    long threadId = getThreadIdForMessage(messageId);
+//    updateMailboxBitmask(messageId, Types.BASE_TYPE_MASK, Types.BASE_SENDING_TYPE, Optional.of(threadId));
+//    notifyConversationListeners(threadId);
+//  }
 
   public void markAsSentFailed(long messageId) {
     long threadId = getThreadIdForMessage(messageId);
@@ -393,9 +395,9 @@ public class MmsDatabase extends MessagingDatabase {
     notifyConversationListeners(threadId);
   }
 
-  public void markAsSent(long messageId) {
+  public void markAsSent(long messageId, boolean secure) {
     long threadId = getThreadIdForMessage(messageId);
-    updateMailboxBitmask(messageId, Types.BASE_TYPE_MASK, Types.BASE_SENT_TYPE, Optional.of(threadId));
+    updateMailboxBitmask(messageId, Types.BASE_TYPE_MASK, Types.BASE_SENT_TYPE | (secure ? Types.PUSH_MESSAGE_BIT | Types.SECURE_MESSAGE_BIT : 0), Optional.of(threadId));
     notifyConversationListeners(threadId);
   }
 
@@ -413,17 +415,17 @@ public class MmsDatabase extends MessagingDatabase {
     notifyConversationListeners(threadId);
   }
 
-  public void markAsSecure(long messageId) {
-    updateMailboxBitmask(messageId, 0, Types.SECURE_MESSAGE_BIT, Optional.<Long>absent());
-  }
+//  public void markAsSecure(long messageId) {
+//    updateMailboxBitmask(messageId, 0, Types.SECURE_MESSAGE_BIT, Optional.<Long>absent());
+//  }
 
   public void markAsInsecure(long messageId) {
     updateMailboxBitmask(messageId, Types.SECURE_MESSAGE_BIT, 0, Optional.<Long>absent());
   }
 
-  public void markAsPush(long messageId) {
-    updateMailboxBitmask(messageId, 0, Types.PUSH_MESSAGE_BIT, Optional.<Long>absent());
-  }
+//  public void markAsPush(long messageId) {
+//    updateMailboxBitmask(messageId, 0, Types.PUSH_MESSAGE_BIT, Optional.<Long>absent());
+//  }
 
   public void markAsDecryptFailed(long messageId, long threadId) {
     updateMailboxBitmask(messageId, Types.ENCRYPTION_MASK, Types.ENCRYPTION_REMOTE_FAILED_BIT, Optional.of(threadId));
@@ -672,6 +674,7 @@ public class MmsDatabase extends MessagingDatabase {
         attachments.add(new DatabaseAttachment(databaseAttachment.getAttachmentId(),
                                                databaseAttachment.getMmsId(),
                                                databaseAttachment.hasData(),
+                                               databaseAttachment.hasThumbnail(),
                                                databaseAttachment.getContentType(),
                                                AttachmentDatabase.TRANSFER_PROGRESS_DONE,
                                                databaseAttachment.getSize(),
@@ -690,10 +693,10 @@ public class MmsDatabase extends MessagingDatabase {
     }
   }
 
-  private Pair<Long, Long> insertMessageInbox(MasterSecretUnion masterSecret,
-                                              IncomingMediaMessage retrieved,
-                                              String contentLocation,
-                                              long threadId, long mailbox)
+  private Optional<InsertResult> insertMessageInbox(MasterSecretUnion masterSecret,
+                                                    IncomingMediaMessage retrieved,
+                                                    String contentLocation,
+                                                    long threadId, long mailbox)
       throws MmsException
   {
     if (threadId == -1 || retrieved.isGroupMessage()) {
@@ -726,6 +729,11 @@ public class MmsDatabase extends MessagingDatabase {
       contentValues.put(DATE_SENT, contentValues.getAsLong(DATE_RECEIVED));
     }
 
+    if (retrieved.isPushMessage() && isDuplicate(retrieved, threadId)) {
+      Log.w(TAG, "Ignoring duplicate media message (" + retrieved.getSentTimeMillis() + ")");
+      return Optional.absent();
+    }
+
     long messageId = insertMediaMessage(masterSecret, retrieved.getAddresses(),
                                         retrieved.getBody(), retrieved.getAttachments(),
                                         contentValues);
@@ -738,12 +746,12 @@ public class MmsDatabase extends MessagingDatabase {
     notifyConversationListeners(threadId);
     jobManager.add(new TrimThreadJob(context, threadId));
 
-    return new Pair<>(messageId, threadId);
+    return Optional.of(new InsertResult(messageId, threadId));
   }
 
-  public Pair<Long, Long> insertMessageInbox(MasterSecretUnion masterSecret,
-                                             IncomingMediaMessage retrieved,
-                                             String contentLocation, long threadId)
+  public Optional<InsertResult> insertMessageInbox(MasterSecretUnion masterSecret,
+                                                   IncomingMediaMessage retrieved,
+                                                   String contentLocation, long threadId)
       throws MmsException
   {
     long type = Types.BASE_INBOX_TYPE;
@@ -765,9 +773,9 @@ public class MmsDatabase extends MessagingDatabase {
     return insertMessageInbox(masterSecret, retrieved, contentLocation, threadId, type);
   }
 
-  public Pair<Long, Long> insertSecureDecryptedMessageInbox(MasterSecretUnion masterSecret,
-                                                            IncomingMediaMessage retrieved,
-                                                            long threadId)
+  public Optional<InsertResult> insertSecureDecryptedMessageInbox(MasterSecretUnion masterSecret,
+                                                                  IncomingMediaMessage retrieved,
+                                                                  long threadId)
       throws MmsException
   {
     long type = Types.BASE_INBOX_TYPE | Types.SECURE_MESSAGE_BIT;
@@ -824,7 +832,10 @@ public class MmsDatabase extends MessagingDatabase {
       contentValues.put(DATE_SENT, contentValues.getAsLong(DATE_RECEIVED));
 
     long messageId = db.insert(TABLE_NAME, null, contentValues);
-    addressDatabase.insertAddressesForId(messageId, MmsAddresses.forFrom(Util.toIsoString(notification.getFrom().getTextString())));
+
+    if (headers.getEncodedStringValue(PduHeaders.FROM) != null) {
+      addressDatabase.insertAddressesForId(messageId, MmsAddresses.forFrom(Util.toIsoString(notification.getFrom().getTextString())));
+    }
 
     return new Pair<>(messageId, threadId);
   }
@@ -845,12 +856,12 @@ public class MmsDatabase extends MessagingDatabase {
                                   long threadId, boolean forceSms)
       throws MmsException
   {
-    long type = Types.BASE_OUTBOX_TYPE;
+    long type = Types.BASE_SENDING_TYPE;
 
     if (masterSecret.getMasterSecret().isPresent()) type |= Types.ENCRYPTION_SYMMETRIC_BIT;
     else                                            type |= Types.ENCRYPTION_ASYMMETRIC_BIT;
 
-    if (message.isSecure()) type |= Types.SECURE_MESSAGE_BIT;
+    if (message.isSecure()) type |= (Types.SECURE_MESSAGE_BIT | Types.PUSH_MESSAGE_BIT);
     if (forceSms)           type |= Types.MESSAGE_FORCE_SMS_BIT;
 
     if (message.isGroup()) {
@@ -987,6 +998,20 @@ public class MmsDatabase extends MessagingDatabase {
     deleteThreads(singleThreadSet);
   }
 
+  private boolean isDuplicate(IncomingMediaMessage message, long threadId) {
+    SQLiteDatabase database = databaseHelper.getReadableDatabase();
+    Cursor         cursor   = database.query(TABLE_NAME, null, DATE_SENT + " = ? AND " + ADDRESS + " = ? AND " + THREAD_ID + " = ?",
+                                             new String[]{String.valueOf(message.getSentTimeMillis()), message.getAddresses().getFrom(), String.valueOf(threadId)},
+                                             null, null, null, "1");
+
+    try {
+      return cursor != null && cursor.moveToFirst();
+    } finally {
+      if (cursor != null) cursor.close();
+    }
+  }
+
+
   /*package*/ void deleteThreads(Set<Long> threadIds) {
     SQLiteDatabase db = databaseHelper.getWritableDatabase();
     String where      = "";
@@ -1073,28 +1098,6 @@ public class MmsDatabase extends MessagingDatabase {
     public static final int DOWNLOAD_SOFT_FAILURE    = 4;
     public static final int DOWNLOAD_HARD_FAILURE    = 5;
     public static final int DOWNLOAD_APN_UNAVAILABLE = 6;
-
-    public static boolean isDisplayDownloadButton(int status) {
-      return
-          status == DOWNLOAD_INITIALIZED     ||
-          status == DOWNLOAD_NO_CONNECTIVITY ||
-          status == DOWNLOAD_SOFT_FAILURE;
-    }
-
-    public static String getLabelForStatus(Context context, int status) {
-      switch (status) {
-        case DOWNLOAD_CONNECTING:      return context.getString(R.string.MmsDatabase_connecting_to_mms_server);
-        case DOWNLOAD_INITIALIZED:     return context.getString(R.string.MmsDatabase_downloading_mms);
-        case DOWNLOAD_HARD_FAILURE:    return context.getString(R.string.MmsDatabase_mms_download_failed);
-        case DOWNLOAD_APN_UNAVAILABLE: return context.getString(R.string.MmsDatabase_mms_pending_download);
-      }
-
-      return context.getString(R.string.MmsDatabase_downloading);
-    }
-
-    public static boolean isHardError(int status) {
-      return status == DOWNLOAD_HARD_FAILURE;
-    }
   }
 
   public class Reader {
@@ -1155,11 +1158,13 @@ public class MmsDatabase extends MessagingDatabase {
       if (!TextUtils.isEmpty(transactionId))
         transactionIdBytes = org.thoughtcrime.securesms.util.Util.toIsoBytes(transactionId);
 
+      SlideDeck slideDeck = new SlideDeck(context, new MmsNotificationAttachment(status, messageSize));
+
 
       return new NotificationMmsMessageRecord(context, id, recipients, recipients.getPrimaryRecipient(),
                                               addressDeviceId, dateSent, dateReceived, receiptCount, threadId,
                                               contentLocationBytes, messageSize, expiry, status,
-                                              transactionIdBytes, mailbox, subscriptionId);
+                                              transactionIdBytes, mailbox, subscriptionId, slideDeck);
     }
 
     private MediaMmsMessageRecord getMediaMmsMessageRecord(Cursor cursor) {

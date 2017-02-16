@@ -16,7 +16,9 @@
  */
 package org.thoughtcrime.securesms;
 
+import android.content.ActivityNotFoundException;
 import android.content.Context;
+import android.content.Intent;
 import android.content.res.Configuration;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -31,8 +33,15 @@ import android.support.annotation.DrawableRes;
 import android.support.annotation.NonNull;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentTransaction;
+import android.text.Html;
+import android.text.TextUtils;
+import android.text.method.LinkMovementMethod;
 import android.util.Log;
+import android.view.ContextMenu;
+import android.view.ContextMenu.ContextMenuInfo;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
@@ -40,6 +49,7 @@ import android.view.animation.Animation;
 import android.view.animation.AnticipateInterpolator;
 import android.view.animation.OvershootInterpolator;
 import android.view.animation.ScaleAnimation;
+import android.widget.AdapterView;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -62,7 +72,6 @@ import org.thoughtcrime.securesms.util.Util;
 import org.thoughtcrime.securesms.util.ViewUtil;
 import org.whispersystems.libsignal.IdentityKey;
 import org.whispersystems.libsignal.fingerprint.Fingerprint;
-import org.whispersystems.libsignal.fingerprint.FingerprintIdentifierMismatchException;
 import org.whispersystems.libsignal.fingerprint.FingerprintParsingException;
 import org.whispersystems.libsignal.fingerprint.FingerprintVersionMismatchException;
 import org.whispersystems.libsignal.fingerprint.NumericFingerprintGenerator;
@@ -99,7 +108,7 @@ public class VerifyIdentityActivity extends PassphraseRequiredActionBarActivity 
   protected void onCreate(Bundle state, @NonNull MasterSecret masterSecret) {
     try {
       getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-      getSupportActionBar().setTitle(R.string.AndroidManifest__verify_safety_numbers);
+      getSupportActionBar().setTitle(R.string.AndroidManifest__verify_safety_number);
 
       Recipient recipient = RecipientFactory.getRecipientForId(this, getIntent().getLongExtra(RECIPIENT_ID, -1), true);
       recipient.addListener(this);
@@ -123,9 +132,21 @@ public class VerifyIdentityActivity extends PassphraseRequiredActionBarActivity 
   }
 
   @Override
+  public boolean onPrepareOptionsMenu(Menu menu) {
+    super.onPrepareOptionsMenu(menu);
+
+    menu.clear();
+    MenuInflater inflater = this.getMenuInflater();
+    inflater.inflate(R.menu.verify_identity, menu);
+
+    return true;
+  }
+
+  @Override
   public boolean onOptionsItemSelected(MenuItem item) {
     switch (item.getItemId()) {
-      case android.R.id.home: finish(); return true;
+      case R.id.verify_identity__share: handleShare();  return true;
+      case android.R.id.home:           finish();       return true;
     }
 
     return false;
@@ -173,6 +194,24 @@ public class VerifyIdentityActivity extends PassphraseRequiredActionBarActivity 
     }
   }
 
+  private void handleShare() {
+    String shareString =
+        getString(R.string.VerifyIdentityActivity_our_signal_safety_number) + "\n" +
+        displayFragment.getFormattedSafetyNumbers() + "\n";
+
+    Intent intent = new Intent();
+    intent.setAction(Intent.ACTION_SEND);
+    intent.putExtra(Intent.EXTRA_TEXT, shareString);
+    intent.setType("text/plain");
+
+    try {
+      startActivity(Intent.createChooser(intent, getString(R.string.VerifyIdentityActivity_share_safety_number_via)));
+    } catch (ActivityNotFoundException e) {
+      Toast.makeText(VerifyIdentityActivity.this, R.string.VerifyIdentityActivity_no_app_to_share_to, Toast.LENGTH_LONG).show();
+    }
+  }
+
+
   public static class VerifyDisplayFragment extends Fragment implements Recipients.RecipientsModifiedListener {
 
     public static final String REMOTE_NUMBER   = "remote_number";
@@ -190,6 +229,7 @@ public class VerifyIdentityActivity extends PassphraseRequiredActionBarActivity 
     private Fingerprint fingerprint;
 
     private View                 container;
+    private View                 numbersContainer;
     private ImageView            qrCode;
     private ImageView            qrVerified;
     private TextView             description;
@@ -201,24 +241,26 @@ public class VerifyIdentityActivity extends PassphraseRequiredActionBarActivity 
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup viewGroup, Bundle bundle) {
-      this.container   = ViewUtil.inflate(inflater, viewGroup, R.layout.verify_display_fragment);
-      this.qrCode      = ViewUtil.findById(container, R.id.qr_code);
-      this.qrVerified  = ViewUtil.findById(container, R.id.qr_verified);
-      this.description = ViewUtil.findById(container, R.id.description);
-      this.codes[0]    = ViewUtil.findById(container, R.id.code_first);
-      this.codes[1]    = ViewUtil.findById(container, R.id.code_second);
-      this.codes[2]    = ViewUtil.findById(container, R.id.code_third);
-      this.codes[3]    = ViewUtil.findById(container, R.id.code_fourth);
-      this.codes[4]    = ViewUtil.findById(container, R.id.code_fifth);
-      this.codes[5]    = ViewUtil.findById(container, R.id.code_sixth);
-      this.codes[6]    = ViewUtil.findById(container, R.id.code_seventh);
-      this.codes[7]    = ViewUtil.findById(container, R.id.code_eighth);
-      this.codes[8]    = ViewUtil.findById(container, R.id.code_ninth);
-      this.codes[9]    = ViewUtil.findById(container, R.id.code_tenth);
-      this.codes[10]   = ViewUtil.findById(container, R.id.code_eleventh);
-      this.codes[11]   = ViewUtil.findById(container, R.id.code_twelth);
+      this.container        = ViewUtil.inflate(inflater, viewGroup, R.layout.verify_display_fragment);
+      this.numbersContainer = ViewUtil.findById(container, R.id.number_table);
+      this.qrCode           = ViewUtil.findById(container, R.id.qr_code);
+      this.qrVerified       = ViewUtil.findById(container, R.id.qr_verified);
+      this.description      = ViewUtil.findById(container, R.id.description);
+      this.codes[0]         = ViewUtil.findById(container, R.id.code_first);
+      this.codes[1]         = ViewUtil.findById(container, R.id.code_second);
+      this.codes[2]         = ViewUtil.findById(container, R.id.code_third);
+      this.codes[3]         = ViewUtil.findById(container, R.id.code_fourth);
+      this.codes[4]         = ViewUtil.findById(container, R.id.code_fifth);
+      this.codes[5]         = ViewUtil.findById(container, R.id.code_sixth);
+      this.codes[6]         = ViewUtil.findById(container, R.id.code_seventh);
+      this.codes[7]         = ViewUtil.findById(container, R.id.code_eighth);
+      this.codes[8]         = ViewUtil.findById(container, R.id.code_ninth);
+      this.codes[9]         = ViewUtil.findById(container, R.id.code_tenth);
+      this.codes[10]        = ViewUtil.findById(container, R.id.code_eleventh);
+      this.codes[11]        = ViewUtil.findById(container, R.id.code_twelth);
 
       this.qrCode.setOnClickListener(clickListener);
+      this.registerForContextMenu(numbersContainer);
 
       return container;
     }
@@ -269,6 +311,26 @@ public class VerifyIdentityActivity extends PassphraseRequiredActionBarActivity 
       recipient.removeListener(this);
     }
 
+    @Override
+    public void onCreateContextMenu(ContextMenu menu, View view,
+                                    ContextMenuInfo menuInfo)
+    {
+      super.onCreateContextMenu(menu, view, menuInfo);
+
+      MenuInflater inflater = getActivity().getMenuInflater();
+      inflater.inflate(R.menu.verify_display_fragment_context_menu, menu);
+
+    }
+
+    @Override
+    public boolean onContextItemSelected(MenuItem item) {
+      switch (item.getItemId()) {
+        case R.id.menu_copy:    handleCopyToClipboard();      return true;
+        case R.id.menu_compare: handleCompareWithClipboard(); return true;
+        default:                return super.onContextItemSelected(item);
+      }
+    }
+
     public void setScannedFingerprint(String scanned) {
       try {
         if (fingerprint.getScannableFingerprint().compareTo(scanned.getBytes("ISO-8859-1"))) {
@@ -278,10 +340,11 @@ public class VerifyIdentityActivity extends PassphraseRequiredActionBarActivity 
         }
       } catch (FingerprintVersionMismatchException e) {
         Log.w(TAG, e);
-        Toast.makeText(getActivity(), R.string.VerifyIdentityActivity_your_contact_is_running_an_old_version_of_signal, Toast.LENGTH_LONG).show();
-      } catch (FingerprintIdentifierMismatchException e) {
-        Log.w(TAG, e);
-        Toast.makeText(getActivity(), getActivity().getString(R.string.VerifyIdentityActivity_you_re_attempting_to_verify_safety_numbers_with, e.getRemoteIdentifier(), e.getScannedLocalIdentifier()), Toast.LENGTH_LONG).show();
+        if (e.getOurVersion() < e.getTheirVersion()) {
+          Toast.makeText(getActivity(), R.string.VerifyIdentityActivity_your_contact_is_running_a_newer_version_of_Signal, Toast.LENGTH_LONG).show();
+        } else {
+          Toast.makeText(getActivity(), R.string.VerifyIdentityActivity_your_contact_is_running_an_old_version_of_signal, Toast.LENGTH_LONG).show();
+        }
       } catch (FingerprintParsingException e) {
         Log.w(TAG, e);
         Toast.makeText(getActivity(), R.string.VerifyIdentityActivity_the_scanned_qr_code_is_not_a_correctly_formatted_safety_number, Toast.LENGTH_LONG).show();
@@ -292,6 +355,47 @@ public class VerifyIdentityActivity extends PassphraseRequiredActionBarActivity 
 
     public void setClickListener(View.OnClickListener listener) {
       this.clickListener = listener;
+    }
+
+    public String getFormattedSafetyNumbers() {
+      StringBuilder result = new StringBuilder();
+
+      for (int i = 0; i < codes.length; i++) {
+        result.append(codes[i].getText());
+
+        if (i != codes.length - 1) {
+          if (((i+1) % 4) == 0) result.append('\n');
+          else                  result.append(' ');
+        }
+      }
+
+      return result.toString();
+    }
+
+    private void handleCopyToClipboard() {
+      Util.writeTextToClipboard(getActivity(), getFormattedSafetyNumbers());
+    }
+
+    private void handleCompareWithClipboard() {
+      String clipboardData = Util.readTextFromClipboard(getActivity());
+
+      if (clipboardData == null) {
+        Toast.makeText(getActivity(), R.string.VerifyIdentityActivity_no_safety_number_to_compare_was_found_in_the_clipboard, Toast.LENGTH_LONG).show();
+        return;
+      }
+
+      String numericClipboardData = clipboardData.replaceAll("\\D", "");
+
+      if (TextUtils.isEmpty(numericClipboardData) || numericClipboardData.length() != 60) {
+        Toast.makeText(getActivity(), R.string.VerifyIdentityActivity_no_safety_number_to_compare_was_found_in_the_clipboard, Toast.LENGTH_LONG).show();
+        return;
+      }
+
+      if (fingerprint.getDisplayableFingerprint().getDisplayText().equals(numericClipboardData)) {
+        animateVerifiedSuccess();
+      } else {
+        animateVerifiedFailure();
+      }
     }
 
     private void setFingerprintViews(Fingerprint fingerprint) {
@@ -307,7 +411,8 @@ public class VerifyIdentityActivity extends PassphraseRequiredActionBarActivity 
       Bitmap qrCodeBitmap = QrCode.create(qrCodeString);
 
       qrCode.setImageBitmap(qrCodeBitmap);
-      description.setText(getActivity().getString(R.string.verify_display_fragment__scan_the_code_on_your_contact_s_phone_or_ask_them_to_scan_your_code_to_verify_that_your_messages_are_end_to_end_encrypted_you_can_alternately_compare_the_number_above, recipient.toShortString()));
+      description.setText(Html.fromHtml(String.format(getActivity().getString(R.string.verify_display_fragment__if_you_wish_to_verify_the_security_of_your_end_to_end_encryption_with_s), recipient.toShortString())));
+      description.setMovementMethod(LinkMovementMethod.getInstance());
     }
 
     private Bitmap createVerifiedBitmap(int width, int height, @DrawableRes int id) {

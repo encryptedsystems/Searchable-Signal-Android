@@ -18,6 +18,7 @@ package org.thoughtcrime.securesms.util;
 
 import android.content.Context;
 import android.os.Build;
+import android.support.annotation.NonNull;
 import android.text.format.DateFormat;
 
 import java.text.SimpleDateFormat;
@@ -37,6 +38,10 @@ public class DateUtils extends android.text.format.DateUtils {
     return System.currentTimeMillis() - millis <= unit.toMillis(span);
   }
 
+  private static boolean isYesterday(final long when) {
+    return DateUtils.isToday(when + TimeUnit.DAYS.toMillis(1));
+  }
+
   private static int convertDelta(final long millis, TimeUnit to) {
     return (int) to.convert(System.currentTimeMillis() - millis, TimeUnit.MILLISECONDS);
   }
@@ -48,7 +53,7 @@ public class DateUtils extends android.text.format.DateUtils {
 
   public static String getBriefRelativeTimeSpanString(final Context c, final Locale locale, final long timestamp) {
     if (isWithin(timestamp, 1, TimeUnit.MINUTES)) {
-      return c.getString(R.string.DateUtils_now);
+      return c.getString(R.string.DateUtils_just_now);
     } else if (isWithin(timestamp, 1, TimeUnit.HOURS)) {
       int mins = convertDelta(timestamp, TimeUnit.MINUTES);
       return c.getResources().getString(R.string.DateUtils_minutes_ago, mins);
@@ -66,7 +71,7 @@ public class DateUtils extends android.text.format.DateUtils {
 
   public static String getExtendedRelativeTimeSpanString(final Context c, final Locale locale, final long timestamp) {
     if (isWithin(timestamp, 1, TimeUnit.MINUTES)) {
-      return c.getString(R.string.DateUtils_now);
+      return c.getString(R.string.DateUtils_just_now);
     } else if (isWithin(timestamp, 1, TimeUnit.HOURS)) {
       int mins = (int)TimeUnit.MINUTES.convert(System.currentTimeMillis() - timestamp, TimeUnit.MILLISECONDS);
       return c.getResources().getString(R.string.DateUtils_minutes_ago, mins);
@@ -109,6 +114,19 @@ public class DateUtils extends android.text.format.DateUtils {
     }
 
     return new SimpleDateFormat(dateFormatPattern, locale);
+  }
+
+  public static String getRelativeDate(@NonNull Context context,
+                                       @NonNull Locale locale,
+                                       long timestamp)
+  {
+    if (isToday(timestamp)) {
+      return context.getString(R.string.DateUtils_today);
+    } else if (isYesterday(timestamp)) {
+      return context.getString(R.string.DateUtils_yesterday);
+    } else {
+      return getFormattedDateTime(timestamp, "EEE, MMM d, yyyy", locale);
+    }
   }
 
   private static String getLocalizedPattern(String template, Locale locale) {

@@ -96,7 +96,6 @@
   <string name="ConversationActivity_message_is_empty_exclamation">ಸಂದೇಶ ಖಾಲಿಯಾಗಿದೆ!</string>
   <string name="ConversationActivity_group_members">ಸಮೂಹದ ಸದಸ್ಯರು</string>
   <string name="ConversationActivity_group_conversation">ಸಮೂಹ ಸಂವಾದ</string>
-  <string name="ConversationActivity_unnamed_group">ಅನಾಮಧೇಯ ಸಮೂಹ</string>
   <plurals name="ConversationActivity_d_recipients_in_group">
     <item quantity="other">%d ಸದಸ್ಯರು </item>
   </plurals>
@@ -111,14 +110,12 @@
   <string name="ConversationActivity_transport_signal">ಸಿಗ್ನಲ್</string>
   <string name="ConversationActivity_lets_switch_to_signal">ಸಿಗ್ನಲ್‌ಗೆ ಬದಲಾಗೊಣ %1$s</string>
   <string name="ConversationActivity_lets_use_this_to_chat">ಇದನ್ನು ಹರಟಲು ಬಳಸೋಣ: %1$s</string>
-  <string name="ConversationActivity_error_leaving_group">ಗುಂಪು ಬಿಡುವಾಗ ದೋಷ ...</string>
   <string name="ConversationActivity_mms_not_supported_title">ಎಂಎಂಎಸ್ ಬೆಂಬಲವಿಲ್ಲ</string>
   <string name="ConversationActivity_mms_not_supported_message">ನಿಮ್ಮ ವಾಹಕ ಎಂಎಂಎಸ್ ನ್ನು ಬೆಂಬಲಿಸುವುದಿಲ್ಲ ಅದುದರಿಂದ ಈ ಸಂದೇಶವನ್ನು ಕಳುಹಿಸಲು ಸಾಧ್ಯವಿಲ್ಲ.</string>
   <string name="ConversationActivity_specify_recipient">ಒಂದು ಸಂಪರ್ಕವನ್ನು ಆರಿಸಿಕೊಳ್ಳಿ</string>
   <string name="ConversationActivity_unblock">ನಿರ್ಬಂಧ ತೆಗೆಯಿರಿ</string>
   <string name="ConversationActivity_quick_camera_unavailable">ಕ್ಯಾಮೆರಾ ಲಭ್ಯವಿಲ್ಲ</string>
   <string name="ConversationActivity_unable_to_record_audio">ಧ್ವನಿ ಮುದ್ರಣ ಮಾಡಲು ಸಾಧ್ಯವಾಗುತ್ತಿಲ್ಲ!</string>
-  <string name="ConversationActivity_error_sending_voice_message">ಧ್ವನಿ ಸಂದೇಶ ಕಳುಹಿಸುವಲ್ಲಿ ದೋಷವಾಗಿದೆ ...</string>
   <!--ConversationFragment-->
   <string name="ConversationFragment_message_details">ಸಂದೇಶದ ವಿವರಗಳು</string>
   <string name="ConversationFragment_transport_s_sent_received_s">ರವಾನೆ: %1$s \nಕಳುಹಿಸಲಾಗಿದೆ/ಸ್ವೀಕರಿಸಲಾಗಿದೆ:%2$s</string>
@@ -134,7 +131,6 @@
   <plurals name="ConversationFragment_error_while_saving_attachments_to_sd_card">
     <item quantity="other">ಸಂಗ್ರಹಕ್ಕೆ ಲಗತ್ತನ್ನು ಉಳಿಸುವಾಗ ತೊಡಕಾಗಿದೆ!</item>
   </plurals>
-  <string name="ConversationFragment_file_saved_successfully">ಕಡತವನ್ನು ಉಳಿಸಲಾಗಿದೆ.</string>
   <string name="ConversationFragment_unable_to_write_to_sd_card_exclamation">ಸಂಗ್ರಹಕ್ಕೆ ಬರೆಯಲು ಸಾಧ್ಯವಿಲ್ಲ!</string>
   <plurals name="ConversationFragment_saving_n_attachments">
     <item quantity="other">%1$d ಲಗತ್ತನ್ನು ಉಳಿಸಲಾಗುತ್ತಿದೆ</item>
@@ -150,7 +146,7 @@
   <string name="ConversationFragment_deleting">ಅಳಿಸಲಾಗುತ್ತಿದೆ</string>
   <string name="ConversationFragment_deleting_messages">ಸಂದೇಶವನ್ನು ಅಳಿಸಲಾಗುತ್ತಿದೆ...</string>
   <!--ConversationListActivity-->
-  <string name="ConversationListActivity_search">ಹುಡುಕಿ...</string>
+  <string name="ConversationListActivity_search">ಹುಡುಕಿ</string>
   <!--ConversationListFragment-->
   <plurals name="ConversationListFragment_delete_selected_conversations">
     <item quantity="other">ಆಯ್ಕೆ ಮಾಡಲಾದ ಸಂಭಾಷಣೆಗಳನ್ನು ಅಳಿಸಬಹುದೇ?</item>
@@ -166,7 +162,6 @@
   </plurals>
   <string name="ConversationListFragment_undo">ರದ್ದುಮಾಡು</string>
   <!--ConversationListItem-->
-  <string name="ConversationListItem_key_exchange_message">ಕೀಲಿ ವಿನಿಮಯ ಸಂದೇಶ...</string>
   <!--ConversationListItemAction-->
   <string name="ConversationListItemAction_archived_conversations_d">ಸಂಗ್ರಹಕ್ಕೆ ಸೇರಿಸಲಾಗಿದೆ (%d)</string>
   <!--CustomDefaultPreference-->
@@ -174,8 +169,8 @@
   <string name="CustomDefaultPreference_using_default">ಪೂರ್ವನಿಯೋಜಿತ ಬಳಕೆ: %s</string>
   <string name="CustomDefaultPreference_none">ಯಾವುದೂ ಇಲ್ಲ</string>
   <!--DateUtils-->
-  <string name="DateUtils_now">ಈಗ</string>
   <string name="DateUtils_minutes_ago">%d ನಿಮಿಷ</string>
+  <string name="DateUtils_today">ಇಂದು</string>
   <!--DeviceListActivity-->
   <string name="DeviceListActivity_unlink_s">\'%s\'ನು ಅಗಲಿಸು?</string>
   <string name="DeviceListActivity_try_again">ಮತ್ತೆ ಪ್ರಯತ್ನಿಸಿ</string>
@@ -258,8 +253,6 @@
   <string name="MessageDetailsRecipient_failed_to_send">ಕಳುಹಿಸಲು ವಿಫಲವಾಗಿದೆ</string>
   <!--MmsDownloader-->
   <string name="MmsDownloader_error_storing_mms">ಎಂ. ಎಂ. ಎಸ್ ಸಂಗ್ರಹಿಸಿಡುವಾಗ ದೋಷ ಸಂಭವಿಸಿದೆ!</string>
-  <string name="MmsDownloader_error_connecting_to_mms_provider">ಎಂ.ಎಂ.ಎಸ್ ಪೂರೈಕೆದಾರರಿಗೆ ಸಂಪರ್ಕಿಸುವಾಗ ದೋಷ ...</string>
-  <string name="MmsDownloader_error_reading_mms_settings">ನಿಸ್ತಂತು ಒದಗಿಸುವವರ ಎಂ.ಎಂ.ಎಸ್ ಸೆಟ್ಟಿಂಗ್ಗಳನ್ನು ಓದುವಲ್ಲಿ ದೋಷವಾಗಿದೆ...</string>
   <!--- NotificationBarManager-->
   <string name="NotificationBarManager_missed_call_from_s">%s ನಿಂದ ತಪ್ಪಿದ ಕರೆ</string>
   <string name="NotificationBarManager_missed_signal_call">ತಪ್ಪಿದ ಸಿಗ್ನಲ್ ಕರೆ</string>
@@ -275,7 +268,6 @@
   <string name="MessageRecord_left_group">ನೀವು ಗುಂಪನ್ನು ಬಿಟ್ಟಿದ್ದೀರ.</string>
   <string name="MessageRecord_updated_group">ಸಮೂಹವನ್ನು ನವೀಕರಿಸಿ</string>
   <string name="MessageRecord_missed_call_from">%s ನಿಂದ ತಪ್ಪಿದ ಕರೆ</string>
-  <string name="MessageRecord_you">ನೀವು</string>
   <!--PassphraseChangeActivity-->
   <string name="PassphraseChangeActivity_passphrases_dont_match_exclamation">ಗುಪ್ತಪದಗಳು ಹೊಂದಿಕೆಯಾಗುವುದಿಲ್ಲ</string>
   <string name="PassphraseChangeActivity_incorrect_old_passphrase_exclamation">ಹಳೆಯ ಗುಪ್ತಪದ ತಪ್ಪಾಗಿದೆ!</string>
@@ -306,6 +298,7 @@
   <string name="RecipientPreferenceActivity_unblock">ನಿರ್ಬಂಧ ತೆಗೆಯಿರಿ</string>
   <string name="RecipientPreferenceActivity_enabled">ಸಕ್ರಿಯಗೊಳಿಸು</string>
   <string name="RecipientPreferenceActivity_disabled">ನಿಷ್ಕ್ರಿಯಗೊಳಿಸು</string>
+  <!--RecipientProvider-->
   <!--RedPhone-->
   <string name="RedPhone_network_failed">ಜಾಲಬಂಧದ ದೋಷ!</string>
   <!--RegistrationActivity-->
@@ -331,7 +324,6 @@
   <string name="RegistrationProgressActivity_verifying_number">ಸಂಖ್ಯೆಯನ್ನು ಪರಿಶೀಲಿಸಲಾಗುತ್ತಿದೆ</string>
   <string name="RegistrationProgressActivity_edit_s">%s ಸಂಪಾದಿಸಿ</string>
   <string name="RegistrationProgressActivity_registration_complete">ನೋಂದಣಿ ಪೂರ್ಣಗೊಂಡಿದೆ!</string>
-  <string name="RegistrationProgressActivity_you_must_enter_the_code_you_received_first">ನೀವು ಮೊದಲ ಸ್ವೀಕರಿಸಿದ ಸಂಕೇತವನ್ನು ನಮೂದಿಸಬೇಕು ...</string>
   <string name="RegistrationProgressActivity_connecting">ಸಂಪರ್ಕಿಸಲಾಗುತ್ತಿದೆ</string>
   <string name="RegistrationProgressActivity_connecting_for_verification">ಪರಿಶೀಲನೆಗಾಗಿ ಸಂಪರ್ಕಿಸಲಾಗುತ್ತಿದೆ ...</string>
   <string name="RegistrationProgressActivity_network_error">ಜಾಲಬಂಧದ ದೋಷ!</string>
@@ -358,16 +350,14 @@
 ಅಮಾನ್ಯವಾದ ಪ್ರೊಟೋಕಾಲ್ ಆವೃತ್ತಿಯ ಕೀಲಿ ವಿನಿಮಯ ಸಂದೇಶವನ್ನು ಸ್ವೀಕರಿಸಲಾಗಿದೆ.</string>
   <string name="SmsMessageRecord_duplicate_message">ನಕಲಿ ಸಂದೇಶ.</string>
   <!--ThreadRecord-->
-  <string name="ThreadRecord_left_the_group">ಗುಂಪನ್ನು ಬಿಟ್ಟಿದ್ದಾರೆ ...</string>
   <string name="ThreadRecord_draft">ಕರಡು</string>
   <!--VerifyIdentityActivity-->
+  <string name="VerifyIdentityActivity_no_app_to_share_to">ಹಂಚಿಕೊಳ್ಳಲು ತಾವು ಯಾವುದೇ ಅಪ್ಲಿಕೇಶನ್ಗಳು ಹೊಂದಿಲ್ಲ ಎಂದಣಿಸುತ್ತದೆ.</string>
   <!--KeyExchangeInitiator-->
   <string name="KeyExchangeInitiator_initiate_despite_existing_request_question">ಅಸ್ತಿತ್ವದಲ್ಲಿರುವ ವಿನಂತಿ ಹೊರತಾಗಿಯೂ ಸಹ ಪುನಃ ಪ್ರಾರಂಭಿಸಿ?</string>
   <string name="KeyExchangeInitiator_send">ಕಳುಹಿಸು</string>
   <!--MessageDisplayHelper-->
-  <string name="MessageDisplayHelper_bad_encrypted_message">ಕಳಪೆ ಗೂಢಲಿಪೀಕರಣಗೊಂಡ ಸಂದೇಶ...</string>
   <string name="MessageDisplayHelper_decrypting_please_wait">ಅಸಂಕೇತಿಕರಣಗೊಳಿಸಲಾಗುತ್ತಿದೆ, ದಯವಿಟ್ಟು ನಿರೀಕ್ಷಿಸಿ ...</string>
-  <string name="MessageDisplayHelper_message_encrypted_for_non_existing_session">ಈ ಸಂದೇಶ ಅಸ್ತಿತ್ವದಲ್ಲಿರದ ಸೆಶನ್ನಿಗೆ ಗೂಢಲಿಪೀಕರಣಗೊಂಡಿದೆ ...</string>
   <!--EncryptingSmsDatabase-->
   <string name="EncryptingSmsDatabase_error_decrypting_message">ಸಂದೇಶ ಡೀಕ್ರಿಪ್ಟ್ ಮಾಡುವಾಗ ದೋಷ.</string>
   <!--ThreadDatabase-->
@@ -381,8 +371,6 @@
   <string name="MmsDatabase_error_decrypting_message">ಸಂದೇಶ ಡೀಕ್ರಿಪ್ಟ್ ಮಾಡುವಾಗ ದೋಷ.</string>
   <!--MmsMessageRecord-->
   <string name="MmsMessageRecord_decrypting_mms_please_wait">ಎಂ. ಎಂ. ಎಸ್ ಅಸಂಕೇತಿಕರಣಗೊಳಿಸಲಾಗುತ್ತಿದೆ, ದಯವಿಟ್ಟು ನಿರೀಕ್ಷಿಸಿ ...</string>
-  <string name="MmsMessageRecord_bad_encrypted_mms_message">ಕಳಪೆ ಗೂಢಲಿಪೀಕರಣಗೊಂಡ ಎಂ. ಎಂ. ಎಸ್ ಸಂದೇಶ ...</string>
-  <string name="MmsMessageRecord_mms_message_encrypted_for_non_existing_session">ಎಂಎಂಎಸ್ ಸಂದೇಶವು ಅಸ್ತಿತ್ವದಲ್ಲಿರದ ಸೆಶನ್ನಿಗೆ ಗೂಢಲಿಪೀಕರಣಗೊಂಡಿದೆ...</string>
   <!--MuteDialog-->
   <!--ApplicationMigrationService-->
   <string name="ApplicationMigrationService_import_in_progress">ಆಮದು ಪ್ರಗತಿಯಲ್ಲಿದೆ</string>
@@ -403,6 +391,8 @@
   <!--SingleRecipientNotificationBuilder-->
   <string name="SingleRecipientNotificationBuilder_signal">ಸಿಗ್ನಲ್</string>
   <string name="SingleRecipientNotificationBuilder_new_message">ಹೊಸ ಸಂದೇಶ</string>
+  <!--WebRtcCallScreen-->
+  <!--WebRtcCallControls-->
   <!--attachment_type_selector-->
   <!--change_passphrase_activity-->
   <!--contact_selection_activity-->
@@ -441,9 +431,11 @@
   <string name="conversation_item_received__download">ಡೌನ್ಲೋಡ್</string>
   <string name="conversation_item_received__contact_photo_description">ಸಂಪರ್ಕದ ಛಾಯಾಚಿತ್ರ</string>
   <string name="conversation_item_received__downloading">ಡೌನ್ಲೋಡ್ ಮಾಡಲಾಗುತ್ತಿದೆ</string>
+  <!--audio_view-->
   <!--conversation_fragment_cab-->
   <string name="conversation_fragment_cab__batch_selection_mode">ಗುಂಪು ಆಯ್ಕೆಯ ಕ್ರಮ</string>
   <string name="conversation_fragment_cab__batch_selection_amount">%s ಆಯ್ಕೆಮಾಡಲಾಗಿದೆ</string>
+  <!--conversation_fragment-->
   <!--country_selection_fragment-->
   <string name="country_selection_fragment__loading_countries">ರಾಷ್ಟ್ರಗಳನ್ನು ಲೋಡ್ ಮಾಡಲಾಗುತ್ತಿದೆ ...</string>
   <string name="country_selection_fragment__search">ಹುಡುಕಿ</string>
@@ -532,6 +524,7 @@
   <!--recipients_panel-->
   <string name="recipients_panel__to"><small>ಹೆಸರು ಅಥವಾ ಸಂಖ್ಯೆಯನ್ನು ನಮೂದಿಸಿ</small></string>
   <!--verify_display_fragment-->
+  <!--verify_identity-->
   <!--message_details_header-->
   <string name="message_details_header__issues_need_your_attention">ಈ ಕೆಲವು ವಿಷಯಗಳತ್ತ ನಿಮ್ಮ ಗಮನದ ಅಗತ್ಯವಿದೆ.</string>
   <string name="message_details_header__sent">ಕಳುಹಿಸಲಾಗಿದೆ</string>
@@ -685,6 +678,7 @@
   <string name="text_secure_normal__menu_settings">ಸೆಟ್ಟಿಂಗ್ಗಳು</string>
   <string name="text_secure_normal__menu_clear_passphrase">ಬೀಗ ಹಾಕಿ</string>
   <string name="text_secure_normal__mark_all_as_read">ಎಲ್ಲವನ್ನು ಓದಿದೆ ಎಂದು ಗುರುತು ಮಾಡಿ</string>
+  <!--verify_display_fragment-->
   <!--reminder_header-->
   <string name="reminder_header_sms_import_button">ಆಮದು</string>
   <string name="reminder_header_push_title">ಸಿಗ್ನಲ್ ಸಂದೇಶಗಳನ್ನು ಮತ್ತು ಕರೆಗಳನ್ನು ಸಕ್ರಿಯಗೊಳಿಸಿ</string>

@@ -16,25 +16,34 @@
  */
 package org.thoughtcrime.securesms;
 
-import android.app.Application;
 import android.content.Context;
+import android.os.AsyncTask;
+import android.os.Build;
 import android.os.StrictMode;
 import android.os.StrictMode.ThreadPolicy;
 import android.os.StrictMode.VmPolicy;
+import android.support.multidex.MultiDexApplication;
+import android.util.Log;
+
+import com.google.android.gms.security.ProviderInstaller;
 
 import org.thoughtcrime.securesms.crypto.PRNGFixes;
 import org.thoughtcrime.securesms.dependencies.AxolotlStorageModule;
 import org.thoughtcrime.securesms.dependencies.InjectableType;
 import org.thoughtcrime.securesms.dependencies.RedPhoneCommunicationModule;
-import org.thoughtcrime.securesms.dependencies.TextSecureCommunicationModule;
+import org.thoughtcrime.securesms.dependencies.SignalCommunicationModule;
 import org.thoughtcrime.securesms.jobs.CreateSignedPreKeyJob;
 import org.thoughtcrime.securesms.jobs.GcmRefreshJob;
 import org.thoughtcrime.securesms.jobs.persistence.EncryptingJobSerializer;
 import org.thoughtcrime.securesms.jobs.requirements.MasterSecretRequirementProvider;
 import org.thoughtcrime.securesms.jobs.requirements.MediaNetworkRequirementProvider;
 import org.thoughtcrime.securesms.jobs.requirements.ServiceRequirementProvider;
+import org.thoughtcrime.securesms.push.SignalServiceNetworkAccess;
+import org.thoughtcrime.securesms.service.DirectoryRefreshListener;
 import org.thoughtcrime.securesms.service.ExpiringMessageManager;
+import org.thoughtcrime.securesms.service.RotateSignedPreKeyListener;
 import org.thoughtcrime.securesms.util.TextSecurePreferences;
+import org.webrtc.PeerConnectionFactory;
 import org.whispersystems.jobqueue.JobManager;
 import org.whispersystems.jobqueue.dependencies.DependencyInjector;
 import org.whispersystems.jobqueue.requirements.NetworkRequirementProvider;
@@ -51,7 +60,9 @@ import dagger.ObjectGraph;
  *
  * @author Moxie Marlinspike
  */
-public class ApplicationContext extends Application implements DependencyInjector {
+public class ApplicationContext extends MultiDexApplication implements DependencyInjector {
+
+  private static final String TAG = ApplicationContext.class.getName();
 
   private ExpiringMessageManager expiringMessageManager;
   private JobManager             jobManager;
@@ -74,6 +85,12 @@ public class ApplicationContext extends Application implements DependencyInjecto
     initializeExpiringMessageManager();
     initializeGcmCheck();
     initializeSignedPreKeyCheck();
+    initializePeriodicTasks();
+    initializeCircumvention();
+
+    if (Build.VERSION.SDK_INT >= 11) {
+      PeerConnectionFactory.initializeAndroidGlobals(this, true, true, true);
+    }
   }
 
   @Override
@@ -126,7 +143,7 @@ public class ApplicationContext extends Application implements DependencyInjecto
   }
 
   private void initializeDependencyInjection() {
-    this.objectGraph = ObjectGraph.create(new TextSecureCommunicationModule(this),
+    this.objectGraph = ObjectGraph.create(new SignalCommunicationModule(this, new SignalServiceNetworkAccess(this)),
                                           new RedPhoneCommunicationModule(this),
                                           new AxolotlStorageModule(this));
   }
@@ -147,6 +164,27 @@ public class ApplicationContext extends Application implements DependencyInjecto
 
   private void initializeExpiringMessageManager() {
     this.expiringMessageManager = new ExpiringMessageManager(this);
+  }
+
+  private void initializePeriodicTasks() {
+    RotateSignedPreKeyListener.schedule(this);
+    DirectoryRefreshListener.schedule(this);
+  }
+
+  private void initializeCircumvention() {
+    new AsyncTask<Void, Void, Void>() {
+      @Override
+      protected Void doInBackground(Void... params) {
+        if (new SignalServiceNetworkAccess(ApplicationContext.this).isCensored(ApplicationContext.this)) {
+          try {
+            ProviderInstaller.installIfNeeded(ApplicationContext.this);
+          } catch (Throwable t) {
+            Log.w(TAG, t);
+          }
+        }
+        return null;
+      }
+    }.execute();
   }
 
 }

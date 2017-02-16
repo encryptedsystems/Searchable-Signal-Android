@@ -2,10 +2,10 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
           xmlns:tools="http://schemas.android.com/tools"
           package="org.thoughtcrime.securesms"
-      android:versionCode="211"
-      android:versionName="3.21.3">
+      android:versionCode="239"
+      android:versionName="3.29.6">
 
-    <uses-sdk tools:overrideLibrary="com.amulyakhare.textdrawable,com.astuetz.pagerslidingtabstrip,pl.tajchert.waitingdots,com.h6ah4i.android.multiselectlistpreferencecompat"/>
+    <uses-sdk tools:overrideLibrary="com.amulyakhare.textdrawable,com.astuetz.pagerslidingtabstrip,pl.tajchert.waitingdots,com.h6ah4i.android.multiselectlistpreferencecompat,android.support.v13,com.davemorrissey.labs.subscaleview,com.tomergoldst.tooltips"/>
 
     <permission android:name="org.thoughtcrime.securesms.ACCESS_SECRETS"
                 android:label="Access to TextSecure Secrets"
@@ -95,7 +95,8 @@
                  android:supportsRtl="true"
                  tools:replace="android:allowBackup"
                  android:allowBackup="false"
-                 android:theme="@style/TextSecure.LightTheme">
+                 android:theme="@style/TextSecure.LightTheme"
+                 android:largeHeap="true">
 
     <meta-data
             android:name="com.google.android.geo.API_KEY"
@@ -107,12 +108,23 @@
     <meta-data android:name="org.thoughtcrime.securesms.mms.TextSecureGlideModule"
                android:value="GlideModule" />
 
+    <!--<meta-data android:name="com.google.android.gms.car.application"-->
+               <!--android:resource="@xml/automotive_app_desc" />-->
+
     <activity android:name="org.thoughtcrime.redphone.RedPhone"
               android:excludeFromRecents="true"
               android:screenOrientation="portrait"
               android:configChanges="mcc|mnc|locale|touchscreen|keyboard|keyboardHidden|navigation|orientation|screenLayout|screenSize|fontScale"
               android:launchMode="singleTask">
     </activity>
+
+    <activity android:name="org.thoughtcrime.securesms.WebRtcCallActivity"
+              android:excludeFromRecents="true"
+              android:screenOrientation="portrait"
+              android:configChanges="mcc|mnc|locale|touchscreen|keyboard|keyboardHidden|navigation|orientation|screenLayout|screenSize|fontScale"
+              android:launchMode="singleTask">
+    </activity>
+
 
     <activity android:name=".CountrySelectionActivity"
               android:configChanges="touchscreen|keyboard|keyboardHidden|orientation|screenLayout|screenSize"/>
@@ -163,6 +175,10 @@
             <data android:mimeType="text/plain" />
             <data android:mimeType="video/*" />
         </intent-filter>
+
+        <meta-data
+                android:name="android.service.chooser.chooser_target_service"
+                android:value=".service.DirectShareService" />
 
     </activity>
 
@@ -305,6 +321,7 @@
 
     <activity android:name=".MediaOverviewActivity"
               android:windowSoftInputMode="stateHidden"
+              android:launchMode="singleTask"
               android:configChanges="touchscreen|keyboard|keyboardHidden|orientation|screenLayout|screenSize"/>
 
     <activity android:name=".DummyActivity"
@@ -340,7 +357,7 @@
         </intent-filter>
     </activity>
 
-    <activity android:name="org.thoughtcrime.redphone.RedPhoneShare"
+    <activity android:name="org.thoughtcrime.redphone.VoiceCallShare"
               android:excludeFromRecents="true"
               android:theme="@style/NoAnimation.Theme.BlackScreen"
               android:launchMode="singleTask"
@@ -362,9 +379,19 @@
               android:theme="@style/TextSecure.LightTheme"
               android:configChanges="touchscreen|keyboard|keyboardHidden|orientation|screenLayout|screenSize"/>
 
+    <activity android:name=".scribbles.ScribbleActivity"
+              android:theme="@style/TextSecure.LightNoActionBar"
+              android:windowSoftInputMode="stateHidden"
+              android:configChanges="touchscreen|keyboard|keyboardHidden|orientation|screenLayout|screenSize"/>
+
+    <activity android:name=".scribbles.StickerSelectActivity"
+              android:theme="@style/TextSecure.LightTheme"
+              android:configChanges="touchscreen|keyboard|keyboardHidden|orientation|screenLayout|screenSize"/>
+
     <activity android:name="com.soundcloud.android.crop.CropImageActivity" />
 
     <service android:enabled="true" android:name="org.thoughtcrime.redphone.RedPhoneService"/>
+    <service android:enabled="true" android:name="org.thoughtcrime.securesms.service.WebRtcCallService"/>
 
     <service android:enabled="true" android:name=".service.ApplicationMigrationService"/>
     <service android:enabled="true" android:name=".service.KeyCachingService"/>
@@ -397,6 +424,13 @@
         </intent-filter>
         <meta-data android:name="android.content.SyncAdapter" android:resource="@xml/syncadapter" />
         <meta-data android:name="android.provider.CONTACTS_STRUCTURE" android:resource="@xml/contactsformat" />
+    </service>
+
+    <service android:name=".service.DirectShareService"
+             android:permission="android.permission.BIND_CHOOSER_TARGET_SERVICE">
+        <intent-filter>
+            <action android:name="android.service.chooser.ChooserTargetService" />
+        </intent-filter>
     </service>
 
     <receiver android:name=".gcm.GcmBroadcastReceiver" android:permission="com.google.android.c2dm.permission.SEND" >
@@ -441,19 +475,34 @@
 
     <receiver android:name=".notifications.MarkReadReceiver"
               android:enabled="true"
-              android:exported="true">
+              android:exported="false">
         <intent-filter>
             <action android:name="org.thoughtcrime.securesms.notifications.CLEAR"/>
         </intent-filter>
     </receiver>
 
-    <receiver android:name=".notifications.WearReplyReceiver"
+    <receiver android:name=".notifications.RemoteReplyReceiver"
               android:enabled="true"
               android:exported="false">
         <intent-filter>
             <action android:name="org.thoughtcrime.securesms.notifications.WEAR_REPLY"/>
         </intent-filter>
     </receiver>
+
+    <receiver android:name=".notifications.AndroidAutoHeardReceiver"
+              android:exported="false">
+        <intent-filter>
+          <action android:name="org.thoughtcrime.securesms.notifications.ANDROID_AUTO_HEARD"/>
+        </intent-filter>
+    </receiver>
+
+    <receiver android:name=".notifications.AndroidAutoReplyReceiver"
+              android:exported="false">
+        <intent-filter>
+          <action android:name="org.thoughtcrime.securesms.notifications.ANDROID_AUTO_REPLY"/>
+        </intent-filter>
+    </receiver>
+
 
     <provider android:name=".providers.PartProvider"
               android:grantUriPermissions="true"
@@ -474,7 +523,12 @@
 
     <receiver android:name=".service.DirectoryRefreshListener">
         <intent-filter>
-            <action android:name="org.whispersystems.whisperpush.DIRECTORY_REFRESH"/>
+            <action android:name="android.intent.action.BOOT_COMPLETED" />
+        </intent-filter>
+    </receiver>
+
+    <receiver android:name=".service.RotateSignedPreKeyListener">
+        <intent-filter>
             <action android:name="android.intent.action.BOOT_COMPLETED" />
         </intent-filter>
     </receiver>

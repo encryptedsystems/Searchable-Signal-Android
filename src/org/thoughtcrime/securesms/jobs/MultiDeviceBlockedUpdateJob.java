@@ -7,16 +7,19 @@ import org.thoughtcrime.securesms.database.DatabaseFactory;
 import org.thoughtcrime.securesms.database.RecipientPreferenceDatabase;
 import org.thoughtcrime.securesms.database.RecipientPreferenceDatabase.BlockedReader;
 import org.thoughtcrime.securesms.dependencies.InjectableType;
-import org.thoughtcrime.securesms.dependencies.TextSecureCommunicationModule.TextSecureMessageSenderFactory;
+import org.thoughtcrime.securesms.dependencies.SignalCommunicationModule.SignalMessageSenderFactory;
 import org.thoughtcrime.securesms.jobs.requirements.MasterSecretRequirement;
 import org.thoughtcrime.securesms.recipients.Recipients;
+import org.thoughtcrime.securesms.util.Util;
 import org.whispersystems.jobqueue.JobParameters;
 import org.whispersystems.jobqueue.requirements.NetworkRequirement;
+import org.whispersystems.libsignal.logging.Log;
 import org.whispersystems.signalservice.api.SignalServiceMessageSender;
 import org.whispersystems.signalservice.api.crypto.UntrustedIdentityException;
 import org.whispersystems.signalservice.api.messages.multidevice.BlockedListMessage;
 import org.whispersystems.signalservice.api.messages.multidevice.SignalServiceSyncMessage;
 import org.whispersystems.signalservice.api.push.exceptions.PushNetworkException;
+import org.whispersystems.signalservice.api.util.InvalidNumberException;
 
 import java.io.IOException;
 import java.util.LinkedList;
@@ -30,7 +33,7 @@ public class MultiDeviceBlockedUpdateJob extends MasterSecretJob implements Inje
 
   private static final String TAG = MultiDeviceBlockedUpdateJob.class.getSimpleName();
 
-  @Inject transient TextSecureMessageSenderFactory messageSenderFactory;
+  @Inject transient SignalMessageSenderFactory messageSenderFactory;
 
   public MultiDeviceBlockedUpdateJob(Context context) {
     super(context, JobParameters.newBuilder()
@@ -54,7 +57,11 @@ public class MultiDeviceBlockedUpdateJob extends MasterSecretJob implements Inje
 
     while ((recipients = reader.getNext()) != null) {
       if (recipients.isSingleRecipient()) {
-        blocked.add(recipients.getPrimaryRecipient().getNumber());
+        try {
+          blocked.add(Util.canonicalizeNumber(context, recipients.getPrimaryRecipient().getNumber()));
+        } catch (InvalidNumberException e) {
+          Log.w(TAG, e);
+        }
       }
     }
 

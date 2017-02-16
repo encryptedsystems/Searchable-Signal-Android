@@ -100,7 +100,6 @@
   <string name="ConversationActivity_message_is_empty_exclamation">پیام خالی است!</string>
   <string name="ConversationActivity_group_members">اعضای گروه</string>
   <string name="ConversationActivity_group_conversation">گروه گفتگو</string>
-  <string name="ConversationActivity_unnamed_group">گروه بی نام</string>
   <plurals name="ConversationActivity_d_recipients_in_group">
     <item quantity="other">%d اعضای</item>
   </plurals>
@@ -115,7 +114,6 @@
   <string name="ConversationActivity_transport_signal">سیگنال</string>
   <string name="ConversationActivity_lets_switch_to_signal">بیایید از این برای سیگنال استفاده کنیم:  %1$s</string>
   <string name="ConversationActivity_lets_use_this_to_chat">بیایید از این برای چت استفاده کنیم:  %1$s</string>
-  <string name="ConversationActivity_error_leaving_group">خطا ترک گروه ...</string>
   <string name="ConversationActivity_mms_not_supported_title">MMS پشتیبانی نمی شود</string>
   <string name="ConversationActivity_mms_not_supported_message">از آنجایی که اپراتور شما MMS را پشتیبانی نمی کند، این پیام قابل ارسال نمی باشد.</string>
   <string name="ConversationActivity_specify_recipient">لطفا یک تماس را انتخاب کنید</string>
@@ -125,7 +123,6 @@
   <string name="ConversationActivity_attachment_exceeds_size_limits">حجم فایل ضمیمه شده بیشتر از اندازه مجاز تعیین شده برای این نوع پیام است.</string>
   <string name="ConversationActivity_quick_camera_unavailable">دوربین در دسترس نیست</string>
   <string name="ConversationActivity_unable_to_record_audio">قادر به ضبط صدا نیست!</string>
-  <string name="ConversationActivity_error_sending_voice_message">خطا در حال ارسال پیام صوتی</string>
   <string name="ConversationActivity_there_is_no_app_available_to_handle_this_link_on_your_device">هیچ برنامه ای به منظور پشتیبانی از لینک برروی دستگاه شما وجود ندارد.</string>
   <!--ConversationFragment-->
   <string name="ConversationFragment_message_details">جزییات پیام</string>
@@ -143,7 +140,6 @@
   <plurals name="ConversationFragment_error_while_saving_attachments_to_sd_card">
     <item quantity="other">خطا در هنگام ذخیره سازی فایل ضمیمه</item>
   </plurals>
-  <string name="ConversationFragment_file_saved_successfully">فایل با موفقیت ذخیره شد.</string>
   <string name="ConversationFragment_unable_to_write_to_sd_card_exclamation">قادر نیست به ارسال به ذخیره سازی!</string>
   <plurals name="ConversationFragment_saving_n_attachments">
     <item quantity="other">در حال ذخیره‌ی %1$d پیوست</item>
@@ -159,7 +155,7 @@
   <string name="ConversationFragment_deleting">در حال حذف کردن</string>
   <string name="ConversationFragment_deleting_messages">حذف پیام های...</string>
   <!--ConversationListActivity-->
-  <string name="ConversationListActivity_search">جستجو...</string>
+  <string name="ConversationListActivity_search">جستجو</string>
   <string name="ConversationListActivity_there_is_no_browser_installed_on_your_device">برروی دستگاه شما هیچ مرورگری نصب نیست.</string>
   <!--ConversationListFragment-->
   <plurals name="ConversationListFragment_delete_selected_conversations">
@@ -178,7 +174,6 @@
     <item quantity="other">انتقال %d گفت‌و‌گو به اینباکس</item>
   </plurals>
   <!--ConversationListItem-->
-  <string name="ConversationListItem_key_exchange_message">پیام تبادل کلید...</string>
   <!--ConversationListItemAction-->
   <string name="ConversationListItemAction_archived_conversations_d">گفتگوهای آرشیو شده (%d)</string>
   <!--CustomDefaultPreference-->
@@ -186,12 +181,11 @@
   <string name="CustomDefaultPreference_using_default">با استفاده از پیش فرض: %s</string>
   <string name="CustomDefaultPreference_none">هیچ کدام</string>
   <!--DateUtils-->
-  <string name="DateUtils_now">اکنون</string>
   <string name="DateUtils_minutes_ago">%d دقیقه</string>
+  <string name="DateUtils_today">امروز</string>
   <!--DeviceListActivity-->
   <string name="DeviceListActivity_unlink_s">قطع ارتباط \'%s\'؟</string>
   <string name="DeviceListActivity_by_unlinking_this_device_it_will_no_longer_be_able_to_send_or_receive">توسط لغو پیوند کردن این دستگاه،دیگر قادر به ارسال و دریافت پیام ها نخواهید بود.</string>
-  <string name="DeviceListActivity_network_connection_failed">قطع ارتباط شبکه ...</string>
   <string name="DeviceListActivity_try_again">دوباره تلاش کن</string>
   <string name="DeviceListActivity_unlinking_device">در حال جداسازی دستگاه...</string>
   <string name="DeviceListActivity_unlinking_device_no_ellipsis">در حال جداسازی دستگاه</string>
@@ -290,8 +284,6 @@
   <string name="MessageDetailsRecipient_failed_to_send">ارسال نشد</string>
   <!--MmsDownloader-->
   <string name="MmsDownloader_error_storing_mms">خطا در ذخیره MMS!</string>
-  <string name="MmsDownloader_error_connecting_to_mms_provider">خطا در اتصال به ارائه دهنده MMS ...</string>
-  <string name="MmsDownloader_error_reading_mms_settings">خطا در خواندن بی سیم تنظیمات MMS ارائه دهنده ...</string>
   <!--- NotificationBarManager-->
   <string name="NotificationBarManager_signal_call_in_progress">پاسخ سیگنال در حال انجام</string>
   <string name="NotificationBarManager_missed_call_from_s">تماس از دست رفته از %s</string>
@@ -312,7 +304,6 @@
   <string name="MessageRecord_called_s">%s تماس گرفته</string>
   <string name="MessageRecord_missed_call_from">تماس از دست رفته از %s</string>
   <string name="MessageRecord_s_is_on_signal_say_hey">%s در سیگنال است،به او سلام کنید!</string>
-  <string name="MessageRecord_you">شما</string>
   <!--PassphraseChangeActivity-->
   <string name="PassphraseChangeActivity_passphrases_dont_match_exclamation">رمزها با هم نمی‌خوانند!</string>
   <string name="PassphraseChangeActivity_incorrect_old_passphrase_exclamation">رمز قبلی نادرست است!</string>
@@ -332,7 +323,6 @@
   <string name="DeviceProvisioningActivity_content_progress_no_device">دستگاه یافت نشد.</string>
   <string name="DeviceProvisioningActivity_content_progress_network_error">خطای شبکه.</string>
   <string name="DeviceProvisioningActivity_content_progress_key_error">کد QR نامعتبر است.</string>
-  <string name="DeviceProvisioningActivity_sorry_you_have_too_many_devices_linked_already">متاسفیم،شما دستگاه های زیادی را لینک کرده اید،برخی از آنها را حذف کنید...</string>
   <string name="DeviceActivity_sorry_this_is_not_a_valid_device_link_qr_code">متاسفانه این یک کد QR معتبر برای اتصال دستگاه نيست.</string>
   <string name="DeviceProvisioningActivity_link_a_signal_device">اتصال يک دستگاه دارای سيگنال؟</string>
   <!--ExpirationDialog-->
@@ -359,6 +349,7 @@
   <string name="RecipientPreferenceActivity_unblock">رفع انسداد</string>
   <string name="RecipientPreferenceActivity_enabled">فعال</string>
   <string name="RecipientPreferenceActivity_disabled">غیر فعال</string>
+  <!--RecipientProvider-->
   <!--RedPhone-->
   <string name="RedPhone_answering">پاسخ دادن</string>
   <string name="RedPhone_ending_call">پایان دادن به پاسخ</string>
@@ -404,7 +395,6 @@
   <string name="RegistrationProgressActivity_verifying_number">تایید شماره</string>
   <string name="RegistrationProgressActivity_edit_s">ویرایش %s</string>
   <string name="RegistrationProgressActivity_registration_complete">ثبت نام کامل شد!</string>
-  <string name="RegistrationProgressActivity_you_must_enter_the_code_you_received_first">شما باید وارد کنید کد خود را اول دریافت کنید ...</string>
   <string name="RegistrationProgressActivity_connecting">اتصال</string>
   <string name="RegistrationProgressActivity_connecting_for_verification">اتصال برای تأیید ...</string>
   <string name="RegistrationProgressActivity_network_error">خطای شبکه!</string>
@@ -438,7 +428,6 @@
   <string name="SmsMessageRecord_secure_session_reset_s">%s نشست امن را ریست نمود.</string>
   <string name="SmsMessageRecord_duplicate_message">تکثیر پیام.</string>
   <!--ThreadRecord-->
-  <string name="ThreadRecord_left_the_group">ترک گروه ...</string>
   <string name="ThreadRecord_secure_session_reset">تنظیم مجدد جلسه امن.</string>
   <string name="ThreadRecord_draft">پیش نویس:</string>
   <string name="ThreadRecord_called">شما تماس گرفتید</string>
@@ -447,13 +436,12 @@
   <string name="ThreadRecord_media_message">پیام رسانه</string>
   <string name="ThreadRecord_s_is_on_signal_say_hey">%s در سیگنال است،به او سلام کنید!</string>
   <!--VerifyIdentityActivity-->
+  <string name="VerifyIdentityActivity_no_app_to_share_to">به نظر می رسد شما هیچ برنامه ای برای اشتراک گذاری در آن ندارید.</string>
   <!--KeyExchangeInitiator-->
   <string name="KeyExchangeInitiator_initiate_despite_existing_request_question">آغاز با وجود درخواست های موجود؟</string>
   <string name="KeyExchangeInitiator_send">ارسال</string>
   <!--MessageDisplayHelper-->
-  <string name="MessageDisplayHelper_bad_encrypted_message">پیام رمزنگاری شده بد...</string>
   <string name="MessageDisplayHelper_decrypting_please_wait">رمز گشایی، لطفا صبر کنید...</string>
-  <string name="MessageDisplayHelper_message_encrypted_for_non_existing_session">پیام رمزگذاری شده برای جلسه غیر موجود...</string>
   <!--EncryptingSmsDatabase-->
   <string name="EncryptingSmsDatabase_error_decrypting_message">خطا در رمز گشایی پیام.</string>
   <!--ThreadDatabase-->
@@ -467,8 +455,6 @@
   <string name="MmsDatabase_error_decrypting_message">خطا در رمز گشایی پیام.</string>
   <!--MmsMessageRecord-->
   <string name="MmsMessageRecord_decrypting_mms_please_wait">رمزگشایی MMS، لطفاً صبر کنید...</string>
-  <string name="MmsMessageRecord_bad_encrypted_mms_message">پیام MMS بد رمزگذاری شده...</string>
-  <string name="MmsMessageRecord_mms_message_encrypted_for_non_existing_session">پیام MMS رمزگذاری شده برای جلسه غیر موجود...</string>
   <!--MuteDialog-->
   <string name="MuteDialog_mute_notifications">بیصدا کردن اعلان ها</string>
   <!--ApplicationMigrationService-->
@@ -483,7 +469,6 @@
   <string name="KeyCachingService_lock">قفل با عبارت عبور</string>
   <!--MessageNotifier-->
   <string name="MessageNotifier_d_new_messages_in_d_conversations">%1$d پیام در %2$d گفتگو</string>
-  <string name="MessageNotifier_locked_message">پیام قفل شده ...</string>
   <string name="MessageNotifier_media_message_with_text">پیام رسانه ها: %s</string>
   <string name="MessageNotifier_no_subject">(بدون موضوع)</string>
   <string name="MessageNotifier_message_delivery_failed">تحویل پیام شکست خورده است.</string>
@@ -499,6 +484,8 @@
   <!--SingleRecipientNotificationBuilder-->
   <string name="SingleRecipientNotificationBuilder_signal">سیگنال</string>
   <string name="SingleRecipientNotificationBuilder_new_message">پیام جدید</string>
+  <!--WebRtcCallScreen-->
+  <!--WebRtcCallControls-->
   <!--attachment_type_selector-->
   <string name="attachment_type_selector__image">تصویر</string>
   <string name="attachment_type_selector__audio">صدا</string>
@@ -520,7 +507,6 @@
   <!--ContactSelectionListFragment-->
   <string name="ContactSelectionlistFragment_select_for">انتخاب برای</string>
   <!--blocked_contacts_fragment-->
-  <string name="blocked_contacts_fragment__no_blocked_contacts">بدون تماس های مسدود شده ...</string>
   <!--contact_selection_recent_activity-->
   <string name="contact_selection_recent_activity__no_recent_calls">بدون تماس های جدید.</string>
   <!--conversation_title_view-->
@@ -552,9 +538,11 @@
   <string name="conversation_item_received__download">دریافت</string>
   <string name="conversation_item_received__contact_photo_description">تصویر مخاطب</string>
   <string name="conversation_item_received__downloading">در حال دانلود</string>
+  <!--audio_view-->
   <!--conversation_fragment_cab-->
   <string name="conversation_fragment_cab__batch_selection_mode">حالت انتخاب دسته ای</string>
   <string name="conversation_fragment_cab__batch_selection_amount">%s منتخب</string>
+  <!--conversation_fragment-->
   <!--country_selection_fragment-->
   <string name="country_selection_fragment__loading_countries">کشورهای در حال بارگذاری ...</string>
   <string name="country_selection_fragment__search">جستجو</string>
@@ -563,7 +551,6 @@
   <!--device_link_fragment-->
   <string name="device_link_fragment__link_device">اتصال دستگاه</string>
   <!--device_list_fragment-->
-  <string name="device_list_fragment__no_devices_linked">هیچ دستگاهی متصل نشده است!</string>
   <string name="device_list_fragment__link_new_device">اتصال دستگاه جدید</string>
   <!--experience_upgrade_activity-->
   <string name="experience_upgrade_activity__continue">ادامه</string>
@@ -711,6 +698,7 @@
   <string name="recipients_panel__add_members">افزودن اعضاء</string>
   <!--verify_display_fragment-->
   <string name="verify_display_fragment__tap_to_scan">برای جستجو ضربه بزنید</string>
+  <!--verify_identity-->
   <!--message_details_header-->
   <string name="message_details_header__issues_need_your_attention">برخی از مسائل نیاز به توجه شما دارند.</string>
   <string name="message_details_header__sent">فرستاده</string>
@@ -939,6 +927,7 @@
   <string name="text_secure_normal__mark_all_as_read">علامت همه به عنوان خوانده شده</string>
   <string name="text_secure_normal__invite_friends">دعوت دوستان</string>
   <string name="text_secure_normal__help">کمک</string>
+  <!--verify_display_fragment-->
   <!--reminder_header-->
   <string name="reminder_header_outdated_build">نسخه سیگنال شما قدیمی است.</string>
   <plurals name="reminder_header_outdated_build_details">

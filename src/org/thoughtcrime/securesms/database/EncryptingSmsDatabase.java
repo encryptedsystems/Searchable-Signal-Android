@@ -38,6 +38,7 @@ import org.thoughtcrime.securesms.sms.IncomingTextMessage;
 import org.thoughtcrime.securesms.sms.OutgoingTextMessage;
 import org.thoughtcrime.securesms.util.LRUCache;
 import org.whispersystems.libsignal.InvalidMessageException;
+import org.whispersystems.libsignal.util.guava.Optional;
 
 import java.lang.ref.SoftReference;
 import java.util.Collections;
@@ -70,7 +71,7 @@ public class EncryptingSmsDatabase extends SmsDatabase {
                                   OutgoingTextMessage message, boolean forceSms,
                                   long timestamp)
   {
-    long type = Types.BASE_OUTBOX_TYPE;
+    long type = Types.BASE_SENDING_TYPE;
 
     String plaintext_body = message.getMessageBody();
     if (masterSecret.getMasterSecret().isPresent()) {
@@ -90,8 +91,8 @@ public class EncryptingSmsDatabase extends SmsDatabase {
     return message_id;
   }
 
-  public Pair<Long, Long> insertMessageInbox(@NonNull MasterSecretUnion masterSecret,
-                                             @NonNull IncomingTextMessage message)
+  public Optional<InsertResult> insertMessageInbox(@NonNull MasterSecretUnion masterSecret,
+                                                   @NonNull IncomingTextMessage message)
   {
     if (masterSecret.getMasterSecret().isPresent()) {
       return insertMessageInbox(masterSecret.getMasterSecret().get(), message);
@@ -100,8 +101,8 @@ public class EncryptingSmsDatabase extends SmsDatabase {
     }
   }
 
-  private Pair<Long, Long> insertMessageInbox(@NonNull MasterSecret masterSecret,
-                                              @NonNull IncomingTextMessage message)
+  private Optional<InsertResult> insertMessageInbox(@NonNull MasterSecret masterSecret,
+                                                    @NonNull IncomingTextMessage message)
   {
     long type = Types.BASE_INBOX_TYPE | Types.ENCRYPTION_SYMMETRIC_BIT;
 
@@ -122,8 +123,8 @@ public class EncryptingSmsDatabase extends SmsDatabase {
     return messageIdThreadIdPair;
   }
 
-  private Pair<Long, Long> insertMessageInbox(@NonNull AsymmetricMasterSecret masterSecret,
-                                              @NonNull IncomingTextMessage message)
+  private Optional<InsertResult> insertMessageInbox(@NonNull AsymmetricMasterSecret masterSecret,
+                                                    @NonNull IncomingTextMessage message)
   {
     long type = Types.BASE_INBOX_TYPE | Types.ENCRYPTION_ASYMMETRIC_BIT;
 

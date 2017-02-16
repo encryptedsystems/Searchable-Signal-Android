@@ -83,7 +83,7 @@ public class GiphyAdapter extends RecyclerView.Adapter<GiphyAdapter.GiphyViewHol
       return false;
     }
 
-    public File getFile() throws ExecutionException, InterruptedException {
+    public File getFile(boolean forMms) throws ExecutionException, InterruptedException {
       synchronized (this) {
         while (!modelReady) {
           Util.wait(this, 0);
@@ -91,7 +91,7 @@ public class GiphyAdapter extends RecyclerView.Adapter<GiphyAdapter.GiphyViewHol
       }
 
       return Glide.with(context)
-                  .load(image.getGifUrl())
+                  .load(forMms ? image.getGifMmsUrl() : image.getGifUrl())
                   .downloadOnly(Target.SIZE_ORIGINAL, Target.SIZE_ORIGINAL)
                   .get();
     }
@@ -154,6 +154,12 @@ public class GiphyAdapter extends RecyclerView.Adapter<GiphyAdapter.GiphyViewHol
            .listener(holder)
            .into(holder.thumbnail);
     }
+  }
+
+  @Override
+  public void onViewRecycled(GiphyViewHolder holder) {
+    super.onViewRecycled(holder);
+    Glide.clear(holder.thumbnail);
   }
 
   @Override
