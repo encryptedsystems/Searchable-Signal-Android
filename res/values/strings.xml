@@ -263,6 +263,7 @@
     <string name="ExportFragment_warning_this_will_enable_encrypted_search_on_sms">Warning, this will enable encrypted search on SMS.</string>
     <string name="ExportFragment_cancel">Cancel</string>
     <string name="ExportFragment_exporting">Exporting</string>
+    <string name="ExportFragment_exporting_plaintext_to_storage">Exporting plaintext to storage...</string>
     <string name="ExportFragment_setting_up_edb">Setting up EDB</string>
     <string name="ExportFragment_setting_up_edb_from_existing_sms">Setting up EDB from existing SMS...</string>
     <string name="ExportFragment_error_unable_to_write_to_storage">Error, unable to write to storage.</string>

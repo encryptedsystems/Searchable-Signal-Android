@@ -109,15 +109,15 @@ public class EncryptingSmsDatabase extends SmsDatabase {
     String plaintext_body = message.getMessageBody();
     message = message.withMessageBody(getEncryptedBody(masterSecret, message.getMessageBody()));
 
-    Pair<Long, Long> messageIdThreadIdPair = insertMessageInbox(message, type);
+    Optional<InsertResult> messageIdThreadIdPair = insertMessageInbox(message, type);
 
     // Update EDB for the case of unlocked Signal.  For locked Signal, asymmetric encryption is
     // used for encrypting incoming messages.  When the user unlocks Signnal with passphrase, the
     // asymmetrically encrypted incoming messages will be encrypted by symmetric encryptino again.
     // See description in AsymmetricMasterCipher.
     // The path is MasterSecretDecryptJob -> getAsymmetricDecryptedBody -> EncryptingSmsDatabase.updateMessageBody
-    if (getEdb() != null) {
-      edb.insertMessage(masterSecret, messageIdThreadIdPair.first, plaintext_body);
+    if (getEdb() != null && messageIdThreadIdPair.isPresent()) {
+      edb.insertMessage(masterSecret, messageIdThreadIdPair.get().getMessageId(), plaintext_body);
     }
 
     return messageIdThreadIdPair;
