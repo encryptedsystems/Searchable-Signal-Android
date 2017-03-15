@@ -139,7 +139,6 @@ public class Edb implements Serializable {
             if (edbSecret == null) {
                 throw new EdbException("EdbSecret has not been generated yet: null");
             }
-            Log.i("edb search", word);
 
             String word_lowercase = word.trim().toLowerCase();
 

@@ -70,7 +70,7 @@ public class ConversationListLoader extends AbstractCursorLoader {
     if (DatabaseFactory.getEncryptingSmsDatabase(context).getEdb() != null) {
       MasterSecret masterSecret = KeyCachingService.getMasterSecret(context);
       messageIds = DatabaseFactory.getEncryptingSmsDatabase(context).getMessageIdsFromWord(masterSecret, filter);
-      Log.d("ConversationListLoader", "edb: not null, filter: " + filter);
+      Log.d("ConversationListLoader", "edb: not null");
     } else {
       Log.d("ConversationListLoader", "edb: null");
     }
