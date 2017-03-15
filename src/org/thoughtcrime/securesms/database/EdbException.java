@@ -1,4 +1,4 @@
-package org.crypto.sse;
+package org.thoughtcrime.securesms.database;
 
 /**
  * Created by zheguang on 11/17/16.

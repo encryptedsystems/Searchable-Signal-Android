@@ -33,41 +33,31 @@ repositories {
     maven { // textdrawable
         url 'https://dl.bintray.com/amulyakhare/maven'
     }
-    maven {
-        url 'https://github.com/rtyley/spongycastle/releases/'
-    }
     jcenter()
     mavenLocal()
 }
 
 dependencies {
-    compile 'com.madgag.spongycastle:core:1.54.0.0'
-    compile 'com.madgag.spongycastle:prov:1.54.0.0'
-    compile 'com.google.guava:guava:19.0'
-
     compile 'com.android.support:appcompat-v7:25.1.0'
     compile 'com.android.support:recyclerview-v7:25.1.0'
     compile 'com.android.support:design:25.1.0'
     compile 'com.android.support:support-v13:25.1.0'
     compile 'com.android.support:cardview-v7:25.1.0'
-    compile ('com.android.support:support-v4-preferencefragment:1.0.0@aar'){
+    compile('com.android.support:support-v4-preferencefragment:1.0.0@aar') {
         exclude module: 'support-v4'
     }
-    compile ('com.android.support:gridlayout-v7:25.1.0') {
+    compile('com.android.support:gridlayout-v7:25.1.0') {
         exclude module: 'support-v4'
     }
     compile 'com.android.support:multidex:1.0.1'
-
     compile 'com.google.android.gms:play-services-gcm:9.6.1'
     compile 'com.google.android.gms:play-services-maps:9.6.1'
     compile 'com.google.android.gms:play-services-places:9.6.1'
-
     compile 'org.whispersystems:jobmanager:1.0.2'
     compile 'org.whispersystems:libpastelog:1.0.7'
     compile 'org.whispersystems:signal-service-android:2.5.0'
     compile 'org.whispersystems:webrtc-android:M56-S1'
-
-    compile "me.leolin:ShortcutBadger:1.10-WS1"
+    compile 'me.leolin:ShortcutBadger:1.10-WS1'
     compile 'se.emilsjolander:stickylistheaders:2.7.0'
     compile 'com.jpardogo.materialtabstrip:library:1.0.9'
     compile 'org.w3c:smil:1.0.0'
@@ -82,23 +72,24 @@ dependencies {
     compile 'com.melnykov:floatingactionbutton:1.3.0'
     compile 'com.google.zxing:android-integration:3.1.0'
     compile 'com.squareup.dagger:dagger:1.2.2'
-    compile ('com.doomonafireball.betterpickers:library:1.5.3') {
+    compile('com.doomonafireball.betterpickers:library:1.5.3') {
         exclude group: 'com.android.support', module: 'support-v4'
     }
+    compile 'com.madgag.spongycastle:prov:1.51.0.0'
     provided 'com.squareup.dagger:dagger-compiler:1.2.2'
     compile 'com.amulyakhare:com.amulyakhare.textdrawable:1.0.1'
     compile 'com.h6ah4i.android.compat:mulsellistprefcompat:1.0.0'
     compile 'com.google.zxing:core:3.2.1'
-    compile ('com.davemorrissey.labs:subsampling-scale-image-view:3.6.0') {
+    compile('com.davemorrissey.labs:subsampling-scale-image-view:3.6.0') {
         exclude group: 'com.android.support', module: 'support-annotations'
     }
-    compile ('cn.carbswang.android:NumberPickerView:1.0.9') {
+    compile('cn.carbswang.android:NumberPickerView:1.0.9') {
         exclude group: 'com.android.support', module: 'appcompat-v7'
     }
-    compile ('com.tomergoldst.android:tooltips:1.0.6') {
+    compile('com.tomergoldst.android:tooltips:1.0.6') {
         exclude group: 'com.android.support', module: 'appcompat-v7'
     }
-
+    compile files('libs/clusion-android-1.0.jar')
     testCompile 'junit:junit:4.12'
     testCompile 'org.assertj:assertj-core:1.7.1'
     testCompile 'org.mockito:mockito-core:1.9.5'
@@ -106,14 +97,13 @@ dependencies {
     testCompile 'org.powermock:powermock-module-junit4:1.6.1'
     testCompile 'org.powermock:powermock-module-junit4-rule:1.6.1'
     testCompile 'org.powermock:powermock-classloading-xstream:1.6.1'
-
     androidTestCompile 'com.google.dexmaker:dexmaker:1.2'
     androidTestCompile 'com.google.dexmaker:dexmaker-mockito:1.2'
-    androidTestCompile ('org.assertj:assertj-core:1.7.1') {
+    androidTestCompile('org.assertj:assertj-core:1.7.1') {
         exclude group: 'org.hamcrest', module: 'hamcrest-core'
     }
-    androidTestCompile ('com.squareup.assertj:assertj-android:1.1.1') {
-        exclude group: 'org.hamcrest',        module: 'hamcrest-core'
+    androidTestCompile('com.squareup.assertj:assertj-android:1.1.1') {
+        exclude group: 'org.hamcrest', module: 'hamcrest-core'
         exclude group: 'com.android.support', module: 'support-annotations'
     }
 }
@@ -151,7 +141,7 @@ dependencyVerification {
         'com.google.zxing:android-integration:89e56aadf1164bd71e57949163c53abf90af368b51669c0d4a47a163335f95c4',
         'com.squareup.dagger:dagger:789aca24537022e49f91fc6444078d9de8f1dd99e1bfb090f18491b186967883',
         'com.doomonafireball.betterpickers:library:132ecd685c95a99e7377c4e27bfadbb2d7ed0bea995944060cd62d4369fdaf3d',
-        //'com.madgag.spongycastle:prov:b8c3fec3a59aac1aa04ccf4dad7179351e54ef7672f53f508151b614c131398a',
+        'com.madgag.spongycastle:prov:b8c3fec3a59aac1aa04ccf4dad7179351e54ef7672f53f508151b614c131398a',
         'com.amulyakhare:com.amulyakhare.textdrawable:54c92b5fba38cfd316a07e5a30528068f45ce8515a6890f1297df4c401af5dcb',
         'com.h6ah4i.android.compat:mulsellistprefcompat:47167c5cb796de1a854788e9ff318358e36c8fb88123baaa6e38fb78511dfabe',
         'com.google.zxing:core:b4d82452e7a6bf6ec2698904b332431717ed8f9a850224f295aec89de80f2259',
@@ -172,7 +162,7 @@ dependencyVerification {
         'org.whispersystems:signal-service-java:910ed96e928355d118454e1dff6c11b9f95daa801f3b4022e5c8999bff47a888',
         'com.nineoldandroids:library:68025a14e3e7673d6ad2f95e4b46d78d7d068343aa99256b686fe59de1b3163a',
         'javax.inject:javax.inject:91c77044a50c481636c32d916fd89c9118a72195390452c81065080f957de7ff',
-        //'com.madgag.spongycastle:core:8d6240b974b0aca4d3da9c7dd44d42339d8a374358aca5fc98e50a995764511f',
+        'com.madgag.spongycastle:core:8d6240b974b0aca4d3da9c7dd44d42339d8a374358aca5fc98e50a995764511f',
         'com.google.android.gms:play-services-tasks:69ec265168e601d0203d04cd42e34bb019b2f029aa1e16fabd38a5153eea2086',
         'org.whispersystems:curve25519-android:bf6c34223d45d2f2813a8efcab9923caf99115115c760c9acea680bcb42d23c0',
         'org.whispersystems:signal-protocol-java:a835cd0609cf116a74651bd0aa748db9392bba48c2d2af787757b8a1b50d131c',
@@ -246,7 +236,7 @@ android {
                           'proguard-appcompat-v7.pro',
                           'proguard-square-okhttp.pro',
                           'proguard-square-okio.pro',
-                          //'proguard-spongycastle.pro',
+                          'proguard-spongycastle.pro',
                           'proguard-rounded-image-view.pro',
                           'proguard-glide.pro',
                           'proguard-shortcutbadger.pro',

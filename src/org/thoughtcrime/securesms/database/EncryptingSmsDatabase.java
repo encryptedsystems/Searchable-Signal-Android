@@ -23,9 +23,6 @@ import android.support.annotation.NonNull;
 import android.util.Log;
 import android.util.Pair;
 
-import com.google.common.collect.Multimap;
-
-import org.crypto.sse.MMGlobal;
 import org.thoughtcrime.securesms.R;
 import org.thoughtcrime.securesms.crypto.AsymmetricMasterCipher;
 import org.thoughtcrime.securesms.crypto.AsymmetricMasterSecret;
@@ -178,8 +175,7 @@ public class EncryptingSmsDatabase extends SmsDatabase {
   }
 
   public List<Long> getMessageIdsFromWord(MasterSecret masterSecret, String word) {
-    List<Long> message_ids = edb.searchMessageIdsFor(masterSecret, word);
-    return message_ids;
+    return edb.searchMessageIdsFor(masterSecret, word);
   }
 
   public Reader getOutgoingMessages(MasterSecret masterSecret) {

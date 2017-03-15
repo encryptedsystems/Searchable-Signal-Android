@@ -4,10 +4,8 @@ import android.content.Context;
 import android.database.Cursor;
 import android.database.MatrixCursor;
 import android.database.MergeCursor;
-import android.text.TextUtils;
 import android.util.Log;
 
-import org.thoughtcrime.securesms.contacts.ContactAccessor;
 import org.thoughtcrime.securesms.crypto.MasterSecret;
 import org.thoughtcrime.securesms.database.DatabaseFactory;
 import org.thoughtcrime.securesms.database.ThreadDatabase;
@@ -65,39 +63,18 @@ public class ConversationListLoader extends AbstractCursorLoader {
     return DatabaseFactory.getThreadDatabase(context).getArchivedConversationList();
   }
 
-  private Cursor getFilteredConversationList(String filter) {
-    Log.i("ConversationListLoader", "getFilteredConversationList, filter: " + filter);
-    // search through (1) contacts and (2) messages in EDB.
-    List<String> numbers = ContactAccessor.getInstance().getNumbersForThreadSearchFilter(context, filter);
-    List<String> all_numbers = new ArrayList<>(numbers);
-
-    if (DatabaseFactory.getEncryptingSmsDatabase(context).getEdb() != null) {
-      MasterSecret masterSecret = KeyCachingService.getMasterSecret(context);
-      List<String> addresses = DatabaseFactory.getEncryptingSmsDatabase(context).getAddressesFromWord(masterSecret, filter);
-      all_numbers.addAll(addresses);
-      Log.i("ConversationListLoader", "edb: not null");
-    } else {
-      Log.i("ConversationListLoader", "edb: null");
-    }
-
-    Log.i("ConversationListLoader", "all_numbers: " + TextUtils.join(",", all_numbers));
-    return DatabaseFactory.getThreadDatabase(context).getFilteredConversationList(all_numbers);
-  }
-
   private Cursor getFilteredMessageList(String filter) {
-    Log.i("ConversationListLoader", "getFilteredMessageList, filter: " + filter);
     // search through messages in EDB.
     List<Long> messageIds = new ArrayList<>();
 
     if (DatabaseFactory.getEncryptingSmsDatabase(context).getEdb() != null) {
       MasterSecret masterSecret = KeyCachingService.getMasterSecret(context);
       messageIds = DatabaseFactory.getEncryptingSmsDatabase(context).getMessageIdsFromWord(masterSecret, filter);
-      Log.i("ConversationListLoader", "edb: not null");
+      Log.d("ConversationListLoader", "edb: not null, filter: " + filter);
     } else {
-      Log.i("ConversationListLoader", "edb: null");
+      Log.d("ConversationListLoader", "edb: null");
     }
 
-    Log.i("ConversationListLoader", "message IDs: " + TextUtils.join(",", messageIds));
     return DatabaseFactory.getMmsSmsDatabase(context).getMessages(messageIds);
   }
 }

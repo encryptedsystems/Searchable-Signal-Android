@@ -24,7 +24,7 @@ import android.support.annotation.Nullable;
 import android.text.TextUtils;
 import android.util.Log;
 
-import org.crypto.sse.EdbException;
+import org.thoughtcrime.securesms.database.EdbException;
 import org.thoughtcrime.securesms.database.EdbSecret;
 import org.thoughtcrime.securesms.util.Base64;
 import org.thoughtcrime.securesms.util.Util;

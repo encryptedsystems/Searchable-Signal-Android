@@ -4,17 +4,13 @@ import android.os.Parcel;
 import android.os.Parcelable;
 import android.util.Log;
 
-import org.crypto.sse.EdbException;
-import org.crypto.sse.IEX2Lev;
-import org.crypto.sse.MMGlobal;
-import org.crypto.sse.RH2Lev;
+import org.clusion.DynRHAndroid;
 import org.thoughtcrime.securesms.util.Util;
 
 import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
 import java.security.spec.InvalidKeySpecException;
 import java.util.Arrays;
-import java.util.List;
 
 import javax.crypto.spec.SecretKeySpec;
 
@@ -56,18 +52,18 @@ public class EdbSecret implements Parcelable {
 
     public static EdbSecret generate(String passphrase, int iterations) {
         Log.i("EdbSecret", "generate");
-        byte[] twoLevKey;
+        byte[] edbSecretKey;
         try {
-            twoLevKey = MMGlobal.keyGenSI(KEY_BIT_SIZE, passphrase, "salt/salt", iterations);
+            edbSecretKey = DynRHAndroid.keyGen(KEY_BIT_SIZE, passphrase, "salt/salt", iterations);
         } catch (InvalidKeySpecException | NoSuchAlgorithmException | NoSuchProviderException e) {
             throw new EdbException(e);
         }
 
-        return from(twoLevKey);
+        return from(edbSecretKey);
     }
 
-    public static EdbSecret from(byte[] twoLevKey) {
-        return new EdbSecret(new SecretKeySpec(twoLevKey, "AES"));
+    public static EdbSecret from(byte[] edbSecretKey) {
+        return new EdbSecret(new SecretKeySpec(edbSecretKey, "AES"));
     }
 
     public SecretKeySpec getInvertedIndexKey() {

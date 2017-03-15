@@ -1,26 +1,19 @@
 package org.thoughtcrime.securesms.database;
 
 import android.content.Context;
-import android.content.SharedPreferences;
 import android.support.annotation.Nullable;
-import android.text.TextUtils;
 import android.util.Log;
 
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.TreeMultimap;
 
-import org.crypto.sse.CryptoPrimitives;
-import org.crypto.sse.DynRH2Lev;
-import org.crypto.sse.EdbException;
-import org.crypto.sse.RH2Lev;
+import org.clusion.DynRHAndroid;
 import org.thoughtcrime.securesms.crypto.MasterCipher;
 import org.thoughtcrime.securesms.crypto.MasterSecret;
 import org.thoughtcrime.securesms.crypto.MasterSecretUtil;
 import org.thoughtcrime.securesms.database.model.DisplayRecord;
 import org.thoughtcrime.securesms.database.model.SmsMessageRecord;
-import org.thoughtcrime.securesms.sms.IncomingTextMessage;
-import org.thoughtcrime.securesms.util.Base64;
 import org.whispersystems.libsignal.InvalidMessageException;
 
 import java.io.ByteArrayInputStream;
@@ -39,8 +32,8 @@ import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
-import java.util.concurrent.ExecutionException;
 
 import javax.crypto.NoSuchPaddingException;
 
@@ -53,21 +46,25 @@ import static org.thoughtcrime.securesms.crypto.MasterSecretUtil.PREFERENCES_NAM
 public class Edb implements Serializable {
     private static final long serialVersionUID = 2L;
 
-    public static int ROW_LIMIT = 500;
-    public static String EDB_FILE = "edb_file_" + serialVersionUID;
-    public static String EDB_FILE_LEN = "edb_file_len";
+    private static int ROW_LIMIT = 500;
+    private static String EDB_FILE = "edb_file_" + serialVersionUID;
+    private static String EDB_FILE_LEN = "edb_file_len";
 
+    private final HashMap<String, byte[]> emm;
 
-    public final DynRH2Lev two_lev;
+    private Edb(HashMap<String, byte[]> emm) {
+        this.emm = emm;
+    }
 
-    private Edb(DynRH2Lev two_lev) {
-        this.two_lev = two_lev;
+    private static Edb emptyEdb()
+    {
+        HashMap<String, byte[]> emm = DynRHAndroid.setup();
+        return new Edb(emm);
     }
 
     public static void setupEdb(EncryptingSmsDatabase db, MasterSecret masterSecret) {
         Log.i("Edb", "setupEdb");
 
-        //EncryptingSmsDatabase db = DatabaseFactory.getEncryptingSmsDatabase(context);
         SmsMessageRecord record;
         EncryptingSmsDatabase.Reader reader = null;
         int skip                            = 0;
@@ -93,22 +90,13 @@ public class Edb implements Serializable {
             skip += ROW_LIMIT;
         } while (reader.getCount() > 0);
 
-        int bigBlock = 1000;
-        int smallBlock = 100;
-        int dataSize = 10000;
-
-        Edb edb;
-        try {
-            EdbSecret edbSecret = masterSecret.getEdbSecret();
-            if (edbSecret == null) {
-                throw new EdbException("EdbSecret has not been generated yet: null");
-            }
-            RH2Lev.master = edbSecret.getInvertedIndexKey().getEncoded();
-            DynRH2Lev two_lev = DynRH2Lev.constructEMMParGMM(edbSecret.getInvertedIndexKey().getEncoded(), word_id_map, bigBlock, smallBlock, dataSize);
-            edb = new Edb(two_lev);
-        } catch (InterruptedException | ExecutionException | IOException e) {
-            throw new EdbException(e);
+        Edb edb = emptyEdb();
+        EdbSecret edbSecret = masterSecret.getEdbSecret();
+        if (edbSecret == null) {
+            throw new EdbException("EdbSecret has not been generated yet: null");
         }
+        // batch update EDB with importing messages
+        edb.updateWith(edbSecret, word_id_map);
 
         db.setEdb(edb);
     }
@@ -120,45 +108,44 @@ public class Edb implements Serializable {
         }
     }
 
-    public void insertMessage(MasterSecret masterSecret, long message_id, String message_body) {
+    void insertMessage(MasterSecret masterSecret, long message_id, String message_body) {
         EdbSecret edbSecret = masterSecret.getEdbSecret();
         if (edbSecret == null) {
             throw new EdbException("EdbSecret has not been generated yet: null");
         }
-        RH2Lev.master = edbSecret.getInvertedIndexKey().getEncoded();
 
         Multimap<String,String> word_id_map = ArrayListMultimap.create();
         putToMap(word_id_map, message_id, message_body);
+        updateWith(edbSecret, word_id_map);
+    }
+
+    private void updateWith(EdbSecret edbSecret, Multimap<String, String> word_id_map) {
         TreeMultimap<String, byte[]> tokenUp;
         try {
-            tokenUp = DynRH2Lev.tokenUpdate(edbSecret.getInvertedIndexKey().getEncoded(), word_id_map);
+            tokenUp = DynRHAndroid.tokenUpdate(edbSecret.getInvertedIndexKey().getEncoded(), word_id_map);
         } catch (InvalidKeyException | InvalidAlgorithmParameterException | NoSuchProviderException | NoSuchPaddingException | IOException | NoSuchAlgorithmException e) {
             throw new EdbException(e);
         }
         if (tokenUp == null) {
             throw new EdbException("null tokenUp");
         }
-        DynRH2Lev.update(two_lev.getDictionaryUpdates(), tokenUp);
+        DynRHAndroid.update(emm, tokenUp);
     }
 
-    public List<Long> searchMessageIdsFor(MasterSecret masterSecret, String word) {
-        // TODO: use provided masterSecret to retrieve Edb secrets
+    List<Long> searchMessageIdsFor(MasterSecret masterSecret, String word) {
         List<String> values;
         try {
             EdbSecret edbSecret = masterSecret.getEdbSecret();
             if (edbSecret == null) {
                 throw new EdbException("EdbSecret has not been generated yet: null");
             }
-            RH2Lev.master = edbSecret.getInvertedIndexKey().getEncoded();
+            Log.i("edb search", word);
 
             String word_lowercase = word.trim().toLowerCase();
-            byte[][] token = DynRH2Lev.genTokenFS(edbSecret.getInvertedIndexKey().getEncoded(), word_lowercase);
-            //byte[][] token = DynRH2Lev.genToken(edbSecret.getInvertedIndexKey().getEncoded(), word_lowercase);
-            values = DynRH2Lev.resolve(
-                    CryptoPrimitives.generateCmac(edbSecret.getInvertedIndexKey().getEncoded(), 3 + new String()),
-                    DynRH2Lev.testSIFS(token, two_lev.getDictionary(), two_lev.getArray(), two_lev.getDictionaryUpdates())
-                    //DynRH2Lev.testSI(token, two_lev.getDictionary(), two_lev.getArray(), two_lev.getDictionaryUpdates())
-            );
+
+            byte[] sk = edbSecret.getInvertedIndexKey().getEncoded();
+            byte[][] token = DynRHAndroid.genTokenFS(sk, word_lowercase);
+            values = DynRHAndroid.resolve(sk, DynRHAndroid.queryFS(token, emm), word_lowercase);
         } catch (IOException | NoSuchAlgorithmException | InvalidKeyException | NoSuchPaddingException | NoSuchProviderException | InvalidAlgorithmParameterException e) {
             throw new EdbException(e);
         }
@@ -170,7 +157,7 @@ public class Edb implements Serializable {
         return message_ids;
     }
 
-    public static Edb fromBytes(byte[] edbBytes) {
+    private static Edb fromBytes(byte[] edbBytes) {
         ByteArrayInputStream bis = new ByteArrayInputStream(edbBytes);
         ObjectInput in = null;
         Edb edb;
@@ -185,7 +172,7 @@ public class Edb implements Serializable {
                     in.close();
                 }
             } catch (IOException ex) {
-                // ignore close exception
+                Log.w("edb", "ignore close exception", ex);
             }
         }
 
@@ -195,7 +182,7 @@ public class Edb implements Serializable {
         return edb;
     }
 
-    public byte[] asBytes() {
+    private byte[] asBytes() {
         ByteArrayOutputStream bos = new ByteArrayOutputStream();
         ObjectOutput out = null;
         byte[] res;
@@ -210,7 +197,7 @@ public class Edb implements Serializable {
             try {
                 bos.close();
             } catch (IOException ex) {
-                // ignore close exception
+                Log.w("edb", "ignore close exception", ex);
             }
         }
 
@@ -254,7 +241,7 @@ public class Edb implements Serializable {
             Log.i("Edb", "retrieveFromSharedPreferences: edb not found");
             return null;
         } else if (edb_bytes_len == -1 || edb_bytes_len != edb_bytes.length) {
-            Log.i("Edb", "retrieveFromSharedPreferences: edb invalid byte length");
+            Log.e("Edb", "retrieveFromSharedPreferences: edb invalid byte length");
             throw new EdbException("invalid byte length");
         } else {
             Log.i("Edb", "retrieveFromSharedPreferences: edb found");

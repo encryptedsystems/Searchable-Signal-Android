@@ -30,12 +30,10 @@ public class ConversationLoader extends AbstractCursorLoader {
 
   @Override
   public Cursor getCursor() {
-    Log.i("ConversationLoader", "getCursor with filter: " + queryFilter);
     if (queryFilter == null || queryFilter.trim().equals("")) {
       return DatabaseFactory.getMmsSmsDatabase(context).getConversation(threadId, limit);
     } else {
       if (DatabaseFactory.getEncryptingSmsDatabase(context).getEdb() != null) {
-        Log.i("ConversationLoader", "edb: not null");
         MasterSecret masterSecret = KeyCachingService.getMasterSecret(context);
         List<Long> message_ids = DatabaseFactory.getEncryptingSmsDatabase(context).getMessageIdsFromWord(masterSecret, queryFilter);
         return DatabaseFactory.getMmsSmsDatabase(context).getConversation(threadId, limit, message_ids);
