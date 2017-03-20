@@ -231,11 +231,8 @@ public class MasterSecretUtil {
 
   private static void saveEdbSecret(Context context, String passphrase, byte[] encryptionSalt, int iterations, byte[] macSalt, EdbSecret edbSecret) throws GeneralSecurityException {
     byte[] edbSecretBytes = edbSecret.asEncodedCombined();
-    Log.i("MasterSecretUtil", "generateEdbSecret: edbSecretBytes.length=" + edbSecretBytes.length);
     byte[] encryptedEdbSecret = encryptWithPassphrase(encryptionSalt, iterations, edbSecretBytes, passphrase);
-    Log.i("MasterSecretUtil", "generateEdbSecret: encryptedEdbSecret.length=" + encryptedEdbSecret.length);
     byte[] encryptedAndMacdEdbSecret = macWithPassphrase(macSalt, iterations, encryptedEdbSecret, passphrase);
-    Log.i("MasterSecretUtil", "generateEdbSecret: encryptedAndMacdEdbSecret.length=" + encryptedAndMacdEdbSecret.length);
     save(context, "edb_secret", encryptedAndMacdEdbSecret);
   }
 
