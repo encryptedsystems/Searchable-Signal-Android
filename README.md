@@ -12,9 +12,9 @@ Messenger and Google Allo.
 ## What This Project is About
 We set out to explore whether encrypted search algorithms
 could be used to add search functionality to the Signal messaging app without
-compromising securely or efficiency.  See this [blog
-post](http://esl.cs.brown.edu/post/signal.html) for details on the approach we
-took.  
+compromising securely or efficiency.  See this
+[writeup](http://esl.cs.brown.edu/post/signal.html) for details on the approach
+we took.  
 
 
 ## Disclaimer
@@ -74,5 +74,5 @@ The full history of our changes can be found in this repository's commit history
 This is a project from the [Encrypted Systems Lab](http://esl.cs.brown.edu) @
 Brown University.  The underlying encrypted search algorithms are provided by
 the [Clusion](https://github.com/encryptedsystems/Clusion) library. The project
-was led by Joe Engelman (@joengelm) and Sam Zhao (@zheguang) in collaboration
+was led by Joe Engelman (@joengelm) and Sam Zhao (@zhegu) in collaboration
 with Tarik Moataz (@orochi89) and Seny Kamara (@senykam).
