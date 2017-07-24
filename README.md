@@ -13,7 +13,7 @@ Messenger and Google Allo.
 We set out to explore whether encrypted search algorithms
 could be used to add search functionality to the Signal messaging app without
 compromising securely or efficiency.  See this
-[writeup](http://esl.cs.brown.edu/post/signal.html) for details on the approach
+[writeup](http://esl.cs.brown.edu/blog/signal/) for details on the approach
 we took.  
 
 
